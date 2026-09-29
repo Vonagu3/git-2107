@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git-тренажёр</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
+  --accent: #d0621b; --accent-ink: #ffffff; --ok: #2f7a4a; --err: #b3372f; --warn: #a86b00;
+  --term-bg: #16181d; --term-ink: #e6e3da; --term-muted: #8b8f98; --term-ok: #7fd18f; --term-err: #ff8c80;
+  --term-hint: #f4c46b; --term-dir: #7cb8ff; --term-ins: #7fd18f; --term-note: #c9a7ff;
+  --lane1: #d0621b; --lane2: #2e7daf; --lane3: #2f7a4a; --lane4: #8a4fb0; --lane5: #a33a3a;
+  --label-ink: #ffffff; --chip: #efece4; --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121317; --panel: #1b1d22; --ink: #e9e7e1; --muted: #9a9ea8; --line: #2e3138;
+    --accent: #ef8a45; --accent-ink: #1b1d22; --ok: #6fc68a; --err: #ff8c80; --warn: #f0b54a;
+    --term-bg: #0b0c0f; --chip: #262930; --shadow: none; --label-ink: #15171b;
+    --lane1: #ef8a45; --lane2: #6bb3e6; --lane3: #6fc68a; --lane4: #c19ae0; --lane5: #ff8c80;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121317; --panel: #1b1d22; --ink: #e9e7e1; --muted: #9a9ea8; --line: #2e3138;
+  --accent: #ef8a45; --accent-ink: #1b1d22; --ok: #6fc68a; --err: #ff8c80; --warn: #f0b54a;
+  --term-bg: #0b0c0f; --chip: #262930; --shadow: none; --label-ink: #15171b;
+  --lane1: #ef8a45; --lane2: #6bb3e6; --lane3: #6fc68a; --lane4: #c19ae0; --lane5: #ff8c80;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
+a { color: var(--accent); }
+code, kbd, pre { font-family: var(--mono); font-size: .92em; }
+code { background: var(--chip); padding: .08em .35em; border-radius: 4px; }
+header { position: sticky; top: 0; z-index: 5; background: var(--panel); border-bottom: 1px solid var(--line); }
+.hwrap { max-width: 1400px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.logo { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+.logo .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); box-shadow: 16px 0 0 var(--lane2), 8px -8px 0 var(--lane3); margin-right: 18px; }
+nav { display: flex; gap: 4px; flex-wrap: wrap; }
+nav button { font: 600 14px var(--sans); border: 0; background: transparent; color: var(--muted); padding: 7px 11px; border-radius: 8px; cursor: pointer; }
+nav button:hover { background: var(--chip); color: var(--ink); }
+nav button.on { background: var(--ink); color: var(--panel); }
+.theme { margin-left: auto; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 6px 10px; cursor: pointer; font: 13px var(--sans); }
+main { max-width: 1400px; margin: 0 auto; padding: 18px 16px 60px; }
+.tab { display: none; }
+.tab.on { display: block; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); }
+h1 { font-size: 26px; margin: 4px 0 10px; }
+h2 { font-size: 20px; margin: 22px 0 8px; }
+h3 { font-size: 16px; margin: 14px 0 6px; }
+.lead { color: var(--muted); max-width: 820px; }
+.btn { font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+.btn:hover { border-color: var(--ink); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn:disabled { opacity: .45; cursor: default; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; vertical-align: top; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+th { font-size: 13px; color: var(--muted); font-weight: 600; }
+.tablewrap { overflow-x: auto; }
+
+/* ---------- тренажёр ---------- */
+.trainer { display: grid; grid-template-columns: 250px minmax(0, 1fr) minmax(0, 420px); gap: 14px; align-items: start; }
+.levels { position: sticky; top: 70px; max-height: calc(100vh - 90px); overflow: auto; padding: 12px; }
+.levels h4 { margin: 12px 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.levels h4:first-of-type { margin-top: 0; }
+.lvl { display: flex; gap: 8px; align-items: center; width: 100%; border: 0; background: transparent; color: var(--ink); text-align: left; padding: 5px 7px; border-radius: 7px; cursor: pointer; font: 14px var(--sans); }
+.lvl:hover { background: var(--chip); }
+.lvl.on { background: var(--ink); color: var(--panel); }
+.lvl .n { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; border: 1.5px solid var(--line); }
+.lvl.done .n { background: var(--ok); border-color: var(--ok); color: #fff; }
+.me { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; font-size: 13px; }
+.me input { width: 100%; font: 14px var(--sans); padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--ink); }
+.progress { height: 8px; background: var(--chip); border-radius: 4px; overflow: hidden; margin: 8px 0 4px; }
+.progress div { height: 100%; background: var(--ok); width: 0; transition: width .3s; }
+.center { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.task h2 { margin: 0 0 4px; }
+.task .blk { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+.goals { list-style: none; padding: 0; margin: 10px 0 4px; }
+.goals li { display: flex; gap: 8px; padding: 3px 0; }
+.goals li .c { flex: none; width: 18px; height: 18px; margin-top: 2px; border-radius: 5px; border: 1.5px solid var(--line); display: grid; place-items: center; font-size: 12px; color: #fff; }
+.goals li.ok .c { background: var(--ok); border-color: var(--ok); }
+.goals li.ok { color: var(--muted); }
+.hints { margin-top: 8px; }
+.hints p { margin: 6px 0; padding: 8px 10px; background: var(--chip); border-radius: 8px; font-size: 14px; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.win { background: color-mix(in srgb, var(--ok) 14%, var(--panel)); border: 1px solid var(--ok); border-radius: 10px; padding: 10px 12px; margin-top: 10px; display: none; align-items: center; gap: 12px; flex-wrap: wrap; }
+.win.on { display: flex; }
+.term { background: var(--term-bg); color: var(--term-ink); border-radius: 12px; font: 13.5px/1.45 var(--mono); padding: 12px 14px; height: 440px; overflow: auto; cursor: text; }
+.term .l { white-space: pre-wrap; word-break: break-word; min-height: 1.45em; }
+.term .p { color: var(--term-ok); }
+.term .p b { color: var(--term-dir); font-weight: 400; }
+.term .p i { color: var(--term-hint); font-style: normal; }
+.term .err, .term .del { color: var(--term-err); }
+.term .hint { color: var(--term-hint); }
+.term .dir { color: var(--term-dir); }
+.term .ok, .term .ins, .term .staged, .term .cur { color: var(--term-ok); }
+.term .note { color: var(--term-note); }
+.term .warn { color: var(--term-hint); font-weight: 600; }
+.term .conf { color: var(--term-err); font-weight: 600; }
+.term .logh { color: var(--term-hint); }
+.term .muted { color: var(--term-muted); }
+.inrow { display: flex; gap: 8px; }
+.inrow .p { flex: none; white-space: pre; }
+.inrow input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--term-ink); font: inherit; padding: 0; }
+.side { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 70px; }
+.side .card { padding: 12px 14px; }
+.side h3 { margin: 0 0 8px; font-size: 14px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.side h3 span { font-weight: 400; color: var(--muted); font-size: 12px; font-family: var(--mono); }
+.files { font: 13px var(--mono); display: grid; gap: 3px; }
+.files .f { display: flex; justify-content: space-between; gap: 8px; }
+.files .f span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag { font: 600 11px var(--sans); padding: 1px 7px; border-radius: 10px; white-space: nowrap; }
+.tag.mod { background: color-mix(in srgb, var(--err) 18%, transparent); color: var(--err); }
+.tag.new { background: color-mix(in srgb, var(--err) 18%, transparent); color: var(--err); }
+.tag.stg { background: color-mix(in srgb, var(--ok) 20%, transparent); color: var(--ok); }
+.tag.cnf { background: var(--err); color: #fff; }
+.tag.ign { background: var(--chip); color: var(--muted); }
+.graph { overflow-x: auto; }
+.graph svg { display: block; }
+.graph text { font: 11px var(--mono); fill: var(--ink); }
+.graph .msg { fill: var(--muted); }
+.empty { color: var(--muted); font-size: 13px; }
+.legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* редактор */
+dialog { border: 1px solid var(--line); border-radius: 12px; padding: 0; background: var(--panel); color: var(--ink); width: min(760px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(0,0,0,.45); }
+.ed-h { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; align-items: center; font: 600 14px var(--mono); }
+dialog textarea { width: 100%; height: 360px; border: 0; padding: 12px 16px; font: 13.5px/1.5 var(--mono); background: var(--bg); color: var(--ink); resize: vertical; outline: 0; }
+.ed-f { padding: 10px 16px; border-top: 1px solid var(--line); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; align-items: center; }
+.ed-f .note { margin-right: auto; font-size: 13px; color: var(--muted); }
+
+/* схема */
+.model { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0; position: relative; }
+.zone { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; min-height: 170px; box-shadow: var(--shadow); }
+.zone h3 { margin: 0 0 2px; font-size: 15px; }
+.zone .where { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.zone.flash { outline: 3px solid var(--accent); outline-offset: 2px; transition: outline .2s; }
+.pill { display: block; font: 12.5px var(--mono); background: var(--chip); border-radius: 7px; padding: 5px 8px; margin: 4px 0; }
+.pill.mine { border-left: 4px solid var(--lane1); }
+.pill.their { border-left: 4px solid var(--lane2); }
+.arrows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.arrows div { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.say { min-height: 52px; padding: 10px 14px; border-radius: 10px; background: var(--chip); margin-top: 12px; }
+.say.bad { background: color-mix(in srgb, var(--err) 14%, var(--panel)); }
+
+/* статьи */
+.doc { max-width: 900px; }
+.doc li { margin: 4px 0; }
+.steps { list-style: none; padding: 0; counter-reset: s; }
+.steps > li { counter-increment: s; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px 12px 54px; margin: 10px 0; position: relative; box-shadow: var(--shadow); }
+.steps > li::before { content: counter(s); position: absolute; left: 14px; top: 12px; width: 28px; height: 28px; border-radius: 50%; background: var(--chip); display: grid; place-items: center; font-weight: 700; }
+.steps > li.done::before { content: "✓"; background: var(--ok); color: #fff; }
+.steps h3 { margin: 2px 0 6px; }
+.steps label { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; color: var(--muted); cursor: pointer; margin-top: 6px; }
+pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+.note-box { border-left: 4px solid var(--accent); background: var(--chip); padding: 8px 12px; border-radius: 0 8px 8px 0; margin: 10px 0; }
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cheat td:first-child { white-space: nowrap; font-family: var(--mono); font-size: 13px; }
+.report { margin-top: 14px; border: 2px dashed var(--line); border-radius: 12px; padding: 14px; }
+.report .code { font: 700 22px var(--mono); letter-spacing: .08em; }
+
+@media (max-width: 1150px) {
+  .trainer { grid-template-columns: 220px minmax(0, 1fr); }
+  .side { grid-column: 1 / -1; position: static; display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px) {
+  .trainer { grid-template-columns: minmax(0, 1fr); }
+  .levels { position: static; max-height: none; order: 2; }
+  .center { order: 1; }
+  .side { order: 3; }
+  .side { grid-template-columns: minmax(0, 1fr); }
+  .term { height: 360px; font-size: 12.5px; }
+  .model, .arrows { grid-template-columns: 1fr 1fr; }
+  .cols2 { grid-template-columns: 1fr; }
+  h1 { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="logo"><span class="dot"></span>Git-тренажёр</div>
+    <nav id="nav">
+      <button data-tab="model">Как устроен Git</button>
+      <button data-tab="train" class="on">Тренажёр</button>
+      <button data-tab="github">Подключение к GitHub</button>
+      <button data-tab="cheat">Шпаргалка</button>
+      <button data-tab="hw">Домашка</button>
+      <button data-tab="teacher">Руководителю</button>
+    </nav>
+    <button class="theme" id="theme" title="Сменить тему">◐ Тема</button>
+  </div>
+</header>
+
+<main>
+<!-- ================= СХЕМА ================= -->
+<section class="tab" id="tab-model">
+  <h1>Как устроен Git: четыре места</h1>
+  <p class="lead">Файл проходит путь слева направо. Нажимайте кнопки под схемой и смотрите, где оказывается ваша версия файла <code>шаги.csv</code>. Оранжевые — ваши версии, синие — коллеги.</p>
+  <div class="model" id="mz">
+    <div class="zone" id="z-work"><h3>Рабочая папка</h3><div class="where">файлы, которые вы правите в VS Code</div><div class="body"></div></div>
+    <div class="zone" id="z-index"><h3>Индекс</h3><div class="where">«корзина» для следующего коммита</div><div class="body"></div></div>
+    <div class="zone" id="z-local"><h3>Коммиты</h3><div class="where">история на вашем компьютере (.git)</div><div class="body"></div></div>
+    <div class="zone" id="z-remote"><h3>GitHub</h3><div class="where">общая копия в интернете (origin)</div><div class="body"></div></div>
+  </div>
+  <div class="arrows">
+    <div><button class="btn" data-m="edit">✎ изменить файл</button></div>
+    <div><button class="btn" data-m="add">git add .</button></div>
+    <div><button class="btn" data-m="commit">git commit -m</button></div>
+    <div><button class="btn" data-m="push">git push</button> <button class="btn" data-m="pull">git pull</button></div>
+  </div>
+  <div class="tools" style="justify-content:center">
+    <button class="btn" data-m="friend">👤 коллега отправил свой коммит</button>
+    <button class="btn" data-m="reset">↺ сначала</button>
+  </div>
+  <div class="say" id="say">Начните с «изменить файл».</div>
+
+  <h2>Ветки</h2>
+  <p class="lead">Ветка — отдельная линия истории. У каждого своя ветка, в <code>main</code> попадает только проверенное. Слить ветку в main — это <code>git merge</code> или кнопка Merge в pull request на GitHub.</p>
+  <div class="card graph" id="branchDemo"></div>
+
+  <h2>Цикл на каждый день</h2>
+  <pre class="cmd">git pull                       # 1. забрать чужое
+# ... правим файлы ...
+git status                     # 2. посмотреть, что изменилось
+git add .                      # 3. отметить всё для коммита
+git commit -m "Что сделал"     # 4. сохранить версию
+git push                       # 5. отправить на GitHub</pre>
+</section>
+
+<!-- ================= ТРЕНАЖЁР ================= -->
+<section class="tab on" id="tab-train">
+  <div class="trainer">
+    <aside class="card levels" id="levels"></aside>
+    <div class="center">
+      <div class="card task" id="task"></div>
+      <div class="term" id="term">
+        <div id="out"></div>
+        <div class="inrow"><span class="p" id="prompt"></span><input id="cmd" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Команда"></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card"><h3>Файлы <span id="where"></span></h3><div class="files" id="files"></div>
+        <div class="legend"><span><span class="tag mod">изменён</span> не добавлен</span><span><span class="tag stg">в индексе</span> попадёт в коммит</span></div></div>
+      <div class="card"><h3>Коммиты на компьютере <span id="headinfo"></span></h3><div class="graph" id="glocal"></div></div>
+      <div class="card"><h3>GitHub <span id="ghurl"></span></h3><div class="graph" id="gremote"></div></div>
+    </div>
+  </div>
+</section>
+
+<dialog id="editor">
+  <div class="ed-h"><span id="ed-name"></span><button class="btn" id="ed-x" aria-label="Закрыть">✕</button></div>
+  <textarea id="ed-text" spellcheck="false"></textarea>
+  <div class="ed-f"><span class="note">Как в VS Code: поправили → «Сохранить» (Ctrl+S). Git увидит изменение.</span><button class="btn" id="ed-cancel">Отмена</button><button class="btn primary" id="ed-save">Сохранить</button></div>
+</dialog>
+
+<!-- ================= GITHUB ================= -->
+<section class="tab" id="tab-github">
+  <div class="doc">
+  <h1>Подключаемся к настоящему GitHub</h1>
+  <p class="lead">Делается один раз на каждом компьютере. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+  <ol class="steps" id="ghsteps">
+    <li><h3>Установить Git, Python и VS Code</h3>
+      <p>Git: <a href="https://git-scm.com/downloads" target="_blank" rel="noopener">git-scm.com/downloads</a>. На Windows при установке всё оставить по умолчанию. На Mac ввести в терминале <code>git --version</code> и согласиться на установку.</p>
+      <p>Проверка в терминале VS Code (меню Terminal → New Terminal):</p>
+      <pre class="cmd">git --version
+python --version       # на Windows может быть: py --version</pre>
+      <p>Если Windows пишет «git не является командой» — закройте и откройте VS Code заново.</p>
+    </li>
+    <li><h3>Аккаунт на GitHub</h3>
+      <p>Регистрация на <a href="https://github.com/signup" target="_blank" rel="noopener">github.com/signup</a>. Нужна почта, к которой есть доступ: придёт код. GitHub можно с 13 лет — если меньше, работаете в паре с соседом, а аккаунт заводите дома вместе с родителями.</p>
+      <p>Логин выбирайте так, чтобы было понятно, кто вы: <code>ivan-petrov</code>, а не <code>xXx_killer</code>. Логин отправьте в чат группы.</p>
+    </li>
+    <li><h3>Принять приглашение в учебный репозиторий</h3>
+      <p>Руководитель пригласит ваш логин в репозиторий <b>git-praktika</b>. Приглашение придёт на почту, или откройте <a class="orglink" target="_blank" rel="noopener"></a> и нажмите «Accept invitation». Репозиторий закрытый: без приглашения его не видно. Без этого push не пройдёт: будет ошибка 403.</p>
+    </li>
+    <li><h3>Представиться git</h3>
+      <p>Почта — та же, что на GitHub. Третья строка избавит от ошибки «divergent branches» при pull.</p>
+      <pre class="cmd">git config --global user.name "Имя Фамилия"
+git config --global user.email "почта@как.на.github"
+git config --global pull.rebase false</pre>
+      <p>Проверить: <code>git config --list</code>. В тренажёре это уровень 1.</p>
+    </li>
+    <li><h3>Скачать учебный репозиторий</h3>
+      <p>В терминале перейдите туда, где будут лежать проекты (например, <code>cd Documents</code>), и:</p>
+      <pre class="cmd" id="clonecmd"></pre>
+      <p>Ссылку всегда можно взять на странице репозитория: зелёная кнопка «&lt;&gt; Code» → HTTPS → копировать. Затем в VS Code: File → Open Folder → <code>git-praktika</code>.</p>
+    </li>
+    <li><h3>Первый push и вход через браузер</h3>
+      <p>При первом <code>git push</code> откроется окно «Sign in to GitHub». Выберите «Sign in with your browser», войдите и нажмите «Authorize». Пароль в терминал вводить не нужно: GitHub давно не принимает пароль в терминале.</p>
+      <pre class="cmd">git checkout -b имя-фамилия
+# ... поменяли файл ...
+git add .
+git commit -m "Поменял цвет графика"
+git push -u origin имя-фамилия</pre>
+      <p>Если окно не открылось, а терминал просит <i>Username / Password</i> — позовите руководителя.</p>
+    </li>
+    <li><h3>Найти свою ветку и открыть pull request</h3>
+      <p>На странице репозитория: кнопка с веткой «main ▾» → найдите свою. Появится жёлтая плашка «имя-фамилия had recent pushes» → «Compare &amp; pull request». Напишите, что сделали, нажмите «Create pull request». Сливает в main руководитель.</p>
+    </li>
+    <li><h3>Проверить себя скриптом</h3>
+      <p>В репозитории лежит <code>проверить.py</code> и список заданий <code>ЗАДАНИЯ.md</code>:</p>
+      <pre class="cmd">python проверить.py        # все задания
+python проверить.py 5      # только задание 5</pre>
+    </li>
+  </ol>
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Сообщение</th><th>Что значит и что делать</th></tr>
+    <tr><td><code>fatal: not a git repository</code></td><td>Вы не в папке репозитория. <code>cd git-praktika</code> или откройте папку в VS Code.</td></tr>
+    <tr><td><code>Author identity unknown</code></td><td>Не выполнен шаг 4.</td></tr>
+    <tr><td><code>Permission denied</code> / <code>403</code></td><td>Не приняли приглашение (шаг 3) или вошли в браузере под другим аккаунтом.</td></tr>
+    <tr><td><code>rejected ... (fetch first)</code></td><td>На GitHub есть чужие коммиты. <code>git pull</code>, потом <code>git push</code>.</td></tr>
+    <tr><td><code>has no upstream branch</code></td><td>Первый push новой ветки: <code>git push -u origin имя-ветки</code>.</td></tr>
+    <tr><td><code>Need to specify how to reconcile divergent branches</code></td><td><code>git config --global pull.rebase false</code> и снова <code>git pull</code>.</td></tr>
+    <tr><td><code>CONFLICT</code></td><td>Двое поменяли одну строку. Уровни 15–16 тренажёра. Если страшно — позовите руководителя, ничего не удаляйте.</td></tr>
+    <tr><td>Терминал открыл непонятный редактор (Vim)</td><td>Это коммит без <code>-m</code>. Нажмите <kbd>Esc</kbd>, наберите <code>:wq</code> и <kbd>Enter</kbd>.</td></tr>
+    <tr><td>Сайт GitHub не открывается в школе</td><td>Раздайте интернет с телефона или скажите руководителю — есть запасной план.</td></tr>
+  </table></div>
+  </div>
+</section>
+
+<!-- ================= ШПАРГАЛКА ================= -->
+<section class="tab" id="tab-cheat">
+  <div class="doc">
+  <h1>Шпаргалка</h1>
+  <p class="lead">Все команды вводятся в терминале VS Code, находясь в папке репозитория.</p>
+  <div class="cols2">
+    <div class="card"><h3>Один раз на компьютере</h3>
+<pre class="cmd">git config --global user.name "Имя Фамилия"
+git config --global user.email "почта"
+git config --global pull.rebase false
+git clone &lt;ссылка&gt;</pre></div>
+    <div class="card"><h3>Каждый день</h3>
+<pre class="cmd">git pull
+git status
+git add .
+git commit -m "Что сделал"
+git push</pre></div>
+  </div>
+  <h2>Все команды тренажёра</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td>git status</td><td>Что изменилось. Ничего не ломает — вводите сколько угодно.</td></tr>
+    <tr><td>git add файл<br>git add .</td><td>Отметить файл (или всё) для следующего коммита.</td></tr>
+    <tr><td>git commit -m "..."</td><td>Сохранить версию с подписью. Подпись — по-русски, глаголом: «Добавил файл с шагами».</td></tr>
+    <tr><td>git log --oneline</td><td>История кратко. <code>git log</code> — с авторами и датами.</td></tr>
+    <tr><td>git show a1b2c3d</td><td>Что поменялось в коммите.</td></tr>
+    <tr><td>git diff</td><td>Что изменено, но ещё не добавлено. <code>git diff --staged</code> — что уже в индексе.</td></tr>
+    <tr><td>git restore файл</td><td>Отменить несохранённые правки в файле (вернуть как в последнем коммите).</td></tr>
+    <tr><td>git restore --staged файл</td><td>Убрать файл из индекса, правки остаются.</td></tr>
+    <tr><td>git rm --cached файл</td><td>Перестать хранить файл в git, но оставить в папке.</td></tr>
+    <tr><td>git branch</td><td>Список веток, <code>*</code> — текущая. <code>git branch -a</code> — вместе с ветками GitHub.</td></tr>
+    <tr><td>git checkout -b имя</td><td>Создать ветку и перейти в неё (то же: <code>git switch -c имя</code>).</td></tr>
+    <tr><td>git checkout имя</td><td>Перейти в ветку (то же: <code>git switch имя</code>).</td></tr>
+    <tr><td>git merge имя</td><td>Слить ветку в текущую. <code>git merge --abort</code> — отменить слияние с конфликтом.</td></tr>
+    <tr><td>git clone ссылка</td><td>Скачать репозиторий с GitHub. Один раз.</td></tr>
+    <tr><td>git remote -v</td><td>Куда смотрит origin.</td></tr>
+    <tr><td>git push -u origin имя</td><td>Первый push новой ветки. Дальше — просто <code>git push</code>.</td></tr>
+    <tr><td>git pull</td><td>Забрать и слить изменения с GitHub.</td></tr>
+    <tr><td>git fetch</td><td>Только узнать, что нового на GitHub, ничего не сливая.</td></tr>
+  </table></div>
+  <h2>Конфликт</h2>
+  <p>Git остановился и написал <code>CONFLICT</code>. В файле появились метки:</p>
+<pre class="cmd">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+ваша версия строки
+=======
+версия из другой ветки
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; шаги</pre>
+  <p>Оставьте правильный вариант (или напишите общий), удалите три строки-метки, сохраните, затем <code>git add файл</code> и <code>git commit -m "Решил конфликт"</code>. В VS Code над конфликтом есть кнопки «Accept Current / Incoming / Both».</p>
+  <h2>Что не кладём в репозиторий</h2>
+  <p>Папку <code>venv</code>, файлы больше 50 МБ, пароли и ключи (<code>.env</code>), картинки, которые скрипт создаёт сам. Для этого есть файл <code>.gitignore</code> — одна строка на шаблон: <code>*.png</code>, <code>venv/</code>.</p>
+  <h2>Команды терминала</h2>
+  <p><code>ls</code> (Windows: <code>dir</code>) — список файлов, <code>cd папка</code> — войти, <code>cd ..</code> — выйти, <code>cat файл</code> — показать файл. В тренажёре ещё есть <code>edit файл</code> — открыть в редакторе.</p>
+  </div>
+</section>
+
+<!-- ================= ДОМАШКА ================= -->
+<section class="tab" id="tab-hw">
+  <div class="doc">
+  <h1>Домашнее задание к занятию 3</h1>
+  <p class="lead">Срок — до следующего занятия. Застряли — пишите в чат группы в MAX заранее, а не в день занятия.</p>
+  <h2>1. Тренажёр</h2>
+  <p>Пройдите уровни, которые не успели на занятии, обязательно — блоки 3, 4 и 5 (уровни 11–18). Внизу списка уровней введите имя и фамилию — появится карточка с кодом. Скриншот карточки пришлите в чат.</p>
+  <div id="hwCard"></div>
+  <h2>2. Настоящий GitHub</h2>
+  <ol>
+    <li>Если на занятии не получилось подключиться — пройдите вкладку «Подключение к GitHub» дома.</li>
+    <li>Выполните задания 6–8 из <code>ЗАДАНИЯ.md</code> и проверьте себя: <code>python проверить.py</code>. Все строки должны быть зелёными ✔.</li>
+    <li>Задание 8 — «цикл дома»: <code>git pull</code>, добавьте в свой CSV ещё один день измерений, <code>add</code> → <code>commit</code> → <code>push</code>. Ссылку на этот коммит пришлите в чат (на GitHub: ваша ветка → Commits → нужный коммит → скопировать адрес).</li>
+  </ol>
+  <h2>3. Тема команды</h2>
+  <ol>
+    <li>Прочитайте файл своей команды <code>группы/A.md</code> или <code>группы/B.md</code> в <code>main</code> (сначала <code>git checkout main</code> и <code>git pull</code>).</li>
+    <li>Напишите в чат команды одно возражение или уточнение к теме: что может не получиться, чего не хватает.</li>
+    <li>Сделайте «первый шаг» из пункта 8 файла команды и принесите результат на третье занятие.</li>
+  </ol>
+  </div>
+</section>
+
+<!-- ================= РУКОВОДИТЕЛЮ ================= -->
+<section class="tab" id="tab-teacher">
+  <div class="doc">
+  <h1>Руководителю: занятие 2</h1>
+  <p class="lead">Цель: каждый сделал свой коммит и push в настоящем терминале и понимает, зачем история версий; команды объявлены, темы выбраны и записаны в репозиторий. 2 часа, 7 учеников, 2 команды. Полная версия — <code>Урок_2_git/План_урока.md</code>.</p>
+  <h2>Подготовить заранее</h2>
+  <ul id="prep"></ul>
+  <h2>Ход занятия</h2>
+  <div class="tablewrap"><table id="flow"></table></div>
+  <h2>Как пользоваться тренажёром на занятии</h2>
+  <ul>
+    <li>На проекторе — вкладка «Как устроен Git», жмите кнопки и проговаривайте каждое место.</li>
+    <li>Уровни 1–10 ученики проходят сами, в своём темпе. Тем, кто быстро, — дальше. Кто застрял — кнопка «Подсказка», потом вы.</li>
+    <li>Тренажёр ничего не отправляет в интернет: прогресс хранится в браузере ученика. Отчёт — карточка с кодом, код проверяется ниже.</li>
+    <li>Блок 4 (конфликты) удобно показать на проекторе перед демонстрацией конфликта на настоящем GitHub.</li>
+  </ul>
+  <h2>Проверить код ученика</h2>
+  <div class="card" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <input id="vName" placeholder="Имя Фамилия" style="flex:2;min-width:160px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink)">
+    <input id="vCount" type="number" min="0" max="18" placeholder="уровней" style="width:100px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink)">
+    <input id="vCode" placeholder="код" style="width:110px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font-family:var(--mono);text-transform:uppercase">
+    <button class="btn primary" id="vBtn">Проверить</button>
+    <span id="vRes"></span>
+  </div>
+  <h2>Типовые проблемы</h2>
+  <ul>
+    <li>«fatal: not a git repository» — не в той папке, <code>cd git-praktika</code>.</li>
+    <li>Терминал не видит <code>git</code> на Windows — не установлен или не перезапущен VS Code после установки.</li>
+    <li><code>python</code> не найден на Windows — при установке не поставили «Add to PATH»; использовать <code>py</code>.</li>
+    <li>push просит логин/пароль в терминале — не сработал Git Credential Manager. Переустановить Git for Windows с настройками по умолчанию или войти через VS Code (Accounts → Sign in with GitHub).</li>
+    <li>403 при push — ученик не принял приглашение в репозиторий или вошёл под другим аккаунтом.</li>
+    <li>Кириллица в имени ветки работает, но если где-то ломается — латиница.</li>
+    <li>Открылся Vim после <code>git commit</code> без <code>-m</code>: <kbd>Esc</kbd>, <code>:wq</code>, <kbd>Enter</kbd>. Профилактика: <code>git config --global core.editor "code --wait"</code>.</li>
+  </ul>
+  <h2>Что сознательно не рассказываем</h2>
+  <p>Rebase, теги, stash, <code>git reset</code>, SSH-ключи. Конфликты на настоящем GitHub ученики не устраивают сами — только в тренажёре и на разборе на экране.</p>
+  </div>
+</section>
+</main>
+
+<script src="engine.js?v=1"></script>
+<script>
+(function () {
+  "use strict";
+  const S = window.GitSim;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // ---------- хранилище (может быть недоступно) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("gt-" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("gt-" + k, JSON.stringify(v)); } catch (e) {} },
+  };
+
+  // ---------- тема ----------
+  const themes = ["auto", "light", "dark"];
+  let theme = store.get("theme", "auto");
+  function applyTheme() {
+    if (theme === "auto") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", theme);
+    $("theme").textContent = "◐ " + ({ auto: "Авто", light: "Светлая", dark: "Тёмная" })[theme];
+  }
+  $("theme").onclick = () => { theme = themes[(themes.indexOf(theme) + 1) % 3]; store.set("theme", theme); applyTheme(); };
+  applyTheme();
+
+  // ---------- вкладки ----------
+  function showTab(t) {
+    document.querySelectorAll("#nav button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
+    document.querySelectorAll(".tab").forEach((s) => s.classList.toggle("on", s.id === "tab-" + t));
+    store.set("tab", t);
+    if (t === "train") setTimeout(() => $("cmd").focus(), 0);
+  }
+  document.querySelectorAll("#nav button").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
+  const hashTab = location.hash.replace("#", "");
+  showTab(["model", "train", "github", "cheat", "hw", "teacher"].includes(hashTab) ? hashTab : store.get("tab", "train"));
+
+  // ---------- приглашение ----------
+  const orgUrl = S.PRAKTIKA_URL + "/invitations";
+  document.querySelectorAll(".org").forEach((e) => (e.textContent = S.ORG));
+  document.querySelectorAll(".orglink").forEach((e) => { e.href = orgUrl; e.textContent = orgUrl.replace("https://", ""); });
+  $("clonecmd").textContent = "git clone " + S.PRAKTIKA_URL + ".git\ncd git-praktika\npython -m venv venv\nvenv\\Scripts\\activate        # Windows\nsource venv/bin/activate     # Mac\npip install -r requirements.txt\npython 01_график.py";
+
+  // ---------- шаги подключения ----------
+  const ghDone = store.get("gh", []);
+  document.querySelectorAll("#ghsteps > li").forEach((li, i) => {
+    const lab = document.createElement("label");
+    lab.innerHTML = '<input type="checkbox"> готово';
+    const cb = lab.querySelector("input");
+    cb.checked = ghDone.includes(i);
+    li.classList.toggle("done", cb.checked);
+    cb.onchange = () => {
+      const k = ghDone.indexOf(i);
+      if (cb.checked && k < 0) ghDone.push(i);
+      if (!cb.checked && k >= 0) ghDone.splice(k, 1);
+      li.classList.toggle("done", cb.checked);
+      store.set("gh", ghDone);
+    };
+    li.appendChild(lab);
+  });
+
+  // ================= ТРЕНАЖЁР =================
+  const L = S.LEVELS;
+  let done = store.get("done", []).filter((id) => L.some((l) => l.id === id));
+  let cur = Math.max(0, L.findIndex((l) => l.id === store.get("level", L[0].id)));
+  const worlds = {};
+  const screens = {};
+  const cmdHist = [];
+  let histPos = 0;
+  let shownHints = 0;
+  let name = store.get("name", "");
+
+  function world() {
+    const lv = L[cur];
+    if (!worlds[lv.id]) {
+      worlds[lv.id] = lv.setup();
+      worlds[lv.id].history = [];
+      screens[lv.id] = [{ text: "Уровень " + (cur + 1) + ". " + lv.title + ". Список команд — help.", cls: "muted" }];
+    }
+    return worlds[lv.id];
+  }
+
+  function renderLevels() {
+    const box = $("levels");
+    let h = "";
+    let blk = 0;
+    L.forEach((lv, i) => {
+      if (lv.block !== blk) { blk = lv.block; h += "<h4>" + blk + ". " + esc(S.BLOCKS[blk]) + "</h4>"; }
+      h += '<button class="lvl' + (i === cur ? " on" : "") + (done.includes(lv.id) ? " done" : "") + '" data-i="' + i + '"><span class="n">' + (done.includes(lv.id) ? "✓" : i + 1) + "</span>" + esc(lv.title) + "</button>";
+    });
+    h += '<div class="me"><label for="nm">Имя и фамилия для отчёта</label><input id="nm" value="' + esc(name) + '" placeholder="Имя Фамилия">' +
+      '<div class="progress"><div style="width:' + Math.round((done.length / L.length) * 100) + '%"></div></div>' +
+      "Пройдено " + done.length + " из " + L.length + reportHtml() + "</div>";
+    box.innerHTML = h;
+    box.querySelectorAll(".lvl").forEach((b) => (b.onclick = () => go(+b.dataset.i)));
+    $("nm").oninput = (e) => { name = e.target.value; store.set("name", name); updateReport(); };
+  }
+  function reportHtml() {
+    if (!name.trim()) return '<div class="empty" style="margin-top:6px">Введите имя — появится код для отчёта.</div>';
+    return '<div class="report" id="rep"><div>' + esc(name.trim()) + "</div><div>уровней: <b>" + done.length + "/" + L.length + '</b></div><div class="code">' + S.progressCode(name, done.length) + "</div></div>";
+  }
+  function updateReport() {
+    const r = $("rep");
+    const wrap = document.querySelector(".me");
+    const old = wrap.querySelector(".report, .empty");
+    const tmp = document.createElement("div");
+    tmp.innerHTML = reportHtml();
+    if (old) old.replaceWith(tmp.firstChild); else wrap.appendChild(tmp.firstChild);
+    renderHwCard();
+  }
+  function renderHwCard() {
+    $("hwCard").innerHTML = '<div class="card">' + (name.trim()
+      ? "Сейчас: <b>" + esc(name.trim()) + "</b>, пройдено <b>" + done.length + "/" + L.length + "</b>, код <code>" + S.progressCode(name, done.length) + "</code>"
+      : "Имя не введено. Откройте вкладку «Тренажёр» и введите имя внизу списка уровней.") + "</div>";
+  }
+
+  function renderTask() {
+    const lv = L[cur], w = world();
+    const st = S.goalStates(lv, w);
+    const all = st.every(Boolean);
+    let h = '<div class="blk">Блок ' + lv.block + " · " + esc(S.BLOCKS[lv.block]) + " · уровень " + (cur + 1) + " из " + L.length + "</div>";
+    h += "<h2>" + esc(lv.title) + "</h2><p>" + fmt(lv.story) + '</p><ul class="goals">';
+    lv.goals.forEach((g, i) => { h += '<li class="' + (st[i] ? "ok" : "") + '"><span class="c">' + (st[i] ? "✓" : "") + "</span><span>" + fmt(g.text) + "</span></li>"; });
+    h += '</ul><div class="hints">';
+    for (let i = 0; i < shownHints && i < lv.hints.length; i++) h += "<p>💡 " + fmt(lv.hints[i]) + "</p>";
+    h += '</div><div class="tools">';
+    if (shownHints < lv.hints.length) h += '<button class="btn" id="bHint">Подсказка (' + (lv.hints.length - shownHints) + ")</button>";
+    h += '<button class="btn" id="bReset">↺ Начать уровень заново</button>';
+    if (cur > 0) h += '<button class="btn" id="bPrev">← Назад</button>';
+    h += "</div>";
+    h += '<div class="win' + (all ? " on" : "") + '"><b>Уровень пройден!</b>' + (cur < L.length - 1 ? '<button class="btn primary" id="bNext">Следующий уровень →</button>' : "<span>Это был последний уровень. Отправьте карточку с кодом в чат.</span>") + "</div>";
+    $("task").innerHTML = h;
+    if ($("bHint")) $("bHint").onclick = () => { shownHints++; renderTask(); };
+    $("bReset").onclick = () => { delete worlds[lv.id]; shownHints = 0; renderAll(); focusCmd(); };
+    if ($("bPrev")) $("bPrev").onclick = () => go(cur - 1);
+    if ($("bNext")) $("bNext").onclick = () => go(cur + 1);
+    if (all && !done.includes(lv.id)) {
+      done.push(lv.id);
+      store.set("done", done);
+      renderLevels();
+      renderHwCard();
+    }
+  }
+  function fmt(s) {
+    // `код` и команды git ... выделяем моноширинным
+    return esc(s).replace(/(git [a-z-]+(?: [^,.;:«»()]*?)?)(?=$|[,.;:)]| —| →| и | или | потом| затем| выдаст)/g, "<code>$1</code>");
+  }
+
+  function prompt(w) {
+    const r = S.curRepo(w);
+    return '<span class="p">ученик@школа <b>~' + (w.cwd ? "/" + esc(w.cwd) : "") + "</b>" + (r ? " <i>(" + esc(r.head) + (r.merging ? "|MERGING" : "") + ")</i>" : "") + " $</span>";
+  }
+
+  function renderTerm() {
+    const w = world();
+    const lines = screens[L[cur].id];
+    $("out").innerHTML = lines.map((l) => '<div class="l ' + (l.cls || "") + '">' + (l.html || esc(l.text)) + "</div>").join("");
+    $("prompt").innerHTML = prompt(w);
+    const t = $("term");
+    t.scrollTop = t.scrollHeight;
+  }
+
+  function renderSide() {
+    const w = world();
+    const r = S.curRepo(w);
+    $("where").textContent = "~" + (w.cwd ? "/" + w.cwd : "");
+    const f = S.worktree(w);
+    let h = "";
+    if (!w.cwd) {
+      const dirs = Object.keys(w.home.dirs).sort();
+      h = dirs.map((d) => '<div class="f"><span>📁 ' + esc(d) + "/</span>" + (w.home.dirs[d].repo ? '<span class="tag stg">репозиторий</span>' : "") + "</div>").join("") || '<div class="empty">пусто</div>';
+      $("headinfo").textContent = "";
+    } else if (!r) {
+      h = Object.keys(f).sort().map((p) => '<div class="f"><span>' + esc(p) + "</span></div>").join("");
+      h += '<div class="empty" style="margin-top:6px">Эта папка ещё не репозиторий.</div>';
+      $("headinfo").textContent = "";
+    } else {
+      const s = S.fileStatus(w);
+      const tags = {};
+      s.staged.forEach((x) => (tags[x.p] = (tags[x.p] || "") + '<span class="tag stg">' + (x.kind === "new file" ? "новый" : x.kind === "deleted" ? "удалён" : "изменён") + " · в индексе</span>"));
+      s.unstaged.forEach((x) => (tags[x.p] = (tags[x.p] || "") + '<span class="tag mod">' + (x.kind === "deleted" ? "удалён" : "изменён") + "</span>"));
+      s.untracked.forEach((p) => (tags[p] = '<span class="tag new">новый, не в git</span>'));
+      s.unmerged.forEach((p) => (tags[p] = '<span class="tag cnf">конфликт</span>'));
+      s.ignored.forEach((p) => (tags[p] = '<span class="tag ign">.gitignore</span>'));
+      const names = new Set(Object.keys(f).concat(Object.keys(tags)));
+      h = [...names].sort().map((p) => '<div class="f"><span>' + esc(p) + "</span><span>" + (tags[p] || "") + "</span></div>").join("");
+      $("headinfo").textContent = "ветка " + r.head;
+    }
+    $("files").innerHTML = h;
+    $("glocal").innerHTML = r ? graphSvg(w, localRefs(w, r)) : '<div class="empty">Нет репозитория — нет истории.</div>';
+    const urls = Object.keys(w.github);
+    if (urls.length) {
+      const gh = w.github[urls[0]];
+      $("ghurl").textContent = urls[0].replace("https://github.com/", "");
+      const refs = Object.keys(gh.branches).map((b) => ({ name: b, id: gh.branches[b], kind: "local" }));
+      $("gremote").innerHTML = graphSvg(w, refs);
+    } else {
+      $("ghurl").textContent = "";
+      $("gremote").innerHTML = '<div class="empty">В этом уровне GitHub не нужен.</div>';
+    }
+  }
+
+  function localRefs(w, r) {
+    const refs = [];
+    Object.keys(r.branches).forEach((b) => refs.push({ name: b, id: r.branches[b], kind: "local", head: b === r.head }));
+    Object.keys(r.tracking).forEach((b) => refs.push({ name: b, id: r.tracking[b], kind: "remote" }));
+    return refs;
+  }
+
+  // Граф коммитов: слева направо по времени, по дорожке на ветку.
+  function graphSvg(w, refs) {
+    refs = refs.filter((r) => r.id);
+    if (!refs.length) return '<div class="empty">Коммитов пока нет.</div>';
+    const all = new Set();
+    refs.forEach((r) => S.ancestors(w, r.id).forEach((c) => all.add(c)));
+    const commits = [...all].map((id) => w.objects[id]).sort((a, b) => a.seq - b.seq);
+    const col = {};
+    commits.forEach((c, i) => (col[c.id] = i));
+    // порядок веток: main первой, затем локальные, затем origin/*
+    const order = refs.slice().sort((a, b) => {
+      const ka = (a.name === "main" ? 0 : a.name === "origin/main" ? 1 : a.kind === "local" ? 2 : 3);
+      const kb = (b.name === "main" ? 0 : b.name === "origin/main" ? 1 : b.kind === "local" ? 2 : 3);
+      return ka - kb || a.name.localeCompare(b.name);
+    });
+    const lane = {};
+    let lanes = 0;
+    order.forEach((r) => {
+      let c = r.id, claimed = false;
+      while (c && lane[c] === undefined) { lane[c] = lanes; claimed = true; c = w.objects[c].parents[0]; }
+      if (claimed) lanes++;
+    });
+    const colors = ["var(--lane1)", "var(--lane2)", "var(--lane3)", "var(--lane4)", "var(--lane5)"];
+    const DX = 46, DY = 34, X0 = 18, Y0 = 20;
+    const labelsAt = {};
+    refs.forEach((r) => (labelsAt[r.id] = (labelsAt[r.id] || []).concat(r)));
+    const maxLabels = Math.max(1, ...Object.values(labelsAt).map((a) => a.length));
+    const width = X0 + (commits.length - 1) * DX + 150;
+    const height = Y0 + (lanes - 1) * DY + 26 + maxLabels * 17;
+    let s = '<svg width="' + width + '" height="' + height + '" role="img" aria-label="граф коммитов">';
+    const xy = (id) => [X0 + col[id] * DX, Y0 + lane[id] * DY];
+    commits.forEach((c) => {
+      const [x, y] = xy(c.id);
+      c.parents.forEach((p, k) => {
+        if (col[p] === undefined) return;
+        const [px, py] = xy(p);
+        const clr = colors[(k === 0 ? lane[c.id] : lane[c.id]) % 5];
+        if (py === y) s += '<line x1="' + px + '" y1="' + py + '" x2="' + x + '" y2="' + y + '" stroke="' + clr + '" stroke-width="2.5"/>';
+        else s += '<path d="M' + px + " " + py + " C " + (px + DX * 0.6) + " " + py + ", " + (x - DX * 0.6) + " " + y + ", " + x + " " + y + '" fill="none" stroke="' + colors[(k === 0 ? lane[c.id] : lane[p]) % 5] + '" stroke-width="2.5"/>';
+      });
+    });
+    commits.forEach((c) => {
+      const [x, y] = xy(c.id);
+      const clr = colors[lane[c.id] % 5];
+      s += '<g><title>' + esc(c.id.slice(0, 7) + " " + c.msg + " — " + c.author.name) + "</title>";
+      s += '<circle cx="' + x + '" cy="' + y + '" r="' + (c.parents.length > 1 ? 8 : 7) + '" fill="' + (c.parents.length > 1 ? "var(--panel)" : clr) + '" stroke="' + clr + '" stroke-width="2.5"/></g>';
+    });
+    // подписи веток под графом: раскладываем по строкам, чтобы не наезжали друг на друга
+    const baseY = Y0 + (lanes - 1) * DY + 22;
+    const labels = [];
+    Object.keys(labelsAt).forEach((id) => {
+      labelsAt[id].sort((a, b) => (b.head ? 1 : 0) - (a.head ? 1 : 0) || (a.kind === "remote") - (b.kind === "remote")).forEach((r) => labels.push({ id: id, r: r }));
+    });
+    labels.sort((a, b) => col[a.id] - col[b.id]);
+    const rowEnd = [];
+    let rows = 1;
+    const placed = labels.map((L) => {
+      const [x, y] = xy(L.id);
+      const txt = (L.r.head ? "HEAD → " : "") + L.r.name;
+      const tw = txt.length * 6.8 + 10;
+      let row = 0;
+      while (rowEnd[row] !== undefined && rowEnd[row] > x - 8) row++;
+      rowEnd[row] = x - 6 + tw;
+      rows = Math.max(rows, row + 1);
+      return { x: x, y: y, txt: txt, tw: tw, row: row, r: L.r, id: L.id };
+    });
+    placed.forEach((P) => {
+      const ly = baseY + P.row * 17;
+      const fill = P.r.kind === "remote" ? "var(--chip)" : colors[lane[P.id] % 5];
+      s += '<line x1="' + P.x + '" y1="' + (P.y + 8) + '" x2="' + P.x + '" y2="' + (ly - 11) + '" stroke="var(--line)" stroke-dasharray="2 2"/>';
+      s += '<rect x="' + (P.x - 6) + '" y="' + (ly - 11) + '" width="' + P.tw + '" height="15" rx="4" fill="' + fill + '"' + (P.r.kind === "remote" ? ' stroke="var(--line)"' : "") + "/>";
+      s += '<text x="' + (P.x - 1) + '" y="' + ly + '" style="fill:' + (P.r.kind === "remote" ? "var(--muted)" : "var(--label-ink)") + ";font-weight:" + (P.r.head ? 700 : 400) + '">' + esc(P.txt) + "</text>";
+    });
+    const needH = baseY + rows * 17;
+    s = s.replace(/height="\d+"/, 'height="' + needH + '"');
+    const needW = Math.max(...placed.map((P) => P.x - 6 + P.tw)) + 10;
+    s = s.replace(/width="\d+"/, 'width="' + Math.max(needW, X0 + (commits.length - 1) * DX + 20) + '"');
+    s += "</svg>";
+    const last = commits[commits.length - 1];
+    return s + '<div class="empty">' + commits.length + " коммит" + plural(commits.length) + " · последний: <code>" + last.id.slice(0, 7) + "</code> " + esc(last.msg) + "</div>";
+  }
+  function plural(n) {
+    const a = n % 10, b = n % 100;
+    if (a === 1 && b !== 11) return "";
+    if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return "а";
+    return "ов";
+  }
+
+  function renderAll() {
+    renderLevels();
+    renderTask();
+    renderTerm();
+    renderSide();
+    renderHwCard();
+  }
+
+  function go(i) {
+    cur = Math.max(0, Math.min(L.length - 1, i));
+    store.set("level", L[cur].id);
+    shownHints = 0;
+    renderAll();
+    focusCmd();
+  }
+  function focusCmd() { if (window.matchMedia("(pointer:fine)").matches) $("cmd").focus(); }
+
+  // ---------- ввод команд ----------
+  function exec(line) {
+    const w = world();
+    const scr = screens[L[cur].id];
+    scr.push({ html: prompt(w) + " " + esc(line), text: "" });
+    const r = S.run(w, line);
+    if (r.clear) scr.length = 0;
+    else r.lines.forEach((l) => scr.push(l));
+    if (scr.length > 600) scr.splice(0, scr.length - 600);
+    if (line.trim()) { cmdHist.push(line); histPos = cmdHist.length; }
+    renderTerm();
+    renderSide();
+    renderTask();
+    if (r.edit) openEditor(r.edit);
+  }
+
+  $("cmd").addEventListener("keydown", (e) => {
+    const inp = e.target;
+    if (e.key === "Enter") { const v = inp.value; inp.value = ""; exec(v); }
+    else if (e.key === "ArrowUp") { if (histPos > 0) { histPos--; inp.value = cmdHist[histPos]; } e.preventDefault(); }
+    else if (e.key === "ArrowDown") { if (histPos < cmdHist.length) { histPos++; inp.value = cmdHist[histPos] || ""; } e.preventDefault(); }
+    else if (e.key === "Tab") { e.preventDefault(); complete(inp); }
+    else if (e.key === "l" && e.ctrlKey) { e.preventDefault(); screens[L[cur].id].length = 0; renderTerm(); }
+  });
+  $("term").addEventListener("click", () => { if (!window.getSelection().toString()) $("cmd").focus(); });
+
+  // Автодополнение по Tab: файлы, папки, ветки.
+  function complete(inp) {
+    const w = world();
+    const v = inp.value;
+    const m = v.match(/(\S*)$/);
+    const pre = m[1];
+    const cands = new Set();
+    Object.keys(S.worktree(w)).forEach((p) => cands.add(p));
+    if (!w.cwd) Object.keys(w.home.dirs).forEach((d) => cands.add(d));
+    const r = S.curRepo(w);
+    if (r) { Object.keys(r.branches).forEach((b) => cands.add(b)); Object.keys(r.tracking).forEach((b) => cands.add(b)); }
+    ["status", "add", "commit", "checkout", "branch", "merge", "push", "pull", "clone", "log", "--oneline", "origin"].forEach((x) => cands.add(x));
+    const hits = [...cands].filter((c) => c.startsWith(pre) && c !== pre);
+    if (hits.length === 1) inp.value = v.slice(0, v.length - pre.length) + hits[0];
+    else if (hits.length > 1) {
+      let common = hits[0];
+      hits.forEach((h) => { while (!h.startsWith(common)) common = common.slice(0, -1); });
+      if (common.length > pre.length) inp.value = v.slice(0, v.length - pre.length) + common;
+      else { screens[L[cur].id].push({ text: hits.join("   "), cls: "muted" }); renderTerm(); }
+    }
+  }
+
+  // ---------- редактор ----------
+  let edPath = null;
+  function openEditor(p) {
+    edPath = p;
+    const f = S.worktree(world());
+    $("ed-name").textContent = p + (p in f ? "" : " (новый файл)");
+    $("ed-text").value = f[p] || "";
+    $("editor").showModal();
+    $("ed-text").focus();
+  }
+  function closeEditor(save) {
+    if (save && edPath) {
+      S.writeFile(world(), edPath, $("ed-text").value.replace(/\r/g, "").replace(/\n+$/, ""));
+      screens[L[cur].id].push({ text: "Сохранено: " + edPath, cls: "muted" });
+    }
+    edPath = null;
+    $("editor").close();
+    renderTerm(); renderSide(); renderTask();
+    focusCmd();
+  }
+  $("ed-save").onclick = () => closeEditor(true);
+  $("ed-cancel").onclick = () => closeEditor(false);
+  $("ed-x").onclick = () => closeEditor(false);
+  $("ed-text").addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); closeEditor(true); }
+    if (e.key === "Tab") { e.preventDefault(); const t = e.target, a = t.selectionStart; t.setRangeText("    ", a, t.selectionEnd, "end"); }
+  });
+  $("editor").addEventListener("cancel", (e) => { e.preventDefault(); closeEditor(false); });
+
+  renderAll();
+
+  // ================= СХЕМА «ЧЕТЫРЕ МЕСТА» =================
+  let M;
+  function mReset() { M = { v: 1, work: 1, index: null, local: [], remote: [], friend: 0, dirty: false }; }
+  mReset();
+  const pill = (t, cls) => '<span class="pill ' + (cls || "mine") + '">' + esc(t) + "</span>";
+  function mRender(msg, bad, flash) {
+    $("z-work").querySelector(".body").innerHTML = pill("шаги.csv — версия " + M.work + (M.dirty ? " ✎" : ""));
+    $("z-index").querySelector(".body").innerHTML = M.index ? pill("шаги.csv — версия " + M.index) : '<span class="empty">пусто</span>';
+    const list = (arr) => arr.length ? arr.slice().reverse().map((c) => pill(c.t, c.who === "me" ? "mine" : "their")).join("") : '<span class="empty">пусто</span>';
+    $("z-local").querySelector(".body").innerHTML = list(M.local);
+    $("z-remote").querySelector(".body").innerHTML = list(M.remote);
+    if (msg) { $("say").innerHTML = msg; $("say").classList.toggle("bad", !!bad); }
+    document.querySelectorAll(".zone").forEach((z) => z.classList.remove("flash"));
+    if (flash) { const z = $("z-" + flash); void z.offsetWidth; z.classList.add("flash"); setTimeout(() => z.classList.remove("flash"), 700); }
+  }
+  const has = (arr, c) => arr.some((x) => x.t === c.t);
+  const actions = {
+    edit() { M.v++; M.work = M.v; M.dirty = true; mRender("Вы поменяли файл в VS Code. Git это видит (<code>git status</code> покажет <i>modified</i>), но пока ничего не сохранил.", false, "work"); },
+    add() {
+      if (!M.dirty) return mRender("Нечего добавлять: файл не менялся после последнего коммита. Сначала измените файл.", true);
+      M.index = M.work; mRender("<code>git add</code> положил версию " + M.index + " в индекс. Это ещё не сохранение, а «отложил в корзину для коммита».", false, "index");
+    },
+    commit() {
+      if (!M.index) return mRender("Индекс пуст — коммитить нечего. Частая ошибка: забыли <code>git add</code>.", true);
+      M.local.push({ t: "«Версия " + M.index + "» — вы", who: "me" }); M.dirty = M.work !== M.index; M.index = null;
+      mRender("Коммит сохранил версию в истории на вашем компьютере. Её можно найти в <code>git log</code>. На GitHub её пока нет!", false, "local");
+    },
+    push() {
+      const foreign = M.remote.filter((c) => !has(M.local, c));
+      if (foreign.length) return mRender("<b>rejected (fetch first)</b>: на GitHub есть коммит коллеги, которого у вас нет. Сначала <code>git pull</code>, потом <code>git push</code>.", true, "remote");
+      const add = M.local.filter((c) => !has(M.remote, c));
+      if (!add.length) return mRender("Everything up-to-date: всё уже на GitHub.", false);
+      add.forEach((c) => M.remote.push(c));
+      mRender("<code>git push</code> отправил " + add.length + " коммит" + plural(add.length) + " на GitHub. Теперь их видит вся команда.", false, "remote");
+    },
+    pull() {
+      const add = M.remote.filter((c) => !has(M.local, c));
+      if (!add.length) return mRender("Already up to date: на GitHub нет ничего нового для вас.", false);
+      add.forEach((c) => M.local.push(c));
+      const mine = M.local.some((c) => c.who === "me" && !has(M.remote, c));
+      if (mine) M.local.push({ t: "Слияние (merge)", who: "me" });
+      mRender("<code>git pull</code> забрал " + add.length + " коммит" + plural(add.length) + " коллеги в вашу историю и обновил папку." + (mine ? " Ваши коммиты тоже остались — git сделал коммит слияния. Теперь можно <code>git push</code>." : ""), false, "local");
+    },
+    friend() { M.friend++; M.remote.push({ t: "«Данные Ани " + M.friend + "» — Аня", who: "them" }); mRender("Аня отправила свой коммит на GitHub. У вас его пока нет — узнать можно только через <code>git pull</code>.", false, "remote"); },
+    reset() { mReset(); mRender("Начните с «изменить файл»."); },
+  };
+  document.querySelectorAll("[data-m]").forEach((b) => (b.onclick = () => actions[b.dataset.m]()));
+  mRender();
+
+  // Пример веток для вкладки «Как устроен Git»
+  (function () {
+    const w = S.newWorld();
+    w.config["user.name"] = "Ученик"; w.config["user.email"] = "u@e";
+    w.home.dirs["п"] = { files: { "a.txt": "1" }, repo: null };
+    w.cwd = "п";
+    ["git init", "git add .", 'git commit -m "Начало"', "git checkout -b аня", 'echo "2" > b.txt', "git add .", 'git commit -m "Шаги Ани"',
+      "git checkout main", 'echo "3" > c.txt', "git add .", 'git commit -m "Правка в main"', "git checkout аня", 'echo "4" >> b.txt', "git add .", 'git commit -m "Ещё шаги"',
+      "git checkout main", "git merge аня"].forEach((c) => S.run(w, c));
+    const r = S.curRepo(w);
+    $("branchDemo").innerHTML = graphSvg(w, localRefs(w, r));
+  })();
+
+  // ================= РУКОВОДИТЕЛЮ =================
+  const prep = [
+    "Собрать GitHub-логины учеников (шаг 2 вкладки «Подключение»).",
+    "Пригласить 7 учеников в " + S.PRAKTIKA_URL.replace("https://", "") + ": Settings → Collaborators → Add people. Напомнить в чате принять приглашение.",
+    "Проверить, что в git-praktika есть ветки main, демо-конфликт-1, демо-конфликт-2.",
+    "На школьном компьютере проверить: git clone по HTTPS и вход через браузер при первом push. Если GitHub режется — раздача с телефона или GitVerse.",
+    "Положить на рабочий стол папку демо_зачем_git (проект_финал*.py) для первых 10 минут.",
+    "Список тех, кому нет 13 или нет почты: работают в паре, регистрируются дома.",
+    "Распечатать GIT.md на 7 человек и шаблон группы на 2 команды.",
+  ];
+  const prepDone = store.get("prep", []);
+  $("prep").innerHTML = prep.map((t, i) => '<li><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" data-p="' + i + '"' + (prepDone.includes(i) ? " checked" : "") + "><span>" + esc(t) + "</span></label></li>").join("");
+  $("prep").querySelectorAll("input").forEach((cb) => (cb.onchange = () => {
+    const i = +cb.dataset.p, k = prepDone.indexOf(i);
+    if (cb.checked && k < 0) prepDone.push(i); if (!cb.checked && k >= 0) prepDone.splice(k, 1);
+    store.set("prep", prepDone);
+  }));
+  const flow = [
+    ["0–10", "Зачем Git", "Папка демо_зачем_git: проект_финал.py, …_2.py, …_настоящий.py, …_ИСПРАВЛЕН_Вася.py — какой правильный? (вопросы — в вопросы.md) Затем git log учебного репозитория — та же история, но с подписями и датами."],
+    ["10–25", "Четыре места", "Вкладка «Как устроен Git» на проекторе. Ученики рисуют схему в тетради. Ветки — график внизу вкладки."],
+    ["25–45", "Тренажёр, блоки 1–2", "Каждый сам: уровни 1–10. Ходите по классу, быстрым — дальше, до уровня 12."],
+    ["45–60", "Настоящий GitHub", "Вкладка «Подключение»: config, clone, открыть папку в VS Code, python 01_график.py. Задания 1–2, python проверить.py."],
+    ["60–70", "Перерыв", ""],
+    ["70–85", "Своя ветка и свои данные", "Задания 3–6: ветка, CSV из 7 строк, commit, push -u. python проверить.py до всех зелёных. Показать, что картинка не попала в коммит (.gitignore)."],
+    ["85–95", "Pull request и конфликт", "На экране: PR одной ветки, Merge. Затем слить демо-конфликт-1, открыть PR демо-конфликт-2 → конфликт → «Resolve conflicts» в браузере. Все: git checkout main, git pull (задание 7)."],
+    ["95–100", "Объявление команд", "Команда А «Данные и ИИ» (3 чел.) и команда Б «Приложение» (4 чел.) — состав по итогам отбора, список у руководителя. Дать каждой 2–3 темы-кандидата."],
+    ["100–120", "Выбор темы", "Команды заполняют группы/A.md и группы/B.md по шаблону. Один человек от команды коммитит и отправляет в свою ветку, открывает PR. Объяснить домашку (вкладка «Домашка»)."],
+  ];
+  $("flow").innerHTML = "<tr><th>Мин</th><th>Блок</th><th>Что происходит</th></tr>" + flow.map((r) => "<tr><td>" + r[0] + "</td><td><b>" + esc(r[1]) + "</b></td><td>" + esc(r[2]) + "</td></tr>").join("");
+  $("vBtn").onclick = () => {
+    const ok = S.progressCode($("vName").value, +$("vCount").value) === $("vCode").value.trim().toUpperCase();
+    $("vRes").innerHTML = ok ? '<b style="color:var(--ok)">✔ код верный</b>' : '<b style="color:var(--err)">✘ не совпадает</b> — проверьте написание имени';
+  };
+})();
+</script>
+</body>
+</html>
