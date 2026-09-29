@@ -192,7 +192,6 @@ pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px
       <button data-tab="github">Подключение к GitHub</button>
       <button data-tab="cheat">Шпаргалка</button>
       <button data-tab="hw">Домашка</button>
-      <button data-tab="teacher">Руководителю</button>
     </nav>
     <button class="theme" id="theme" title="Сменить тему">◐ Тема</button>
   </div>
@@ -404,47 +403,9 @@ git push</pre></div>
   </div>
 </section>
 
-<!-- ================= РУКОВОДИТЕЛЮ ================= -->
-<section class="tab" id="tab-teacher">
-  <div class="doc">
-  <h1>Руководителю: занятие 2</h1>
-  <p class="lead">Цель: каждый сделал свой коммит и push в настоящем терминале и понимает, зачем история версий; команды объявлены, темы выбраны и записаны в репозиторий. 2 часа, 7 учеников, 2 команды. Полная версия — <code>Урок_2_git/План_урока.md</code>.</p>
-  <h2>Подготовить заранее</h2>
-  <ul id="prep"></ul>
-  <h2>Ход занятия</h2>
-  <div class="tablewrap"><table id="flow"></table></div>
-  <h2>Как пользоваться тренажёром на занятии</h2>
-  <ul>
-    <li>На проекторе — вкладка «Как устроен Git», жмите кнопки и проговаривайте каждое место.</li>
-    <li>Уровни 1–10 ученики проходят сами, в своём темпе. Тем, кто быстро, — дальше. Кто застрял — кнопка «Подсказка», потом вы.</li>
-    <li>Тренажёр ничего не отправляет в интернет: прогресс хранится в браузере ученика. Отчёт — карточка с кодом, код проверяется ниже.</li>
-    <li>Блок 4 (конфликты) удобно показать на проекторе перед демонстрацией конфликта на настоящем GitHub.</li>
-  </ul>
-  <h2>Проверить код ученика</h2>
-  <div class="card" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-    <input id="vName" placeholder="Имя Фамилия" style="flex:2;min-width:160px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink)">
-    <input id="vCount" type="number" min="0" max="18" placeholder="уровней" style="width:100px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink)">
-    <input id="vCode" placeholder="код" style="width:110px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font-family:var(--mono);text-transform:uppercase">
-    <button class="btn primary" id="vBtn">Проверить</button>
-    <span id="vRes"></span>
-  </div>
-  <h2>Типовые проблемы</h2>
-  <ul>
-    <li>«fatal: not a git repository» — не в той папке, <code>cd git-praktika</code>.</li>
-    <li>Терминал не видит <code>git</code> на Windows — не установлен или не перезапущен VS Code после установки.</li>
-    <li><code>python</code> не найден на Windows — при установке не поставили «Add to PATH»; использовать <code>py</code>.</li>
-    <li>push просит логин/пароль в терминале — не сработал Git Credential Manager. Переустановить Git for Windows с настройками по умолчанию или войти через VS Code (Accounts → Sign in with GitHub).</li>
-    <li>403 при push — ученик не принял приглашение в репозиторий или вошёл под другим аккаунтом.</li>
-    <li>Кириллица в имени ветки работает, но если где-то ломается — латиница.</li>
-    <li>Открылся Vim после <code>git commit</code> без <code>-m</code>: <kbd>Esc</kbd>, <code>:wq</code>, <kbd>Enter</kbd>. Профилактика: <code>git config --global core.editor "code --wait"</code>.</li>
-  </ul>
-  <h2>Что сознательно не рассказываем</h2>
-  <p>Rebase, теги, stash, <code>git reset</code>, SSH-ключи. Конфликты на настоящем GitHub ученики не устраивают сами — только в тренажёре и на разборе на экране.</p>
-  </div>
-</section>
 </main>
 
-<script src="engine.js?v=1"></script>
+<script src="engine.js?v=20260929164231"></script>
 <script>
 (function () {
   "use strict";
@@ -478,7 +439,7 @@ git push</pre></div>
   }
   document.querySelectorAll("#nav button").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
   const hashTab = location.hash.replace("#", "");
-  showTab(["model", "train", "github", "cheat", "hw", "teacher"].includes(hashTab) ? hashTab : store.get("tab", "train"));
+  showTab(["model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab : store.get("tab", "train"));
 
   // ---------- приглашение ----------
   const orgUrl = S.PRAKTIKA_URL + "/invitations";
@@ -898,39 +859,6 @@ git push</pre></div>
     $("branchDemo").innerHTML = graphSvg(w, localRefs(w, r));
   })();
 
-  // ================= РУКОВОДИТЕЛЮ =================
-  const prep = [
-    "Собрать GitHub-логины учеников (шаг 2 вкладки «Подключение»).",
-    "Пригласить 7 учеников в " + S.PRAKTIKA_URL.replace("https://", "") + ": Settings → Collaborators → Add people. Напомнить в чате принять приглашение.",
-    "Проверить, что в git-praktika есть ветки main, демо-конфликт-1, демо-конфликт-2.",
-    "На школьном компьютере проверить: git clone по HTTPS и вход через браузер при первом push. Если GitHub режется — раздача с телефона или GitVerse.",
-    "Положить на рабочий стол папку демо_зачем_git (проект_финал*.py) для первых 10 минут.",
-    "Список тех, кому нет 13 или нет почты: работают в паре, регистрируются дома.",
-    "Распечатать GIT.md на 7 человек и шаблон группы на 2 команды.",
-  ];
-  const prepDone = store.get("prep", []);
-  $("prep").innerHTML = prep.map((t, i) => '<li><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" data-p="' + i + '"' + (prepDone.includes(i) ? " checked" : "") + "><span>" + esc(t) + "</span></label></li>").join("");
-  $("prep").querySelectorAll("input").forEach((cb) => (cb.onchange = () => {
-    const i = +cb.dataset.p, k = prepDone.indexOf(i);
-    if (cb.checked && k < 0) prepDone.push(i); if (!cb.checked && k >= 0) prepDone.splice(k, 1);
-    store.set("prep", prepDone);
-  }));
-  const flow = [
-    ["0–10", "Зачем Git", "Папка демо_зачем_git: проект_финал.py, …_2.py, …_настоящий.py, …_ИСПРАВЛЕН_Вася.py — какой правильный? (вопросы — в вопросы.md) Затем git log учебного репозитория — та же история, но с подписями и датами."],
-    ["10–25", "Четыре места", "Вкладка «Как устроен Git» на проекторе. Ученики рисуют схему в тетради. Ветки — график внизу вкладки."],
-    ["25–45", "Тренажёр, блоки 1–2", "Каждый сам: уровни 1–10. Ходите по классу, быстрым — дальше, до уровня 12."],
-    ["45–60", "Настоящий GitHub", "Вкладка «Подключение»: config, clone, открыть папку в VS Code, python 01_график.py. Задания 1–2, python проверить.py."],
-    ["60–70", "Перерыв", ""],
-    ["70–85", "Своя ветка и свои данные", "Задания 3–6: ветка, CSV из 7 строк, commit, push -u. python проверить.py до всех зелёных. Показать, что картинка не попала в коммит (.gitignore)."],
-    ["85–95", "Pull request и конфликт", "На экране: PR одной ветки, Merge. Затем слить демо-конфликт-1, открыть PR демо-конфликт-2 → конфликт → «Resolve conflicts» в браузере. Все: git checkout main, git pull (задание 7)."],
-    ["95–100", "Объявление команд", "Команда А «Данные и ИИ» (3 чел.) и команда Б «Приложение» (4 чел.) — состав по итогам отбора, список у руководителя. Дать каждой 2–3 темы-кандидата."],
-    ["100–120", "Выбор темы", "Команды заполняют группы/A.md и группы/B.md по шаблону. Один человек от команды коммитит и отправляет в свою ветку, открывает PR. Объяснить домашку (вкладка «Домашка»)."],
-  ];
-  $("flow").innerHTML = "<tr><th>Мин</th><th>Блок</th><th>Что происходит</th></tr>" + flow.map((r) => "<tr><td>" + r[0] + "</td><td><b>" + esc(r[1]) + "</b></td><td>" + esc(r[2]) + "</td></tr>").join("");
-  $("vBtn").onclick = () => {
-    const ok = S.progressCode($("vName").value, +$("vCount").value) === $("vCode").value.trim().toUpperCase();
-    $("vRes").innerHTML = ok ? '<b style="color:var(--ok)">✔ код верный</b>' : '<b style="color:var(--err)">✘ не совпадает</b> — проверьте написание имени';
-  };
 })();
 </script>
 </body>

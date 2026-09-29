@@ -1671,7 +1671,7 @@
 
   // Код прохождения: руководитель может проверить его на вкладке «Руководителю».
   function progressCode(name, count) {
-    const s = "git-trenazher|" + (name || "").trim().toLowerCase().replace(/\s+/g, " ") + "|" + count;
+    const s = "git-trenazher|" + (name || "").trim().toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ") + "|" + count;
     return hash(s).slice(0, 6).toUpperCase();
   }
 
