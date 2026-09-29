@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20260929170602">
+<link rel="stylesheet" href="quiz.css?v=20260929171448">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -66,6 +66,12 @@ ol.demo li { margin: 6px 0; }
 .answered span.y { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
 .big-count { font: 700 15px var(--sans); }
 .keycell { font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+.keycell a { font-weight: 400; font-size: 12px; }
+.msg { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; align-items: start; padding: 12px 14px; margin-bottom: 8px; }
+.msg pre { margin: 0; white-space: pre-wrap; font: 14px/1.5 var(--sans); }
+.msg .who { grid-column: 1 / -1; font-weight: 700; display: flex; gap: 10px; align-items: center; }
+.msg .acts { display: flex; flex-direction: column; gap: 6px; }
+.msg.sent { opacity: .55; }
 .prog { font-size: 13px; white-space: nowrap; }
 .prog small { display: block; color: var(--muted); white-space: normal; max-width: 260px; }
 .muted { color: var(--muted); }
@@ -122,6 +128,10 @@ body.show .qz-text { font-size: 26px; }
     </div>
     <div class="status" id="status" style="margin-top:8px"></div>
   </div>
+  <h2>Сообщения для рассылки</h2>
+  <p class="lead">Каждому — его сообщение, в личку, не в общий чат: по ссылке тренажёр узнаёт ученика. «Отправлено» — просто пометка для вас.</p>
+  <div id="msgs" style="margin-top:8px"></div>
+
   <details class="card" style="margin-top:10px"><summary>Проверить код с карточки (для тех, кто без ключа)</summary>
     <div class="addrow"><input type="text" id="cName" placeholder="Имя Фамилия как в карточке"><input type="number" id="cN" placeholder="уровней" style="max-width:110px"><input type="text" id="cCode" class="code" placeholder="код" style="max-width:120px"><span id="cRes"></span></div>
   </details>
@@ -167,8 +177,8 @@ body.show .qz-text { font-size: 26px; }
   </div>
 </div>
 </main>
-<script src="quiz.js?v=20260929170602"></script>
-<script src="engine.js?v=20260929170602"></script>
-<script src="teacher.js?v=20260929170602"></script>
+<script src="quiz.js?v=20260929171448"></script>
+<script src="engine.js?v=20260929171448"></script>
+<script src="teacher.js?v=20260929171448"></script>
 </body>
 </html>

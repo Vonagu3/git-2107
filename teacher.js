@@ -90,7 +90,7 @@
   let pupils = [];
   let events = [];          // уровни и проверки
   let answers = [];         // ответы текущего опроса
-  const SITE = new URL("./", location.href).href;
+  const SITE = "https://www.irtuganov.pro/git-2107/";
   const norm = (s) => String(s || "").trim().toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ");
   function status(t) { $("status").textContent = t; }
   const byKey = () => { const m = {}; pupils.forEach((p) => { if (p.key) m[p.key] = p; }); return m; };
@@ -128,7 +128,7 @@
       byTeam[team].forEach((p) => {
         const pr = progHtml(p);
         h += "<tr data-id='" + p.id + "'><td>" + esc(p.name) + (p.klass ? "<div class='muted' style='font-size:12px'>" + esc(p.klass) + "</div>" : "") + "</td>" +
-          "<td class='keycell'>" + (p.key ? esc(p.key) + " <button class='btn mini' data-link title='Скопировать личную ссылку'>ссылка</button>" : "—") + "</td>" +
+          "<td class='keycell'>" + (p.key ? esc(p.key) + " <button class='btn mini' data-link title='Скопировать личную ссылку'>копировать</button><br><a href='" + esc(linkOf(p)) + "' target='_blank' rel='noopener'>" + esc(linkOf(p).replace(/^https?:\/\//, "")) + "</a>" : "—") + "</td>" +
           "<td><input type='text' data-k='github' value='" + esc(p.github) + "' placeholder='логин'></td>" +
           "<td class='prog'>" + pr[0] + "</td><td class='prog'>" + pr[1] + "</td>" +
           "<td><input type='text' data-k='note' value='" + esc(p.note) + "'></td>" +
@@ -142,7 +142,7 @@
     });
     $("pupils").querySelectorAll("[data-link]").forEach((b) => (b.onclick = async () => {
       const p = pupils.find((x) => x.id === +b.closest("tr").dataset.id);
-      const link = SITE + "?k=" + p.key;
+      const link = linkOf(p);
       try { await navigator.clipboard.writeText(link); status("Скопировано: " + link); } catch (e) { prompt("Личная ссылка для " + p.name, link); }
     }));
     $("pupils").querySelectorAll("[data-del]").forEach((b) => (b.onclick = async () => {
@@ -155,6 +155,43 @@
       status("Удалено.");
     }));
     if ($("genKeys")) $("genKeys").onclick = genKeys;
+    renderMsgs();
+  }
+  function linkOf(p) { return SITE + "?k=" + p.key; }
+  function firstName(p) { const w = p.name.trim().split(/\s+/); return w.length > 1 ? w[1] : w[0]; }
+  function messageOf(p) {
+    return "Привет, " + firstName(p) + "! Это твоя личная ссылка на git-тренажёр — по ней я вижу твои ответы и пройденные уровни:\n" +
+      linkOf(p) + "\n\n" +
+      "Не пересылай её другим. Открой ссылку и проверь, что вверху написано «✓ руководитель видит ваши ответы».\n\n" +
+      "В ответ пришли, пожалуйста, свой логин на GitHub (если аккаунта нет — заведи по вкладке «Подключение к GitHub», шаг 2) " +
+      "и напиши, установлены ли у тебя Git, Python и VS Code.\n\n" +
+      "На занятии пригодится твой ключ: " + p.key;
+  }
+  let sentMarks = [];
+  function renderMsgs() {
+    const list = pupils.filter((p) => p.key);
+    if (!list.length) { $("msgs").innerHTML = "<div class='card muted'>Сначала выдайте ключи.</div>"; return; }
+    $("msgs").innerHTML = list.map((p) =>
+      "<div class='card msg" + (sentMarks.includes(p.key) ? " sent" : "") + "' data-key='" + esc(p.key) + "'>" +
+      "<div class='who'>" + esc(p.name) + "<span class='muted' style='font-weight:400'>команда " + esc(p.team || "—") + "</span></div>" +
+      "<pre>" + esc(messageOf(p)) + "</pre>" +
+      "<div class='acts'><button class='btn primary' data-copy>Скопировать</button>" +
+      "<label class='muted' style='font-size:13px'><input type='checkbox' data-sent" + (sentMarks.includes(p.key) ? " checked" : "") + "> отправлено</label></div></div>"
+    ).join("");
+    $("msgs").querySelectorAll("[data-copy]").forEach((b) => (b.onclick = async () => {
+      const p = pupils.find((x) => x.key === b.closest(".msg").dataset.key);
+      try { await navigator.clipboard.writeText(messageOf(p)); b.textContent = "Скопировано ✓"; setTimeout(() => (b.textContent = "Скопировать"), 1500); }
+      catch (e) { prompt("Сообщение для " + p.name, messageOf(p)); }
+    }));
+    $("msgs").querySelectorAll("[data-sent]").forEach((cb) => (cb.onchange = async () => {
+      const k = cb.closest(".msg").dataset.key;
+      sentMarks = sentMarks.filter((x) => x !== k);
+      if (cb.checked) sentMarks.push(k);
+      cb.closest(".msg").classList.toggle("sent", cb.checked);
+      try {
+        await rest("git_teacher_kv?on_conflict=key", { method: "POST", body: JSON.stringify({ key: "sent", value: sentMarks, updated_at: new Date().toISOString() }), headers: { Prefer: "resolution=merge-duplicates,return=minimal" } });
+      } catch (e) { alert("Не сохранилось: " + e.message); }
+    }));
   }
   function newKey() {
     const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -302,17 +339,19 @@
       if (quiz.session) await loadAnswers();
       await loadEvents();
       const active = document.activeElement;
-      if (!(active && active.closest && active.closest("#pupils"))) renderPupils();
+      if (!(active && active.closest && (active.closest("#pupils") || active.closest("#msgs")))) renderPupils();
     } catch (e) { /* сеть моргнула — попробуем в следующий раз */ }
   }
   async function start() {
     const [ps, kv, qz] = await Promise.all([
       rest("git_pupils?select=*&order=team.asc,sort.asc,name.asc"),
-      rest("git_teacher_kv?select=*&key=eq.prep"),
+      rest("git_teacher_kv?select=*&key=in.(prep,sent)"),
       rest("git_quiz?select=session,q,revealed&id=eq.1"),
     ]);
     pupils = ps;
-    prepDone = (kv[0] && kv[0].value) || [];
+    const kvOf = (k) => { const r = kv.find((x) => x.key === k); return (r && r.value) || []; };
+    prepDone = kvOf("prep");
+    sentMarks = kvOf("sent");
     if (qz[0]) quiz = qz[0];
     await loadEvents();
     await loadAnswers();
