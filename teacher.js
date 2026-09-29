@@ -339,7 +339,9 @@
       if (quiz.session) await loadAnswers();
       await loadEvents();
       const active = document.activeElement;
-      if (!(active && active.closest && (active.closest("#pupils") || active.closest("#msgs")))) renderPupils();
+      // Не перерисовывать, только пока руководитель печатает в поле таблицы.
+      const typing = active && active.tagName === "INPUT" && active.type !== "checkbox" && active.closest && active.closest("#pupils");
+      if (!typing) renderPupils();
     } catch (e) { /* сеть моргнула — попробуем в следующий раз */ }
   }
   async function start() {
