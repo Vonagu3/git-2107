@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Руководителю · git-тренажёр</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
+  --accent: #d0621b; --accent-ink: #ffffff; --ok: #2f7a4a; --err: #b3372f; --chip: #efece4;
+  --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #121317; --panel: #1b1d22; --ink: #e9e7e1; --muted: #9a9ea8; --line: #2e3138; --accent: #ef8a45; --accent-ink: #1b1d22; --ok: #6fc68a; --err: #ff8c80; --chip: #262930; --shadow: none; }
+}
+:root[data-theme="dark"] { --bg: #121317; --panel: #1b1d22; --ink: #e9e7e1; --muted: #9a9ea8; --line: #2e3138; --accent: #ef8a45; --accent-ink: #1b1d22; --ok: #6fc68a; --err: #ff8c80; --chip: #262930; --shadow: none; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
+main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 60px; }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 28px 0 8px; }
+.lead { color: var(--muted); margin: 0; }
+a { color: var(--accent); }
+code, kbd { font-family: var(--mono); font-size: .9em; background: var(--chip); padding: .08em .35em; border-radius: 4px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; vertical-align: middle; padding: 6px 6px; border-bottom: 1px solid var(--line); }
+th { font-size: 13px; color: var(--muted); font-weight: 600; }
+.wrap { overflow-x: auto; }
+input[type=text], input[type=number], input[type=email], input[type=password] { font: 14px var(--sans); padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--ink); width: 100%; }
+input.code { font-family: var(--mono); text-transform: uppercase; }
+.btn { font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+.btn:hover { border-color: var(--ink); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.mini { padding: 3px 8px; font-size: 12px; color: var(--muted); }
+.btn.mini:hover { color: var(--err); border-color: var(--err); }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.top .right { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; flex-wrap: wrap; }
+.links { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 0; }
+ul.check { list-style: none; padding: 0; margin: 0; }
+ul.check li { padding: 4px 0; }
+ul.check label { display: flex; gap: 8px; cursor: pointer; }
+.ok { color: var(--ok); font-weight: 700; }
+.bad { color: var(--err); font-weight: 700; }
+.saved { color: var(--ok); font-size: 12px; }
+.team-h td { background: var(--chip); font-weight: 700; font-size: 13px; }
+ol.demo li { margin: 6px 0; }
+.note { border-left: 4px solid var(--accent); background: var(--chip); padding: 8px 12px; border-radius: 0 8px 8px 0; }
+.login { max-width: 400px; margin: 70px auto; }
+.login label { display: block; font-size: 14px; color: var(--muted); margin-top: 10px; }
+.login .row { display: flex; gap: 10px; align-items: center; margin-top: 16px; }
+#msg { font-size: 13px; color: var(--err); }
+.status { font-size: 13px; color: var(--muted); }
+.addrow { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.addrow input { flex: 1; min-width: 140px; }
+@media (max-width: 700px) { h1 { font-size: 22px; } }
+</style>
+</head>
+<body>
+<main>
+<section id="login" class="card login" hidden>
+  <div class="status">Только для руководителя</div>
+  <h1>Вход</h1>
+  <p class="lead">Та же учётная запись, что в панели отбора. Сессия живёт, пока открыта вкладка, и завершается после 30 минут бездействия.</p>
+  <form id="lform">
+    <label>Email<input type="email" id="email" autocomplete="username" required></label>
+    <label>Пароль<input type="password" id="password" autocomplete="current-password" required></label>
+    <div class="row"><button class="btn primary" type="submit">Войти</button><span id="msg"></span></div>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <div class="top">
+    <div>
+      <h1>Занятие 2 — руководителю</h1>
+      <p class="lead">Данные учеников хранятся в Supabase и видны только после входа. Полный план — <code>Урок_2_git/План_урока.md</code>.</p>
+    </div>
+    <div class="right"><span id="who"></span><button class="btn" id="logout">Выйти</button></div>
+  </div>
+  <div class="links">
+    <a href="./" target="_blank" rel="noopener">Тренажёр</a>
+    <a id="lRepo" target="_blank" rel="noopener">git-praktika</a>
+    <a id="lCollab" target="_blank" rel="noopener">Collaborators (пригласить)</a>
+    <a id="lBranches" target="_blank" rel="noopener">Ветки учеников</a>
+    <a id="lPulls" target="_blank" rel="noopener">Pull requests</a>
+  </div>
+
+  <h2>Ученики</h2>
+  <p class="lead">Изменения сохраняются сами. Карточка ученика в тренажёре: имя, «уровней N/18», код — впишите число и код, проверка сразу. Код считается по имени из столбца «Ученик» (порядок слов и «ё» не важны).</p>
+  <div class="card wrap" style="margin-top:8px">
+    <table id="pupils"></table>
+    <div class="addrow">
+      <input type="text" id="newName" placeholder="Фамилия Имя">
+      <input type="text" id="newTeam" placeholder="Команда (А, Б, В…)" style="max-width:170px">
+      <input type="text" id="newKlass" placeholder="Класс" style="max-width:100px">
+      <button class="btn" id="add">Добавить ученика</button>
+    </div>
+    <div class="status" id="status" style="margin-top:8px"></div>
+  </div>
+
+  <h2>Подготовить заранее</h2>
+  <div class="card"><ul class="check" id="prep"></ul></div>
+
+  <h2>Ход занятия</h2>
+  <div class="card wrap"><table id="flow"></table></div>
+
+  <h2>Как показывать «Как устроен Git» (10–25 мин)</h2>
+  <div class="note">Кнопки на этой вкладке ничего не выполняют в настоящем git — это модель: карточка файла переезжает между четырьмя местами. Ученики параллельно рисуют четыре колонки в тетради.</div>
+  <ol class="demo">
+    <li><b>Изменить файл.</b> «Я поправил файл в VS Code. Git заметил, но ничего не сохранил.»</li>
+    <li><b>git commit -m</b> без add — красное «Индекс пуст». «Самая частая ошибка: забыли add.»</li>
+    <li><b>git add .</b> — «Отложил версию в корзину для следующего снимка. Это ещё не сохранение.» Спросить: где сейчас версия 2?</li>
+    <li><b>git commit -m</b> — «Сохранено в истории на моём компьютере. Видит ли это Аня?» (нет)</li>
+    <li><b>git push</b> — «Теперь видит вся команда.»</li>
+    <li><b>Коллега отправил свой коммит</b> — синяя карточка на GitHub. «У меня её нет, и git сам не скажет.»</li>
+    <li><b>Изменить → add → commit → push</b> — push отклонён (rejected, fetch first). «Почему? Что делать?»</li>
+    <li><b>git pull</b> → коммит слияния → <b>git push</b> проходит.</li>
+    <li>Ещё круг: команды называют ученики, вы только нажимаете. Затем сразу «Тренажёр», уровни 3–4 — то же настоящими командами.</li>
+  </ol>
+
+  <h2>Как пользоваться тренажёром на занятии</h2>
+  <ul>
+    <li>Уровни 1–10 ученики проходят сами, в своём темпе. Быстрым — дальше, до 12. Кто застрял — кнопка «Подсказка», потом вы.</li>
+    <li>Тренажёр ничего не отправляет в интернет: прогресс хранится в браузере ученика. Отчёт — карточка с кодом, проверка в таблице выше.</li>
+    <li>Уровень 15 (конфликт) удобно показать на проекторе перед разбором конфликта на настоящем GitHub.</li>
+    <li>Код можно подобрать, прочитав код страницы, — это мотивация, а не экзамен. Настоящая проверка — <code>python проверить.py</code> и ветки на GitHub.</li>
+  </ul>
+
+  <h2>Типовые проблемы</h2>
+  <ul>
+    <li>«fatal: not a git repository» — не в той папке, <code>cd git-praktika</code>.</li>
+    <li>Терминал не видит <code>git</code> на Windows — не установлен или не перезапущен VS Code после установки.</li>
+    <li><code>python</code> не найден на Windows — не поставили «Add to PATH»; использовать <code>py</code>.</li>
+    <li>push просит логин/пароль в терминале — не сработал Git Credential Manager. Переустановить Git for Windows с настройками по умолчанию или войти через VS Code (Accounts → Sign in with GitHub).</li>
+    <li>403 / «Repository not found» при clone или push — ученик не принял приглашение (репозиторий закрытый) или вошёл под другим аккаунтом.</li>
+    <li>«Need to specify how to reconcile divergent branches» — <code>git config --global pull.rebase false</code>.</li>
+    <li>Кириллица в имени ветки работает, но если где-то ломается — латиница.</li>
+    <li>Открылся Vim после <code>git commit</code> без <code>-m</code>: <kbd>Esc</kbd>, <code>:wq</code>, <kbd>Enter</kbd>. Профилактика: <code>git config --global core.editor "code --wait"</code>.</li>
+  </ul>
+
+  <h2>Что сознательно не рассказываем</h2>
+  <p>Rebase, теги, stash, <code>git reset</code>, SSH-ключи. Конфликты на настоящем GitHub ученики сами не устраивают — только в тренажёре и на разборе на экране.</p>
+</div>
+</main>
+<script src="engine.js?v=20260929164728"></script>
+<script src="teacher.js?v=20260929164728"></script>
+</body>
+</html>
