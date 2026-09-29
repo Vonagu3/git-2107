@@ -7,6 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="quiz.css?v=20260929170602">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -58,6 +59,21 @@ ol.demo li { margin: 6px 0; }
 .status { font-size: 13px; color: var(--muted); }
 .addrow { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .addrow input { flex: 1; min-width: 140px; }
+.live-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.live-ctl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.answered { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; font-size: 13px; }
+.answered span { padding: 2px 9px; border-radius: 12px; background: var(--chip); color: var(--muted); }
+.answered span.y { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.big-count { font: 700 15px var(--sans); }
+.keycell { font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+.prog { font-size: 13px; white-space: nowrap; }
+.prog small { display: block; color: var(--muted); white-space: normal; max-width: 260px; }
+.muted { color: var(--muted); }
+/* режим показа: только опрос, без имён */
+body.show .hide-on-show { display: none !important; }
+body.show main { max-width: 1100px; }
+body.show #live { border: 0; box-shadow: none; }
+body.show .qz-text { font-size: 26px; }
 @media (max-width: 700px) { h1 { font-size: 22px; } }
 </style>
 </head>
@@ -75,14 +91,14 @@ ol.demo li { margin: 6px 0; }
 </section>
 
 <div id="app" hidden>
-  <div class="top">
+  <div class="top hide-on-show">
     <div>
       <h1>Занятие 2 — руководителю</h1>
       <p class="lead">Данные учеников хранятся в Supabase и видны только после входа. Полный план — <code>Урок_2_git/План_урока.md</code>.</p>
     </div>
     <div class="right"><span id="who"></span><button class="btn" id="logout">Выйти</button></div>
   </div>
-  <div class="links">
+  <div class="links hide-on-show">
     <a href="./" target="_blank" rel="noopener">Тренажёр</a>
     <a id="lRepo" target="_blank" rel="noopener">git-praktika</a>
     <a id="lCollab" target="_blank" rel="noopener">Collaborators (пригласить)</a>
@@ -90,8 +106,12 @@ ol.demo li { margin: 6px 0; }
     <a id="lPulls" target="_blank" rel="noopener">Pull requests</a>
   </div>
 
+  <h2 class="hide-on-show">Опрос в прямом эфире</h2>
+  <div class="card" id="live"></div>
+
+  <div class="hide-on-show">
   <h2>Ученики</h2>
-  <p class="lead">Изменения сохраняются сами. Карточка ученика в тренажёре: имя, «уровней N/18», код — впишите число и код, проверка сразу. Код считается по имени из столбца «Ученик» (порядок слов и «ё» не важны).</p>
+  <p class="lead">Изменения сохраняются сами. Каждому нужен личный ключ: отправьте ученику ссылку из столбца «Ключ» — тренажёр запомнит его, и уровни, ответы опроса и результаты <code>python проверить.py</code> будут появляться здесь. Обновляется каждые 5 секунд.</p>
   <div class="card wrap" style="margin-top:8px">
     <table id="pupils"></table>
     <div class="addrow">
@@ -102,6 +122,9 @@ ol.demo li { margin: 6px 0; }
     </div>
     <div class="status" id="status" style="margin-top:8px"></div>
   </div>
+  <details class="card" style="margin-top:10px"><summary>Проверить код с карточки (для тех, кто без ключа)</summary>
+    <div class="addrow"><input type="text" id="cName" placeholder="Имя Фамилия как в карточке"><input type="number" id="cN" placeholder="уровней" style="max-width:110px"><input type="text" id="cCode" class="code" placeholder="код" style="max-width:120px"><span id="cRes"></span></div>
+  </details>
 
   <h2>Подготовить заранее</h2>
   <div class="card"><ul class="check" id="prep"></ul></div>
@@ -109,24 +132,20 @@ ol.demo li { margin: 6px 0; }
   <h2>Ход занятия</h2>
   <div class="card wrap"><table id="flow"></table></div>
 
-  <h2>Как показывать «Как устроен Git» (10–25 мин)</h2>
-  <div class="note">Кнопки на этой вкладке ничего не выполняют в настоящем git — это модель: карточка файла переезжает между четырьмя местами. Ученики параллельно рисуют четыре колонки в тетради.</div>
+  <h2>Как вести первые 25 минут онлайн</h2>
   <ol class="demo">
-    <li><b>Изменить файл.</b> «Я поправил файл в VS Code. Git заметил, но ничего не сохранил.»</li>
-    <li><b>git commit -m</b> без add — красное «Индекс пуст». «Самая частая ошибка: забыли add.»</li>
-    <li><b>git add .</b> — «Отложил версию в корзину для следующего снимка. Это ещё не сохранение.» Спросить: где сейчас версия 2?</li>
-    <li><b>git commit -m</b> — «Сохранено в истории на моём компьютере. Видит ли это Аня?» (нет)</li>
-    <li><b>git push</b> — «Теперь видит вся команда.»</li>
-    <li><b>Коллега отправил свой коммит</b> — синяя карточка на GitHub. «У меня её нет, и git сам не скажет.»</li>
-    <li><b>Изменить → add → commit → push</b> — push отклонён (rejected, fetch first). «Почему? Что делать?»</li>
-    <li><b>git pull</b> → коммит слияния → <b>git push</b> проходит.</li>
-    <li>Ещё круг: команды называют ученики, вы только нажимаете. Затем сразу «Тренажёр», уровни 3–4 — то же настоящими командами.</li>
+    <li><b>До занятия</b> — выдать ключи и разослать ученикам личные ссылки (столбец «Ключ»). На занятии попросить открыть ссылку и вкладку «Урок».</li>
+    <li><b>«Начать опрос»</b> и «Режим показа» — демонстрируйте экран. Вопрос 1 — голосование «какой файл последний»: пусть откроют файлы, проголосуют, потом разбор — зачем нужен git.</li>
+    <li>Каждый вопрос: ждать, пока ответят все (счётчик «ответили N из M»; кто не ответил — видно в обычном режиме), затем «Показать ответ» — появятся распределение и объяснение. Разобрать тех, кто ошибся, без имён.</li>
+    <li>Вопросы 2–8 — путь файла: папка → индекс → коммиты → GitHub и отказ push. Если класс путается, переключитесь на вкладку тренажёра «Как устроен Git» и пройдите то же кнопками.</li>
+    <li>Вопросы 9–13 — status, ветки, порядок работы, где хранится история.</li>
+    <li>После опроса — «Тренажёр», уровни 1–10. Прогресс каждого появится в таблице учеников.</li>
   </ol>
 
   <h2>Как пользоваться тренажёром на занятии</h2>
   <ul>
     <li>Уровни 1–10 ученики проходят сами, в своём темпе. Быстрым — дальше, до 12. Кто застрял — кнопка «Подсказка», потом вы.</li>
-    <li>Тренажёр ничего не отправляет в интернет: прогресс хранится в браузере ученика. Отчёт — карточка с кодом, проверка в таблице выше.</li>
+    <li>С ключом тренажёр отправляет только номера пройденных уровней и ответы опроса — без имени. Без ключа ничего не уходит, тогда отчёт — карточка с кодом (проверка под таблицей).</li>
     <li>Уровень 15 (конфликт) удобно показать на проекторе перед разбором конфликта на настоящем GitHub.</li>
     <li>Код можно подобрать, прочитав код страницы, — это мотивация, а не экзамен. Настоящая проверка — <code>python проверить.py</code> и ветки на GitHub.</li>
   </ul>
@@ -145,9 +164,11 @@ ol.demo li { margin: 6px 0; }
 
   <h2>Что сознательно не рассказываем</h2>
   <p>Rebase, теги, stash, <code>git reset</code>, SSH-ключи. Конфликты на настоящем GitHub ученики сами не устраивают — только в тренажёре и на разборе на экране.</p>
+  </div>
 </div>
 </main>
-<script src="engine.js?v=20260929164728"></script>
-<script src="teacher.js?v=20260929164728"></script>
+<script src="quiz.js?v=20260929170602"></script>
+<script src="engine.js?v=20260929170602"></script>
+<script src="teacher.js?v=20260929170602"></script>
 </body>
 </html>

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="quiz.css?v=20260929170602">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -149,6 +150,15 @@ dialog textarea { width: 100%; height: 360px; border: 0; padding: 12px 16px; fon
 .say { min-height: 52px; padding: 10px 14px; border-radius: 10px; background: var(--chip); margin-top: 12px; }
 .say.bad { background: color-mix(in srgb, var(--err) 14%, var(--panel)); }
 
+/* урок */
+.keybox { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 14px; }
+.keybox input { font: 600 15px var(--mono); text-transform: uppercase; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--ink); width: 130px; }
+.keybox .k { font: 700 15px var(--mono); letter-spacing: .06em; }
+.keybox .ok { color: var(--ok); font-weight: 600; }
+.keybox .bad { color: var(--err); }
+.wait { text-align: center; color: var(--muted); padding: 40px 10px; font-size: 17px; }
+.me .sync { font-size: 12px; color: var(--ok); margin-top: 6px; }
+
 /* статьи */
 .doc { max-width: 900px; }
 .doc li { margin: 4px 0; }
@@ -187,6 +197,7 @@ pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px
   <div class="hwrap">
     <div class="logo"><span class="dot"></span>Git-тренажёр</div>
     <nav id="nav">
+      <button data-tab="live">Урок</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -198,6 +209,14 @@ pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px
 </header>
 
 <main>
+<!-- ================= УРОК (опрос в прямом эфире) ================= -->
+<section class="tab" id="tab-live">
+  <div class="doc" style="max-width:980px">
+  <div class="card keybox" id="keybox"></div>
+  <div class="card" id="liveq" style="margin-top:14px"></div>
+  </div>
+</section>
+
 <!-- ================= СХЕМА ================= -->
 <section class="tab" id="tab-model">
   <h1>Как устроен Git: четыре места</h1>
@@ -405,7 +424,9 @@ git push</pre></div>
 
 </main>
 
-<script src="engine.js?v=20260929164728"></script>
+<script src="live.js?v=20260929170602"></script>
+<script src="quiz.js?v=20260929170602"></script>
+<script src="engine.js?v=20260929170602"></script>
 <script>
 (function () {
   "use strict";
@@ -439,7 +460,7 @@ git push</pre></div>
   }
   document.querySelectorAll("#nav button").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
   const hashTab = location.hash.replace("#", "");
-  showTab(["model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab : store.get("tab", "train"));
+  showTab(["live", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab : store.get("tab", "train"));
 
   // ---------- приглашение ----------
   const orgUrl = S.PRAKTIKA_URL + "/invitations";
@@ -502,6 +523,7 @@ git push</pre></div>
     $("nm").oninput = (e) => { name = e.target.value; store.set("name", name); updateReport(); };
   }
   function reportHtml() {
+    if (GitLive.getKey()) return '<div class="sync">✓ Прогресс сам уходит руководителю (ключ ' + esc(GitLive.getKey()) + ").</div>";
     if (!name.trim()) return '<div class="empty" style="margin-top:6px">Введите имя — появится код для отчёта.</div>';
     return '<div class="report" id="rep"><div>' + esc(name.trim()) + "</div><div>уровней: <b>" + done.length + "/" + L.length + '</b></div><div class="code">' + S.progressCode(name, done.length) + "</div></div>";
   }
@@ -543,6 +565,7 @@ git push</pre></div>
     if (all && !done.includes(lv.id)) {
       done.push(lv.id);
       store.set("done", done);
+      syncLevels();
       renderLevels();
       renderHwCard();
     }
@@ -796,6 +819,100 @@ git push</pre></div>
   $("editor").addEventListener("cancel", (e) => { e.preventDefault(); closeEditor(false); });
 
   renderAll();
+
+  // Пройденные уровни уходят руководителю (если есть личный ключ). Досылаем то, что не ушло.
+  function syncLevels() {
+    if (!GitLive.getKey()) return;
+    const sent = store.get("sent-" + GitLive.getKey(), []);
+    done.filter((id) => !sent.includes(id)).forEach((id) => {
+      GitLive.submit("level", { id: id, n: done.length }).then((ok) => {
+        if (!ok) return;
+        const s2 = store.get("sent-" + GitLive.getKey(), []);
+        if (!s2.includes(id)) { s2.push(id); store.set("sent-" + GitLive.getKey(), s2); }
+      });
+    });
+  }
+
+  // ================= УРОК: ключ и опрос в прямом эфире =================
+  const QZ = GitQuiz.QUIZ;
+  let keyState = GitLive.getKey() ? "checking" : "none";
+  let live = null;
+  let liveErr = false;
+  (function takeKeyFromLink() {
+    const m = location.search.match(/[?&]k=([A-Za-z0-9]+)/);
+    if (!m) return;
+    GitLive.setKey(m[1]);
+    keyState = "checking";
+    history.replaceState(null, "", location.pathname + "#live");
+    showTab("live");
+  })();
+  function renderKey() {
+    const k = GitLive.getKey();
+    let h;
+    if (!k || keyState === "bad") {
+      h = "<span>Введите личный ключ от руководителя (или откройте ссылку, которую он прислал):</span>" +
+        '<input id="keyIn" maxlength="10" value="' + esc(keyState === "bad" ? k : "") + '" placeholder="ABC123"><button class="btn primary" id="keyGo">Войти</button>' +
+        (keyState === "bad" ? '<span class="bad">Такого ключа нет — проверьте буквы.</span>' : "");
+    } else {
+      h = '<span>Ваш ключ: <span class="k">' + esc(k) + "</span></span>" +
+        (keyState === "ok" ? '<span class="ok">✓ руководитель видит ваши ответы и уровни</span>' : keyState === "offline" ? '<span class="bad">нет связи с сервером, ответы не уходят</span>' : "<span>проверяю…</span>") +
+        '<button class="btn" id="keyChange" style="margin-left:auto">Сменить</button>';
+    }
+    $("keybox").innerHTML = h;
+    if ($("keyGo")) {
+      const go = () => { GitLive.setKey($("keyIn").value); keyState = "checking"; checkKey(); };
+      $("keyGo").onclick = go;
+      $("keyIn").onkeydown = (e) => { if (e.key === "Enter") go(); };
+    }
+    if ($("keyChange")) $("keyChange").onclick = () => { GitLive.setKey(""); keyState = "none"; renderKey(); renderLive(); renderLevels(); };
+  }
+  async function checkKey() {
+    renderKey();
+    const k = GitLive.getKey();
+    if (!k) return;
+    try { keyState = (await GitLive.keyOk(k)) ? "ok" : "bad"; } catch (e) { keyState = "offline"; }
+    renderKey(); renderLive(); renderLevels();
+    if (keyState === "ok") syncLevels();
+  }
+  const answerKey = () => "ans-" + (live && live.session) + "-" + (live && live.q);
+  function renderLive() {
+    const box = $("liveq");
+    if (liveErr && !live) { box.innerHTML = '<div class="wait">Нет связи с сервером. Проверьте интернет.</div>'; return; }
+    if (!live || !live.session) { box.innerHTML = '<div class="wait">Опрос ещё не начался. Когда руководитель начнёт, вопрос появится здесь сам.</div>'; return; }
+    const q = QZ[live.q];
+    if (!q) { box.innerHTML = '<div class="wait">Опрос закончился.</div>'; return; }
+    const sel = store.get(answerKey(), null);
+    const can = !live.revealed && keyState === "ok";
+    box.innerHTML = GitQuiz.render(q, { index: live.q, total: QZ.length, selected: sel, revealed: live.revealed, clickable: can }) +
+      (keyState !== "ok" ? '<div class="empty" style="margin-top:10px">Чтобы отвечать, введите ключ выше.</div>' : sel === null && !live.revealed ? '<div class="empty" style="margin-top:10px">Выберите ответ — его можно поменять, пока руководитель не открыл правильный.</div>' : "");
+    box.querySelectorAll(".qz-opt").forEach((b) => (b.onclick = async () => {
+      if (!can) return;
+      const a = +b.dataset.a;
+      store.set(answerKey(), a);
+      renderLive();
+      const ok = await GitLive.submit("answer", { s: live.session, q: live.q, a: a });
+      if (!ok) { keyState = "offline"; renderKey(); }
+    }));
+  }
+  let lastLive = "";
+  async function pollOnce() {
+    try {
+      live = await GitLive.quiz();
+      liveErr = false;
+      const sig = JSON.stringify(live);
+      if (sig !== lastLive) { lastLive = sig; renderLive(); }
+    } catch (e) { if (!liveErr) { liveErr = true; renderLive(); } }
+  }
+  async function pollLive() {
+    const onTab = document.querySelector("#tab-live").classList.contains("on");
+    if (onTab && !document.hidden) await pollOnce();
+    setTimeout(pollLive, onTab ? 2000 : 5000);
+  }
+  document.querySelector('[data-tab="live"]').addEventListener("click", pollOnce);
+  renderKey();
+  renderLive();
+  if (GitLive.getKey()) checkKey();
+  pollLive();
 
   // ================= СХЕМА «ЧЕТЫРЕ МЕСТА» =================
   let M;

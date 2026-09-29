@@ -88,59 +88,95 @@
 
   // ---------- ученики ----------
   let pupils = [];
+  let events = [];          // уровни и проверки
+  let answers = [];         // ответы текущего опроса
+  const SITE = new URL("./", location.href).href;
   const norm = (s) => String(s || "").trim().toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ");
-  function codeOk(p) {
-    if (!p.code || p.levels == null || p.levels === "") return null;
-    const c = String(p.code).trim().toUpperCase();
-    const words = norm(p.name).split(" ");
-    const variants = [words.join(" "), words.slice().reverse().join(" ")];
-    return variants.some((v) => S.progressCode(v, +p.levels) === c);
-  }
   function status(t) { $("status").textContent = t; }
+  const byKey = () => { const m = {}; pupils.forEach((p) => { if (p.key) m[p.key] = p; }); return m; };
+  const ago = (t) => { const m = Math.round((Date.now() - new Date(t)) / 60000); return m < 1 ? "только что" : m < 60 ? m + " мин назад" : new Date(t).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); };
+
+  function progressOf(key) {
+    const lv = new Set(), last = { level: null, check: null };
+    events.forEach((e) => {
+      if (e.key !== key) return;
+      if (e.kind === "level") { lv.add(e.payload.id); last.level = e.created_at; }
+      if (e.kind === "check") last.check = e;
+    });
+    return { levels: lv.size, levelAt: last.level, check: last.check };
+  }
+  function progHtml(p) {
+    if (!p.key) return ["<span class='muted'>нет ключа</span>", ""];
+    const g = progressOf(p.key);
+    const tr = g.levels ? "<b>" + g.levels + "</b>/" + S.LEVELS.length + "<small>" + ago(g.levelAt) + "</small>" : "<span class='muted'>—</span>";
+    let ch = "<span class='muted'>—</span>";
+    if (g.check) {
+      const c = g.check.payload;
+      const okN = (c.ok || []).length;
+      ch = (c.fail ? "✔ " + okN + " · <span class='bad'>✘ " + c.fail + "</span>" : "<span class='ok'>✔ все " + okN + "</span>") +
+        "<small>" + (c.fail && c.msg ? esc(c.msg) + " · " : "") + ago(g.check.created_at) + "</small>";
+    }
+    return [tr, ch];
+  }
 
   function renderPupils() {
     const byTeam = {};
     pupils.forEach((p) => { (byTeam[p.team || "—"] = byTeam[p.team || "—"] || []).push(p); });
-    let h = "<tr><th>Ученик</th><th>Класс</th><th>Логин GitHub</th><th style='width:90px'>Уровней</th><th style='width:110px'>Код</th><th></th><th>Заметка</th><th></th></tr>";
+    let h = "<tr><th>Ученик</th><th>Ключ</th><th>Логин GitHub</th><th>Тренажёр</th><th>проверить.py</th><th>Заметка</th><th></th></tr>";
     Object.keys(byTeam).sort().forEach((team) => {
-      h += "<tr class='team-h'><td colspan='8'>Команда " + esc(team) + " · " + byTeam[team].length + " чел.</td></tr>";
+      h += "<tr class='team-h'><td colspan='7'>Команда " + esc(team) + " · " + byTeam[team].length + " чел.</td></tr>";
       byTeam[team].forEach((p) => {
-        const ok = codeOk(p);
-        h += "<tr data-id='" + p.id + "'><td>" + esc(p.name) + "</td><td>" + esc(p.klass) + "</td>" +
+        const pr = progHtml(p);
+        h += "<tr data-id='" + p.id + "'><td>" + esc(p.name) + (p.klass ? "<div class='muted' style='font-size:12px'>" + esc(p.klass) + "</div>" : "") + "</td>" +
+          "<td class='keycell'>" + (p.key ? esc(p.key) + " <button class='btn mini' data-link title='Скопировать личную ссылку'>ссылка</button>" : "—") + "</td>" +
           "<td><input type='text' data-k='github' value='" + esc(p.github) + "' placeholder='логин'></td>" +
-          "<td><input type='number' min='0' max='18' data-k='levels' value='" + esc(p.levels) + "'></td>" +
-          "<td><input type='text' class='code' data-k='code' value='" + esc(p.code) + "'></td>" +
-          "<td class='v'>" + (ok === null ? "" : ok ? "<span class='ok'>✔</span>" : "<span class='bad'>✘</span>") + "</td>" +
+          "<td class='prog'>" + pr[0] + "</td><td class='prog'>" + pr[1] + "</td>" +
           "<td><input type='text' data-k='note' value='" + esc(p.note) + "'></td>" +
           "<td><button class='btn mini' data-del>удалить</button></td></tr>";
       });
     });
-    $("pupils").innerHTML = h;
+    const noKey = pupils.filter((p) => !p.key).length;
+    $("pupils").innerHTML = h + (noKey ? "<tr><td colspan='7'><button class='btn' id='genKeys'>Выдать ключи (" + noKey + ")</button></td></tr>" : "");
     $("pupils").querySelectorAll("input").forEach((inp) => {
-      inp.oninput = () => {
-        const p = pupils.find((x) => x.id === +inp.closest("tr").dataset.id);
-        p[inp.dataset.k] = inp.value;
-        const ok = codeOk(p);
-        inp.closest("tr").querySelector(".v").innerHTML = ok === null ? "" : ok ? "<span class='ok'>✔</span>" : "<span class='bad'>✘</span>";
-      };
       inp.onchange = () => save(+inp.closest("tr").dataset.id, inp.dataset.k, inp.value);
     });
+    $("pupils").querySelectorAll("[data-link]").forEach((b) => (b.onclick = async () => {
+      const p = pupils.find((x) => x.id === +b.closest("tr").dataset.id);
+      const link = SITE + "?k=" + p.key;
+      try { await navigator.clipboard.writeText(link); status("Скопировано: " + link); } catch (e) { prompt("Личная ссылка для " + p.name, link); }
+    }));
     $("pupils").querySelectorAll("[data-del]").forEach((b) => (b.onclick = async () => {
       const id = +b.closest("tr").dataset.id;
       const p = pupils.find((x) => x.id === id);
-      if (!confirm("Удалить " + p.name + " из списка?")) return;
+      if (!confirm("Удалить " + p.name + " из списка? Его ключ перестанет работать.")) return;
       await rest("git_pupils?id=eq." + id, { method: "DELETE" });
       pupils = pupils.filter((x) => x.id !== id);
-      renderPupils(); renderFlow();
+      renderPupils(); renderFlow(); renderLive();
       status("Удалено.");
     }));
+    if ($("genKeys")) $("genKeys").onclick = genKeys;
+  }
+  function newKey() {
+    const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const r = crypto.getRandomValues(new Uint32Array(6));
+    return Array.from(r, (x) => A[x % A.length]).join("");
+  }
+  async function genKeys() {
+    for (const p of pupils.filter((x) => !x.key)) {
+      const k = newKey();
+      await rest("git_pupils?id=eq." + p.id, { method: "PATCH", body: JSON.stringify({ key: k, updated_at: new Date().toISOString() }), headers: { Prefer: "return=minimal" } });
+      p.key = k;
+    }
+    renderPupils(); renderLive();
+    status("Ключи выданы. Кнопка «ссылка» копирует личную ссылку ученика.");
   }
   async function save(id, key, value) {
     const body = {};
-    body[key] = key === "levels" ? (value === "" ? null : +value) : value.trim() || null;
+    body[key] = value.trim() || null;
     body.updated_at = new Date().toISOString();
     try {
       await rest("git_pupils?id=eq." + id, { method: "PATCH", body: JSON.stringify(body), headers: { Prefer: "return=minimal" } });
+      pupils.find((x) => x.id === id)[key] = body[key];
       status("Сохранено " + new Date().toLocaleTimeString("ru-RU"));
     } catch (e) { status("Не сохранилось: " + e.message); }
   }
@@ -152,8 +188,66 @@
     pupils.push(res[0]);
     $("newName").value = "";
     renderPupils(); renderFlow();
-    status("Добавлен " + name + ".");
+    status("Добавлен " + name + ". Не забудьте выдать ключ.");
   };
+  // Проверка кода с карточки — для тех, кто без ключа.
+  function checkCode() {
+    const w = norm($("cName").value).split(" ");
+    const c = $("cCode").value.trim().toUpperCase();
+    if (!c || $("cN").value === "") { $("cRes").innerHTML = ""; return; }
+    const ok = [w.join(" "), w.slice().reverse().join(" ")].some((v) => S.progressCode(v, +$("cN").value) === c);
+    $("cRes").innerHTML = ok ? "<span class='ok'>✔ верный</span>" : "<span class='bad'>✘ не совпадает</span>";
+  }
+  ["cName", "cN", "cCode"].forEach((id) => ($(id).oninput = checkCode));
+
+  // ---------- опрос в прямом эфире ----------
+  const QZ = GitQuiz.QUIZ;
+  let quiz = { session: null, q: 0, revealed: false };
+  async function setQuiz(patch) {
+    Object.assign(quiz, patch);
+    renderLive();
+    await rest("git_quiz?id=eq.1", { method: "PATCH", body: JSON.stringify(Object.assign({}, quiz, { updated_at: new Date().toISOString() })), headers: { Prefer: "return=minimal" } });
+    await loadAnswers();
+  }
+  function currentAnswers() {
+    const last = {};
+    answers.forEach((e) => { if (e.payload.q === quiz.q) last[e.key] = e.payload.a; });
+    return last;
+  }
+  function renderLive() {
+    const box = $("live");
+    if (!quiz.session) {
+      box.innerHTML = "<div class='live-top'><div><b>Опрос «Как устроен Git»</b> — " + QZ.length + " вопросов. Ученики отвечают на вкладке «Урок» тренажёра со своим ключом.</div>" +
+        "<button class='btn primary' id='qStart'>Начать опрос</button></div>";
+      $("qStart").onclick = () => setQuiz({ session: Math.random().toString(36).slice(2, 10), q: 0, revealed: false });
+      return;
+    }
+    const q = QZ[quiz.q];
+    const ans = currentAnswers();
+    const keyed = pupils.filter((p) => p.key);
+    const n = Object.keys(ans).filter((k) => byKey()[k]).length;
+    const counts = GitQuiz.optionsOf(q).map((_, i) => Object.values(ans).filter((a) => a === i).length);
+    const showMode = document.body.classList.contains("show");
+    let h = "<div class='live-top'><span class='big-count'>Ответили " + n + " из " + keyed.length + "</span><div class='live-ctl'>" +
+      "<button class='btn' id='qPrev'" + (quiz.q === 0 ? " disabled" : "") + ">← Назад</button>" +
+      (quiz.revealed ? "" : "<button class='btn primary' id='qReveal'>Показать ответ</button>") +
+      "<button class='btn" + (quiz.revealed ? " primary" : "") + "' id='qNext'" + (quiz.q >= QZ.length - 1 ? " disabled" : "") + ">Дальше →</button>" +
+      "<button class='btn' id='qShow'>" + (showMode ? "Обычный режим" : "Режим показа") + "</button>" +
+      "<button class='btn' id='qStop'>Завершить</button></div></div>";
+    h += GitQuiz.render(q, { index: quiz.q, total: QZ.length, revealed: quiz.revealed, counts: counts, showCounts: quiz.revealed, clickable: false });
+    if (!showMode) h += "<div class='answered'>" + keyed.map((p) => "<span class='" + (p.key in ans ? "y" : "") + "'>" + esc(p.name.split(" ").slice(-1)[0]) + (quiz.revealed && p.key in ans && q.correct !== null ? (ans[p.key] === q.correct ? " ✔" : " ✘") : "") + "</span>").join("") + "</div>";
+    box.innerHTML = h;
+    $("qPrev").onclick = () => setQuiz({ q: quiz.q - 1, revealed: false });
+    $("qNext").onclick = () => setQuiz({ q: quiz.q + 1, revealed: false });
+    if ($("qReveal")) $("qReveal").onclick = () => setQuiz({ revealed: true });
+    $("qShow").onclick = () => { document.body.classList.toggle("show"); renderLive(); };
+    $("qStop").onclick = () => { if (confirm("Завершить опрос? У учеников появится «Опрос ещё не начался».")) { document.body.classList.remove("show"); setQuiz({ session: null, q: 0, revealed: false }); } };
+  }
+  async function loadAnswers() {
+    if (!quiz.session) { answers = []; return; }
+    answers = await rest("git_events?select=key,payload,created_at&kind=eq.answer&payload->>s=eq." + encodeURIComponent(quiz.session) + "&order=created_at.asc");
+    renderLive();
+  }
 
   // ---------- чек-лист (git_teacher_kv, ключ prep) ----------
   const PREP = [
@@ -198,18 +292,37 @@
     $("flow").innerHTML = "<tr><th>Мин</th><th>Блок</th><th>Что происходит</th></tr>" + flow.map((r) => "<tr><td style='white-space:nowrap'>" + r[0] + "</td><td><b>" + esc(r[1]) + "</b></td><td>" + esc(r[2]) + "</td></tr>").join("");
   }
 
+  async function loadEvents() {
+    events = await rest("git_events?select=key,kind,payload,created_at&kind=in.(level,check)&order=created_at.asc&limit=10000");
+  }
+  let timer = null;
+  async function tick() {
+    if (!session || document.hidden) return;
+    try {
+      if (quiz.session) await loadAnswers();
+      await loadEvents();
+      const active = document.activeElement;
+      if (!(active && active.closest && active.closest("#pupils"))) renderPupils();
+    } catch (e) { /* сеть моргнула — попробуем в следующий раз */ }
+  }
   async function start() {
-    const [ps, kv] = await Promise.all([
+    const [ps, kv, qz] = await Promise.all([
       rest("git_pupils?select=*&order=team.asc,sort.asc,name.asc"),
       rest("git_teacher_kv?select=*&key=eq.prep"),
+      rest("git_quiz?select=session,q,revealed&id=eq.1"),
     ]);
     pupils = ps;
     prepDone = (kv[0] && kv[0].value) || [];
+    if (qz[0]) quiz = qz[0];
+    await loadEvents();
+    await loadAnswers();
     $("who").textContent = session.email;
     $("login").hidden = true;
     $("app").hidden = false;
-    renderPupils(); renderPrep(); renderFlow();
+    renderPupils(); renderPrep(); renderFlow(); renderLive();
     status(pupils.length ? "Учеников: " + pupils.length : "Список пуст — добавьте учеников ниже.");
+    clearInterval(timer);
+    timer = setInterval(tick, 3000);
   }
 
   if (session) start().catch((e) => { if (e.message !== "idle" && e.message !== "401") showLogin("Не удалось загрузить: " + e.message); });
