@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20260929181326">
+<link rel="stylesheet" href="quiz.css?v=20260930063016">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -80,6 +80,16 @@ body.show .hide-on-show { display: none !important; }
 body.show main { max-width: 1100px; }
 body.show #live { border: 0; box-shadow: none; }
 body.show .qz-text { font-size: 26px; }
+.res-top { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.res-top select { font: 14px var(--sans); padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--ink); }
+table.res th, table.res td { text-align: center; padding: 5px 4px; font-size: 14px; }
+table.res th:first-child, table.res td:first-child { text-align: left; white-space: nowrap; }
+table.res td.y { color: var(--ok); font-weight: 700; }
+table.res td.n { color: var(--err); font-weight: 700; }
+table.res td.v { color: var(--muted); }
+table.res tr.pct td { font-size: 12px; color: var(--muted); border-top: 2px solid var(--line); }
+table.res tr.pct td.low { color: var(--err); font-weight: 700; }
+table.res th[title] { cursor: help; }
 @media (max-width: 700px) { h1 { font-size: 22px; } }
 </style>
 </head>
@@ -128,6 +138,10 @@ body.show .qz-text { font-size: 26px; }
     </div>
     <div class="status" id="status" style="margin-top:8px"></div>
   </div>
+  <h2>Результаты опросов</h2>
+  <p class="lead">Каждый проведённый опрос сохраняется. Учитывается последний ответ ученика на вопрос. Вопрос 1 — голосование, в счёт не идёт.</p>
+  <div class="card wrap" id="results" style="margin-top:8px"></div>
+
   <h2>Сообщения для рассылки</h2>
   <p class="lead">Каждому — его сообщение, в личку, не в общий чат: по ссылке тренажёр узнаёт ученика. «Отправлено» — просто пометка для вас.</p>
   <div id="msgs" style="margin-top:8px"></div>
@@ -177,8 +191,8 @@ body.show .qz-text { font-size: 26px; }
   </div>
 </div>
 </main>
-<script src="quiz.js?v=20260929181326"></script>
-<script src="engine.js?v=20260929181326"></script>
-<script src="teacher.js?v=20260929181326"></script>
+<script src="quiz.js?v=20260930063016"></script>
+<script src="engine.js?v=20260930063016"></script>
+<script src="teacher.js?v=20260930063016"></script>
 </body>
 </html>

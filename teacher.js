@@ -329,6 +329,78 @@
     $("flow").innerHTML = "<tr><th>Мин</th><th>Блок</th><th>Что происходит</th></tr>" + flow.map((r) => "<tr><td style='white-space:nowrap'>" + r[0] + "</td><td><b>" + esc(r[1]) + "</b></td><td>" + esc(r[2]) + "</td></tr>").join("");
   }
 
+  // ---------- результаты опросов ----------
+  let allAnswers = [];
+  let resSession = null;
+  const fmtDate = (t) => new Date(t).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+  function sessionsList() {
+    const m = {};
+    allAnswers.forEach((e) => {
+      const s = e.payload.s;
+      if (!m[s]) m[s] = { id: s, start: e.created_at, keys: new Set() };
+      m[s].keys.add(e.key);
+    });
+    return Object.values(m).sort((a, b) => (a.start < b.start ? 1 : -1));
+  }
+  function renderResults() {
+    const box = $("results");
+    const list = sessionsList();
+    if (!list.length) { box.innerHTML = "<div class='muted'>Опросов с ответами пока не было.</div>"; return; }
+    if (!resSession || !list.some((x) => x.id === resSession)) resSession = list[0].id;
+    const cur = list.find((x) => x.id === resSession);
+    // последний ответ каждого ученика на каждый вопрос
+    const last = {};
+    allAnswers.forEach((e) => { if (e.payload.s === resSession) (last[e.key] = last[e.key] || {})[e.payload.q] = e.payload.a; });
+    const known = byKey();
+    const keys = pupils.filter((p) => p.key && last[p.key]).map((p) => p.key)
+      .concat(Object.keys(last).filter((k) => !known[k]));
+    const L = "АБВГДЕ";
+    let h = "<div class='res-top'><select id='resSel'>" + list.map((x) =>
+      "<option value='" + esc(x.id) + "'" + (x.id === resSession ? " selected" : "") + ">" + esc(fmtDate(x.start)) + " · ответили " + x.keys.size + "</option>").join("") +
+      "</select>" + (quiz.session === resSession ? "<span class='muted'>идёт сейчас</span>" : "") +
+      "<button class='btn mini' id='resDel' style='margin-left:auto'>удалить этот опрос</button></div>";
+    h += "<table class='res'><tr><th>Ученик</th>" + QZ.map((q, i) => "<th title='" + esc(q.text) + "'>" + (i + 1) + "</th>").join("") + "<th>Итог</th></tr>";
+    const perQ = QZ.map(() => ({ ok: 0, n: 0 }));
+    keys.forEach((k) => {
+      const p = known[k];
+      let ok = 0, n = 0;
+      h += "<tr><td>" + (p ? esc(p.name) : "<span class='muted'>удалённый ученик</span>") + "</td>";
+      QZ.forEach((q, i) => {
+        const a = last[k][i];
+        if (a === undefined) { h += "<td class='v'>·</td>"; return; }
+        if (q.correct === null) { h += "<td class='v'>" + L[a] + "</td>"; return; }
+        n++; perQ[i].n++;
+        if (a === q.correct) { ok++; perQ[i].ok++; h += "<td class='y' title='" + esc(GitQuiz.optionsOf(q)[a]) + "'>✔</td>"; }
+        else h += "<td class='n' title='Ответил: " + esc(GitQuiz.optionsOf(q)[a]) + "'>" + L[a] + "</td>";
+      });
+      h += "<td><b>" + ok + "</b> из " + n + "</td></tr>";
+    });
+    h += "<tr class='pct'><td>верно, %</td>" + QZ.map((q, i) => {
+      if (q.correct === null || !perQ[i].n) return "<td>—</td>";
+      const pc = Math.round((perQ[i].ok / perQ[i].n) * 100);
+      return "<td class='" + (pc < 60 ? "low" : "") + "'>" + pc + "</td>";
+    }).join("") + "<td></td></tr></table>";
+    const graded = QZ.map((q, i) => ({ q: q, i: i, pc: perQ[i].n ? Math.round((perQ[i].ok / perQ[i].n) * 100) : 100 })).filter((x) => x.q.correct !== null);
+    const minPc = Math.min.apply(null, graded.map((x) => x.pc));
+    const weak = graded.filter((x) => x.pc < 60 || (x.pc === minPc && x.pc < 100));
+    h += weak.length
+      ? "<p class='lead' style='margin-top:10px'><b>" + (minPc < 60 ? "Повторить на следующем занятии" : "Слабее всего") + ":</b> " + weak.map((x) => "№" + (x.i + 1) + " «" + esc(x.q.text) + "» — " + x.pc + "%").join("; ") + "</p>"
+      : "<p class='lead' style='margin-top:10px'>Все вопросы решены без ошибок.</p>";
+    h += "<p class='muted' style='font-size:12px'>✔ — верно, буква — неверный ответ (наведите, чтобы увидеть текст), · — не ответил.</p>";
+    box.innerHTML = h;
+    $("resSel").onchange = (e) => { resSession = e.target.value; renderResults(); };
+    $("resDel").onclick = async () => {
+      if (!confirm("Удалить все ответы опроса от " + fmtDate(cur.start) + "? Это нельзя отменить. Удобно для репетиций.")) return;
+      await rest("git_events?kind=eq.answer&payload->>s=eq." + encodeURIComponent(resSession), { method: "DELETE" });
+      allAnswers = allAnswers.filter((e) => e.payload.s !== resSession);
+      resSession = null;
+      renderResults(); loadAnswers();
+    };
+  }
+  async function loadAllAnswers() {
+    allAnswers = await rest("git_events?select=key,payload,created_at&kind=eq.answer&order=created_at.asc&limit=20000");
+  }
+
   async function loadEvents() {
     events = await rest("git_events?select=key,kind,payload,created_at&kind=in.(level,check)&order=created_at.asc&limit=10000");
   }
@@ -342,6 +414,8 @@
       // Не перерисовывать, только пока руководитель печатает в поле таблицы.
       const typing = active && active.tagName === "INPUT" && active.type !== "checkbox" && active.closest && active.closest("#pupils");
       if (!typing) renderPupils();
+      await loadAllAnswers();
+      if (!(active && active.id === "resSel")) renderResults();
     } catch (e) { /* сеть моргнула — попробуем в следующий раз */ }
   }
   async function start() {
@@ -360,7 +434,8 @@
     $("who").textContent = session.email;
     $("login").hidden = true;
     $("app").hidden = false;
-    renderPupils(); renderPrep(); renderFlow(); renderLive();
+    await loadAllAnswers();
+    renderPupils(); renderPrep(); renderFlow(); renderLive(); renderResults();
     status(pupils.length ? "Учеников: " + pupils.length : "Список пуст — добавьте учеников ниже.");
     clearInterval(timer);
     timer = setInterval(tick, 3000);
