@@ -1644,7 +1644,20 @@
         { text: "Дописать *.png в .gitignore и закоммитить .gitignore", test: (w) => /^\*\.png$/m.test(H.tree(w, H.tip(w, "проект", "main"))[".gitignore"] || "") },
         { text: "Картинка не попала ни в один коммит, папка чистая", test: (w) => { const tip = H.tip(w, "проект", "main"); const any = [...ancestors(w, tip)].some((c) => Object.keys(w.objects[c].tree).some((p) => p.endsWith(".png"))); return H.ranOk(w, /^py/) && !any && H.clean(w, "проект"); } },
       ],
-      hints: ["echo \"*.png\" >> .gitignore — допишет строку в конец файла", "После этого git status перестанет показывать картинку."],
+      hints: [
+        "Дописать строку в .gitignore можно двумя способами. Командой: echo \"*.png\" >> .gitignore (два знака >> — дописать в конец; один > сотрёт весь файл). Или в редакторе: edit .gitignore, новой строкой *.png, кнопка «Сохранить».",
+        "Проверьте: cat .gitignore — последней строкой должно быть *.png. Теперь git status не показывает картинку, зато показывает изменённый .gitignore.",
+        "Осталось сохранить правило: git add .gitignore, затем git commit -m \"Картинки не храним\". Не пишите git add . раньше, чем дописали *.png, — иначе картинка попадёт в индекс.",
+      ],
+      trap: {
+        test: (w) => {
+          const r = H.repo(w, "проект");
+          const inIndex = Object.keys(r.index).some((p) => p.endsWith(".png"));
+          const inCommit = [...ancestors(w, r.branches.main)].some((c) => Object.keys(w.objects[c].tree).some((p) => p.endsWith(".png")));
+          return inIndex || inCommit;
+        },
+        text: "Картинка попала в git. Если она только в индексе (ещё не было commit) — уберите её: git restore --staged график_визиты_к_кормушке.png. Если уже закоммитили — нажмите «Начать уровень заново» и сначала допишите *.png в .gitignore.",
+      },
       solution: ["python 01_график.py", "git status", 'echo "*.png" >> .gitignore', "git status", "git add .gitignore", 'git commit -m "Картинки не храним"', "git status"],
       bad: ["python 01_график.py", "git add .", 'git commit -m "всё"'],
     },
