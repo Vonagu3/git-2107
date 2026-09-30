@@ -1590,7 +1590,12 @@
       goals: [
         { text: "Слить птицы в main (пройдёт без вопросов)", test: (w) => { const r = H.repo(w, "проект"); return isAncestor(w, r.branches["птицы"], r.branches.main); } },
         { text: "Слить шаги и увидеть CONFLICT", test: (w) => w.history.some((h) => /CONFLICT/.test(h.text)) },
-        { text: "Исправить файл: оставить один заголовок, убрать метки <<<<<<< ======= >>>>>>>", test: (w) => { const r = H.repo(w, "проект"); return isAncestor(w, r.branches["шаги"], r.branches.main) && H.noMarkers(H.tree(w, r.branches.main)["01_график.py"]); } },
+        { text: "Исправить файл: оставить один заголовок, убрать метки <<<<<<< ======= >>>>>>> и сохранить", test: (w) => {
+          const r = H.repo(w, "проект");
+          const fixedNow = r.merging && H.noMarkers(w.home.dirs["проект"].files["01_график.py"]);
+          const fixedDone = isAncestor(w, r.branches["шаги"], r.branches.main) && H.noMarkers(H.tree(w, r.branches.main)["01_график.py"]);
+          return !!(fixedNow || fixedDone);
+        } },
         { text: "Закончить слияние: git add и git commit", test: (w) => { const r = H.repo(w, "проект"); const c = w.objects[r.branches.main]; return c.parents.length === 2 && !r.merging && H.noMarkers(c.tree["01_график.py"]); } },
       ],
       hints: ["edit 01_график.py — найдите блок между <<<<<<< и >>>>>>>. Всё между <<<<<<< и ======= — версия main, между ======= и >>>>>>> — версия ветки.", "Удалите три строки-метки и лишний вариант. Можно написать свой, общий заголовок.", "Передумали? git merge --abort вернёт всё как было."],
