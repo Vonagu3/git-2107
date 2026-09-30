@@ -310,11 +310,8 @@
     }));
   }
 
-  // ---------- ход занятия (команды — из таблицы учеников) ----------
+  // ---------- ход занятия ----------
   function renderFlow() {
-    const teams = {};
-    pupils.forEach((p) => { (teams[p.team || "—"] = teams[p.team || "—"] || []).push(p.name.split(" ").slice(-1)[0]); });
-    const teamText = Object.keys(teams).sort().map((t) => t + ": " + teams[t].join(", ")).join(". ") || "составы — в таблице учеников";
     const n = pupils.length || "все";
     const flow = [
       ["0–10", "Разбор опроса", "Слабые вопросы №8, №11, №13 — кнопками на вкладке «Как устроен Git» (см. ниже). Глянуть столбец «Тренажёр»."],
