@@ -314,8 +314,7 @@
   function renderFlow() {
     const n = pupils.length || "все";
     const flow = [
-      ["0–10", "Разбор опроса", "Слабые вопросы №8, №11, №13 — кнопками на вкладке «Как устроен Git» (см. ниже). Глянуть столбец «Тренажёр»."],
-      ["10–25", "Подключение", "Задания 1–2, команды в чат: git config ×3 → git clone https://github.com/Vonagu3/git-praktika.git → cd git-praktika → python проверить.py --ключ … → python проверить.py. У всех ✔ 2."],
+      ["0–25", "Подключение", "Глянуть столбец «Тренажёр». Задания 1–2, команды в чат: git config ×3 → git clone https://github.com/Vonagu3/git-praktika.git → cd git-praktika → python проверить.py --ключ … → python проверить.py. У всех ✔ 2."],
       ["25–45", "Своя ветка и push", "Задания 3–5: git checkout -b имя-фамилия → правка → add → commit → git push -u origin имя-фамилия (вход через браузер). Показать ветки на GitHub. У всех ✔ 5."],
       ["45–55", "Перерыв", "Застрявшие — демонстрация своего экрана, по одному."],
       ["55–70", "Свои данные", "Задание 6: CSV из 7 строк → add, commit, push. Картинка не в коммите (.gitignore). У всех (" + n + ") ✔ 6."],
