@@ -1641,7 +1641,8 @@
       },
       goals: [
         { text: "Запустить скрипт: python 01_график.py", test: (w) => H.ranOk(w, /^py(thon3?)? 01_график\.py/) },
-        { text: "Дописать *.png в .gitignore и закоммитить .gitignore", test: (w) => /^\*\.png$/m.test(H.tree(w, H.tip(w, "проект", "main"))[".gitignore"] || "") },
+        { text: "Дописать в .gitignore строку *.png и сохранить (echo или edit)", test: (w) => /^[ \t]*\*\.png[ \t]*$/m.test(w.home.dirs["проект"].files[".gitignore"] || "") || /^[ \t]*\*\.png[ \t]*$/m.test(H.tree(w, H.tip(w, "проект", "main"))[".gitignore"] || "") },
+        { text: "Закоммитить .gitignore: git add .gitignore и git commit", test: (w) => /^[ \t]*\*\.png[ \t]*$/m.test(H.tree(w, H.tip(w, "проект", "main"))[".gitignore"] || "") },
         { text: "Картинка не попала ни в один коммит, папка чистая", test: (w) => { const tip = H.tip(w, "проект", "main"); const any = [...ancestors(w, tip)].some((c) => Object.keys(w.objects[c].tree).some((p) => p.endsWith(".png"))); return H.ranOk(w, /^py/) && !any && H.clean(w, "проект"); } },
       ],
       hints: [
