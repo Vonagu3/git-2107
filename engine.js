@@ -993,7 +993,7 @@
         untrackedClash.forEach((p) => lines.push(err("\t" + p)));
       }
       lines.push(err("Aborting"));
-      lines.push(hint("сначала закоммитьте изменения в этой ветке: git add . и git commit -m \"...\""));
+      lines.push(hint("изменения нужно сначала сохранить. Если они для этой ветки — git add . и git commit -m \"...\". Если нет — унесите их в новую ветку: git checkout -b имя-ветки, и закоммитьте там."));
       return false;
     }
     const newIdx = clone(newT);
@@ -1483,8 +1483,10 @@
         { text: "Создать свою ветку: git checkout -b ... (изменения переедут с вами)", test: (w) => H.otherBranch(w, "проект").some((b) => b !== "птицы") },
         { text: "Закоммитить «Мой график» в своей ветке, main не трогать", test: (w) => { const r = H.repo(w, "проект"); return H.tree(w, r.branches.main)["01_график.py"] === SCRIPT && H.otherBranch(w, "проект").some((b) => b !== "птицы" && (H.tree(w, r.branches[b])["01_график.py"] || "").includes("Мой график")); } },
       ],
-      hints: ["Незакоммиченные изменения «едут» с вами в новую ветку, созданную через checkout -b."],
+      hints: ["Незакоммиченные изменения «едут» с вами в новую ветку, созданную через checkout -b.", "Порядок: git checkout -b мой-график → git add . → git commit -m \"...\". Коммитить до создания ветки нельзя — коммит попадёт в main."],
+      trap: { test: (w) => H.tree(w, H.tip(w, "проект", "main"))["01_график.py"] !== SCRIPT, text: "Вы закоммитили изменения в main, а по заданию main трогать нельзя. Отменять коммиты мы пока не проходим — нажмите «Начать уровень заново» и сначала создайте ветку (git checkout -b …), а коммит сделайте уже в ней." },
       solution: ["git checkout птицы", "git checkout -b мой-график", "git add .", 'git commit -m "Мой заголовок графика"'],
+      bad: ["git checkout птицы", "git add .", 'git commit -m "Мой график"', "git checkout -b my_branch"],
     },
     {
       id: "l10", block: 2, title: "Слияние",
@@ -1529,6 +1531,7 @@
         { text: "main на GitHub не тронут", test: (w) => Object.keys(H.gh(w).branches).some((b) => b !== "main") && countBetween(w, null, H.gh(w).branches.main) === 1 },
       ],
       hints: ["echo \"дата,шаги\" > data/мои_шаги.csv — создаёт файл с одной строкой", "Первый push новой ветки: git push -u origin имя-ветки. Просто git push выдаст подсказку."],
+      trap: { test: (w) => countBetween(w, null, H.gh(w).branches.main) > 1, text: "Вы отправили работу в общий main на GitHub, а договорились — только в свою ветку. Нажмите «Начать уровень заново»: сначала git checkout -b имя-ветки, потом коммит и git push -u origin имя-ветки." },
       solution: ["git checkout -b test", 'echo "дата,шаги" > data/мои_шаги.csv', 'echo "2026-09-28,5000" >> data/мои_шаги.csv', "git add .", 'git commit -m "Добавил мои шаги"', "git push", "git push -u origin test"],
     },
     {
@@ -1662,6 +1665,10 @@
     5: "Сценарии",
   };
 
+  function trapped(level, w) {
+    try { return !!(level.trap && level.trap.test(w)); } catch (e) { return false; }
+  }
+
   function levelDone(level, w) {
     return level.goals.every((g) => { try { return !!g.test(w); } catch (e) { return false; } });
   }
@@ -1676,7 +1683,7 @@
   }
 
   const api = {
-    ORG, PRAKTIKA_URL, LEVELS, BLOCKS, run, writeFile, levelDone, goalStates, progressCode,
+    ORG, PRAKTIKA_URL, LEVELS, BLOCKS, run, writeFile, levelDone, goalStates, trapped, progressCode,
     curRepo, worktree, fileStatus, treeOf, headId, ancestors, isIgnored, clone, newWorld, tokenize, mergeText,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

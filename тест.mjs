@@ -21,7 +21,13 @@ for (const lv of S.LEVELS) {
   const ok = S.levelDone(lv, w);
   let badOk = false;
   if (lv.bad) badOk = S.levelDone(lv, play(lv, lv.bad));
-  const good = ok && !startDone && !badOk;
+  // ловушка: на эталонном пути не срабатывает, на «плохом» — срабатывает (если у уровня есть и то и другое)
+  let trapBad = false;
+  if (lv.trap) {
+    if (S.trapped(lv, w)) { trapBad = true; console.log("  ловушка сработала на эталонном решении"); }
+    if (lv.bad && !S.trapped(lv, play(lv, lv.bad))) { trapBad = true; console.log("  ловушка не сработала на плохом пути"); }
+  }
+  const good = ok && !startDone && !badOk && !trapBad;
   if (!good) fail++;
   console.log((good ? "OK  " : "FAIL") + " " + lv.id + " " + lv.title +
     (startDone ? " [засчитан сразу]" : "") + (badOk ? " [засчитан плохой путь]" : "") +

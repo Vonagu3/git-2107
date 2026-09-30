@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20260930065742">
+<link rel="stylesheet" href="quiz.css?v=20260930070937">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -87,6 +87,7 @@ th { font-size: 13px; color: var(--muted); font-weight: 600; }
 .goals li.ok .c { background: var(--ok); border-color: var(--ok); }
 .goals li.ok { color: var(--muted); }
 .hints { margin-top: 8px; }
+.trap { margin-top: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--err); background: color-mix(in srgb, var(--err) 10%, var(--panel)); font-weight: 600; }
 .hints p { margin: 6px 0; padding: 8px 10px; background: var(--chip); border-radius: 8px; font-size: 14px; }
 .tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 .win { background: color-mix(in srgb, var(--ok) 14%, var(--panel)); border: 1px solid var(--ok); border-radius: 10px; padding: 10px 12px; margin-top: 10px; display: none; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -424,9 +425,9 @@ git push</pre></div>
 
 </main>
 
-<script src="live.js?v=20260930065742"></script>
-<script src="quiz.js?v=20260930065742"></script>
-<script src="engine.js?v=20260930065742"></script>
+<script src="live.js?v=20260930070937"></script>
+<script src="quiz.js?v=20260930070937"></script>
+<script src="engine.js?v=20260930070937"></script>
 <script>
 (function () {
   "use strict";
@@ -558,7 +559,9 @@ git push</pre></div>
     let h = '<div class="blk">Блок ' + lv.block + " · " + esc(S.BLOCKS[lv.block]) + " · уровень " + (cur + 1) + " из " + L.length + "</div>";
     h += "<h2>" + esc(lv.title) + "</h2><p>" + fmt(lv.story) + '</p><ul class="goals">';
     lv.goals.forEach((g, i) => { h += '<li class="' + (st[i] ? "ok" : "") + '"><span class="c">' + (st[i] ? "✓" : "") + "</span><span>" + fmt(g.text) + "</span></li>"; });
-    h += '</ul><div class="hints">';
+    h += "</ul>";
+    if (!all && S.trapped(lv, w)) h += '<div class="trap">⚠ ' + esc(lv.trap.text) + "</div>";
+    h += '<div class="hints">';
     for (let i = 0; i < shownHints && i < lv.hints.length; i++) h += "<p>💡 " + fmt(lv.hints[i]) + "</p>";
     h += '</div><div class="tools">';
     if (shownHints < lv.hints.length) h += '<button class="btn" id="bHint">Подсказка (' + (lv.hints.length - shownHints) + ")</button>";
