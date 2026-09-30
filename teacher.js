@@ -359,23 +359,36 @@
       "<option value='" + esc(x.id) + "'" + (x.id === resSession ? " selected" : "") + ">" + esc(fmtDate(x.start)) + " · ответили " + x.keys.size + "</option>").join("") +
       "</select>" + (quiz.session === resSession ? "<span class='muted'>идёт сейчас</span>" : "") +
       "<button class='btn mini' id='resDel' style='margin-left:auto'>удалить этот опрос</button></div>";
-    h += "<table class='res'><tr><th>Ученик</th>" + QZ.map((q, i) => "<th title='" + esc(q.text) + "'>" + (i + 1) + "</th>").join("") + "<th>Итог</th></tr>";
+    // считаем баллы и сортируем: больше верных → меньше ошибок → по алфавиту
     const perQ = QZ.map(() => ({ ok: 0, n: 0 }));
-    keys.forEach((k) => {
-      const p = known[k];
+    const rows = keys.map((k) => {
       let ok = 0, n = 0;
-      h += "<tr><td>" + (p ? esc(p.name) : "<span class='muted'>удалённый ученик</span>") + "</td>";
       QZ.forEach((q, i) => {
         const a = last[k][i];
+        if (a === undefined || q.correct === null) return;
+        n++; perQ[i].n++;
+        if (a === q.correct) { ok++; perQ[i].ok++; }
+      });
+      const p = known[k];
+      return { k: k, p: p, ok: ok, n: n, name: p ? p.name : "яяя" };
+    }).sort((a, b) => b.ok - a.ok || (a.n - a.ok) - (b.n - b.ok) || a.name.localeCompare(b.name, "ru"));
+    h += "<table class='res'><tr><th>Место</th><th>Ученик</th>" + QZ.map((q, i) => "<th title='" + esc(q.text) + "'>" + (i + 1) + "</th>").join("") + "<th>Итог</th></tr>";
+    let place = 0, prev = null;
+    rows.forEach((r, idx) => {
+      const sig = r.ok + "/" + (r.n - r.ok);
+      if (sig !== prev) { place = idx + 1; prev = sig; }
+      const medal = place === 1 ? " 🥇" : place === 2 ? " 🥈" : place === 3 ? " 🥉" : "";
+      h += "<tr><td><b>" + place + "</b>" + medal + "</td><td style='text-align:left'>" + (r.p ? esc(r.p.name) : "<span class='muted'>удалённый ученик</span>") + "</td>";
+      QZ.forEach((q, i) => {
+        const a = last[r.k][i];
         if (a === undefined) { h += "<td class='v'>·</td>"; return; }
         if (q.correct === null) { h += "<td class='v'>" + L[a] + "</td>"; return; }
-        n++; perQ[i].n++;
-        if (a === q.correct) { ok++; perQ[i].ok++; h += "<td class='y' title='" + esc(GitQuiz.optionsOf(q)[a]) + "'>✔</td>"; }
+        if (a === q.correct) h += "<td class='y' title='" + esc(GitQuiz.optionsOf(q)[a]) + "'>✔</td>";
         else h += "<td class='n' title='Ответил: " + esc(GitQuiz.optionsOf(q)[a]) + "'>" + L[a] + "</td>";
       });
-      h += "<td><b>" + ok + "</b> из " + n + "</td></tr>";
+      h += "<td><b>" + r.ok + "</b> из " + r.n + "</td></tr>";
     });
-    h += "<tr class='pct'><td>верно, %</td>" + QZ.map((q, i) => {
+    h += "<tr class='pct'><td></td><td style='text-align:left'>верно, %</td>" + QZ.map((q, i) => {
       if (q.correct === null || !perQ[i].n) return "<td>—</td>";
       const pc = Math.round((perQ[i].ok / perQ[i].n) * 100);
       return "<td class='" + (pc < 60 ? "low" : "") + "'>" + pc + "</td>";
