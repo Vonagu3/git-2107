@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20260930065325">
+<link rel="stylesheet" href="quiz.css?v=20260930065742">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -424,9 +424,9 @@ git push</pre></div>
 
 </main>
 
-<script src="live.js?v=20260930065325"></script>
-<script src="quiz.js?v=20260930065325"></script>
-<script src="engine.js?v=20260930065325"></script>
+<script src="live.js?v=20260930065742"></script>
+<script src="quiz.js?v=20260930065742"></script>
+<script src="engine.js?v=20260930065742"></script>
 <script>
 (function () {
   "use strict";
@@ -581,7 +581,14 @@ git push</pre></div>
   }
   function fmt(s) {
     // `код` и команды git ... выделяем моноширинным
-    return esc(s).replace(/(git [a-z-]+(?: [^,.;:«»()]*?)?)(?=$|[,.;:)]| —| →| и | или | потом| затем| выдаст)/g, "<code>$1</code>");
+    // ищем команды в исходном тексте и только потом экранируем, иначе «<id>» режется на «&lt;»
+    const re = /(git [a-z-]+(?: [^,.;:«»()]*?)?)(?=$|[,.;:)]| —| →| и | или | потом| затем| выдаст)/g;
+    let out = "", last = 0, m;
+    while ((m = re.exec(s))) {
+      out += esc(s.slice(last, m.index)) + "<code>" + esc(m[1]) + "</code>";
+      last = m.index + m[1].length;
+    }
+    return out + esc(s.slice(last));
   }
 
   function prompt(w) {
