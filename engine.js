@@ -1502,7 +1502,10 @@
       goals: [
         { text: "Посмотреть, что в ветке данные: git log --oneline данные", test: (w) => H.ranOk(w, /^git log.*данные/) },
         { text: "Слить ветку данные в main", test: (w) => { const r = H.repo(w, "проект"); return isAncestor(w, r.branches["данные"], r.branches.main); } },
-        { text: "Проверить: в main появился файл data/шаги.csv", test: (w) => H.ranOk(w, /^(ls|cat)/) && "data/шаги.csv" in H.tree(w, H.tip(w, "проект", "main")) && H.repo(w, "проект").head === "main" },
+        { text: "Проверить, что в main появился файл шаги.csv: ls data", test: (w) => {
+          const i = w.history.findIndex((h) => h.ok && /^git merge данные/.test(h.cmd));
+          return i >= 0 && w.history.slice(i + 1).some((h) => h.ok && /^(ls|dir|cat|type)\b/.test(h.cmd) && /шаги\.csv/.test(h.text + h.cmd)) && H.repo(w, "проект").head === "main";
+        } },
       ],
       hints: ["Вы уже в main. git merge данные", "Fast-forward — значит, main просто «догнал» ветку, отдельный коммит не нужен."],
       solution: ["git log --oneline данные", "git merge данные", "ls data"],
