@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261003092702">
+<link rel="stylesheet" href="quiz.css?v=20261003093203">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -297,28 +297,31 @@ python --version       # на Windows может быть: py --version</pre>
       <p>Логин выбирайте так, чтобы было понятно, кто вы: <code>ivan-petrov</code>, а не <code>xXx_killer</code>. Логин отправьте в чат группы.</p>
     </li>
     <li><h3>Принять приглашение в учебный репозиторий</h3>
-      <p>Руководитель пригласит ваш логин в репозиторий <b>git-praktika</b>. Приглашение придёт на почту, или откройте <a class="orglink" target="_blank" rel="noopener"></a> и нажмите «Accept invitation». Репозиторий закрытый: без приглашения его не видно. Без этого push не пройдёт: будет ошибка 403.</p>
+      <p>Руководитель пригласит ваш логин в репозиторий <b>git-praktika</b>. Приглашение придёт на почту, или откройте <a class="orglink" target="_blank" rel="noopener"></a> и нажмите «Accept invitation». Репозиторий закрытый: без приглашения его не видно. Без этого push не пройдёт: будет ошибка 403. В вашем профиле на GitHub этого репозитория не будет — он не ваш, вы в нём участник. Открывайте по ссылке.</p>
     </li>
     <li><h3>Представиться git</h3>
-      <p>Почта — та же, что на GitHub. Третья строка избавит от ошибки «divergent branches» при pull.</p>
+      <p>Почта — та же, что на GitHub. Третья строка избавит от ошибки «divergent branches» при pull, четвёртая — покажет русские имена файлов по-русски.</p>
       <pre class="cmd">git config --global user.name "Имя Фамилия"
 git config --global user.email "почта@как.на.github"
-git config --global pull.rebase false</pre>
+git config --global pull.rebase false
+git config --global core.quotepath false</pre>
       <p>Проверить: <code>git config --list</code>. В тренажёре это уровень 1.</p>
     </li>
     <li><h3>Скачать учебный репозиторий</h3>
       <p>В терминале перейдите туда, где будут лежать проекты (например, <code>cd Documents</code>), и:</p>
       <pre class="cmd" id="clonecmd"></pre>
-      <p>Ссылку всегда можно взять на странице репозитория: зелёная кнопка «&lt;&gt; Code» → HTTPS → копировать. Затем в VS Code: File → Open Folder → <code>git-praktika</code>.</p>
+      <p>При <code>git clone</code> откроется окно «Sign in to GitHub»: выберите «Sign in with your browser», войдите и нажмите «Authorize». Пароль в терминал вводить не нужно.</p>
+      <p><b>На Mac</b> окна не будет: git спросит <i>Username</i> и <i>Password</i>. Username — ваш логин, а в Password вставьте токен (символы не видны — это нормально): <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">github.com/settings/tokens/new</a> → «Generate new token (classic)» → срок 30 дней → галочка <code>repo</code> → «Generate token» → скопировать строку <code>ghp_…</code>. Токен «Fine-grained» не подойдёт: будет ошибка 403.</p>
+      <p>Третья строка ставит библиотеки для графика, это один раз. Ссылку на репозиторий всегда можно взять на его странице: зелёная кнопка «&lt;&gt; Code» → HTTPS → копировать. Затем в VS Code: File → Open Folder → <code>git-praktika</code>.</p>
     </li>
-    <li><h3>Первый push и вход через браузер</h3>
-      <p>При первом <code>git push</code> откроется окно «Sign in to GitHub». Выберите «Sign in with your browser», войдите и нажмите «Authorize». Пароль в терминал вводить не нужно: GitHub давно не принимает пароль в терминале.</p>
+    <li><h3>Первый push</h3>
+      <p>Вход в GitHub вы уже сделали при clone, второй раз он не нужен.</p>
       <pre class="cmd">git checkout -b имя-фамилия
 # ... поменяли файл ...
 git add .
 git commit -m "Поменял цвет графика"
 git push -u origin имя-фамилия</pre>
-      <p>Если окно не открылось, а терминал просит <i>Username / Password</i> — позовите руководителя.</p>
+      <p>Если на Windows терминал просит <i>Username / Password</i> вместо окна — позовите руководителя.</p>
     </li>
     <li><h3>Найти свою ветку и открыть pull request</h3>
       <p>На странице репозитория: кнопка с веткой «main ▾» → найдите свою. Появится жёлтая плашка «имя-фамилия had recent pushes» → «Compare &amp; pull request». Напишите, что сделали, нажмите «Create pull request». Сливает в main руководитель.</p>
@@ -425,9 +428,9 @@ git push</pre></div>
 
 </main>
 
-<script src="live.js?v=20261003092702"></script>
-<script src="quiz.js?v=20261003092702"></script>
-<script src="engine.js?v=20261003092702"></script>
+<script src="live.js?v=20261003093203"></script>
+<script src="quiz.js?v=20261003093203"></script>
+<script src="engine.js?v=20261003093203"></script>
 <script>
 (function () {
   "use strict";
@@ -467,7 +470,7 @@ git push</pre></div>
   const orgUrl = S.PRAKTIKA_URL + "/invitations";
   document.querySelectorAll(".org").forEach((e) => (e.textContent = S.ORG));
   document.querySelectorAll(".orglink").forEach((e) => { e.href = orgUrl; e.textContent = orgUrl.replace("https://", ""); });
-  $("clonecmd").textContent = "git clone " + S.PRAKTIKA_URL + ".git\ncd git-praktika\npython -m venv venv\nvenv\\Scripts\\activate        # Windows\nsource venv/bin/activate     # Mac\npip install -r requirements.txt\npython 01_график.py";
+  $("clonecmd").textContent = "git clone " + S.PRAKTIKA_URL + ".git\ncd git-praktika\npython -m pip install -r requirements.txt\npython 01_график.py";
 
   // ---------- шаги подключения ----------
   const ghDone = store.get("gh", []);
