@@ -289,13 +289,14 @@
 
   // ---------- чек-лист (git_teacher_kv, ключ prep) ----------
   const PREP = [
-    "Собрать GitHub-логины учеников (таблица выше) и прислать Claude — он пригласит всех в git-praktika. Или вручную: Settings → Collaborators → Add people.",
-    "Напомнить в чате принять приглашение: письмо на почту или " + REPO.replace("https://", "") + "/invitations.",
-    "Проверить, что в git-praktika есть ветки main, демо-конфликт-1, демо-конфликт-2.",
-    "На школьном компьютере: открывается тренажёр, git clone по HTTPS проходит, первый push открывает вход через браузер. Если GitHub режется — раздача с телефона или GitVerse; тренажёр — из файла index.html.",
-    "Положить на рабочий стол папку демо_зачем_git для первых 10 минут.",
-    "Список тех, кому нет 13 или нет почты: работают в паре, регистрируются дома.",
-    "Распечатать GIT.md на всех учеников и шаблон группы на каждую команду.",
+    "Все 6 логинов GitHub приглашены в git-praktika (прислать логины Claude или Settings → Collaborators → Add people), приглашения приняты.",
+    "У ребят стоят Git, Python, VS Code и библиотеки: python -m pip install pandas matplotlib.",
+    "У кого Mac: сделан classic-токен с галочкой repo (fine-grained даёт 403).",
+    "Глянуть столбец «Тренажёр» в таблице учеников.",
+    "Свежий клон для показа в ~/Desktop/демо (не стартовый_репозиторий).",
+    "Ссылка " + REPO + " в чате MAX: в профиле у ребят репозитория не видно.",
+    "Две комнаты или два чата для команд (на 85–105 мин).",
+    "Демонстрировать окно, а не весь экран; эту страницу — только в «Режиме показа».",
   ];
   let prepDone = [];
   function renderPrep() {
@@ -305,25 +306,70 @@
       if (cb.checked && k < 0) prepDone.push(i);
       if (!cb.checked && k >= 0) prepDone.splice(k, 1);
       try {
-        await rest("git_teacher_kv?on_conflict=key", { method: "POST", body: JSON.stringify({ key: "prep", value: prepDone, updated_at: new Date().toISOString() }), headers: { Prefer: "resolution=merge-duplicates,return=minimal" } });
+        await rest("git_teacher_kv?on_conflict=key", { method: "POST", body: JSON.stringify({ key: "prep3", value: prepDone, updated_at: new Date().toISOString() }), headers: { Prefer: "resolution=merge-duplicates,return=minimal" } });
       } catch (e) { alert("Не сохранилось: " + e.message); }
     }));
   }
 
-  // ---------- ход занятия ----------
+  // ---------- ход занятия: команды копируются кликом для чата MAX ----------
+  const copied = new Set();
+  const C = (...cmds) => ({ cmd: cmds });
+  const FLOW = [
+    ["0–25", "задания 1–2", "Подключение", [
+      C('git config --global user.name "Имя Фамилия"', 'git config --global user.email "почта@как.на.github"', "git config --global pull.rebase false", "git config --global core.quotepath false", "cd Desktop", "git clone " + REPO + ".git", "cd git-praktika"),
+      { note: "VS Code: File → Open Folder → <code>git-praktika</code>, затем Terminal → New Terminal." },
+      C("python -m pip install -r requirements.txt", "python проверить.py --ключ ВАШ_КЛЮЧ", "python проверить.py"),
+      { note: "На Windows вместо <code>python</code> может быть <code>py</code>, на Mac <code>python3</code>. Рабочий стол в OneDrive: <code>cd OneDrive\\Desktop</code>." },
+      { ready: "Все готовы: у всех ✔ 2" }]],
+    ["25–45", "задания 3–5", "Своя ветка и первый push", [
+      C("git checkout -b имя-фамилия"),
+      { note: "В <code>01_график.py</code>, строка 57: поменять заголовок или цвет, сохранить." },
+      C("python 01_график.py", "git status", "git add .", 'git commit -m "Поменял заголовок графика"', "git push -u origin имя-фамилия", "python проверить.py"),
+      { note: "Показать на GitHub вкладку Branches: вот ваши ветки." },
+      { ready: "Все готовы: ✔ 5" }]],
+    ["45–55", "перерыв", "Перерыв", [{ note: "Застрявшие показывают свой экран, разбираете по одному." }]],
+    ["55–70", "задание 6", "Свои данные", [
+      { note: "Новый файл <code>data/имя_что-измерял.csv</code>: заголовок и 7 строк, во втором столбце числа (дробные через точку)." },
+      C("дата,шаги\n2026-09-21,6400\n2026-09-22,7100", "python 01_график.py data/имя_что-измерял.csv", "git add .", 'git commit -m "Добавил свои данные"', "git push", "python проверить.py"),
+      { note: "Показать: <code>график_*.png</code> нет в <code>git status</code>, его не пускает <code>.gitignore</code>." },
+      { ready: "Все готовы: ✔ 6" }]],
+    ["70–85", "PR, затем К1", "Pull request и review: сначала вы на экране", [
+      { ol: ["Все открывают PR своей ветки: жёлтая плашка → <b>Compare &amp; pull request</b>. Название понятное: «Захар: заголовок и мои шаги», а не «Update …».",
+        "Вы подробно разбираете 1–2 PR: <b>Files changed</b> → синий «+» у строки → комментарий. Он копится в черновике, кнопки «Start a review» больше нет.",
+        "<b>Submit review</b> → <b>Approve</b> → <b>Submit review</b> → вкладка Conversation → <b>Merge pull request</b> → <b>Confirm merge</b>.",
+        "Остальные PR быстро одобрить и слить."] },
+      C("git checkout main", "git pull", "python проверить.py"),
+      { note: "Дальше review делают ребята (на PR в К2), сливает автор после одобрения соседа. <b>А:</b> Захар → Илья → Геннадий → Захар. <b>Б:</b> Пётр → Лев → Леонид → Пётр." },
+      { ready: "Все готовы: ✔ 7" }]],
+    ["85–105", "К2", "Командный конфликт, в комнатах", [
+      C("git checkout main", "git pull", "git checkout -b девиз-имя"),
+      { note: "В <code>команды/А.md</code> или <code>команды/Б.md</code> вписать свой вариант в строку «Девиз команды»." },
+      C("git add .", 'git commit -m "Мой вариант девиза"', "git push -u origin девиз-имя"),
+      { ol: ["Каждый открывает PR. Первый сливается чисто, у остальных «This branch has conflicts».",
+        "<b>Resolve conflicts</b> → договориться → оставить одну строку девиза → удалить <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>.",
+        "<b>Mark as resolved</b> → <b>Commit merge</b> → review соседа → автор нажимает <b>Merge</b>."] },
+      { warn: "<b>Ловите на ревью:</b> две строки «Девиз команды» подряд. Метки удалены, а договорённости нет. GitHub такое пропускает." },
+      { ready: "Готово: в main в каждом файле команды одна строка девиза" }]],
+    ["105–115", "К3", "Issues: идеи проектов", [{ note: "Вкладка Issues → <b>New issue</b>. Название «[А] …» или «[Б] …». В описании: что сделать, для кого, какие данные нужны. Товарищи ставят 👍 понравившимся." }]],
+    ["115–120", "домашка", "Домашнее задание", [{ note: "Вкладка тренажёра «Домашка»: задание 8 (ещё один коммит с данными, ссылку в чат), ещё одна идея в issues или комментарий к чужой, тренажёр 13–18." }]],
+  ];
   function renderFlow() {
-    const n = pupils.length || "все";
-    const flow = [
-      ["0–25", "Подключение", "Глянуть столбец «Тренажёр». Задания 1–2, команды в чат: git config ×4 → git clone https://github.com/Vonagu3/git-praktika.git → cd git-praktika → python -m pip install -r requirements.txt → python проверить.py --ключ … → python проверить.py. У всех ✔ 2."],
-      ["25–45", "Своя ветка и push", "Задания 3–5: git checkout -b имя-фамилия → правка → add → commit → git push -u origin имя-фамилия (вход через браузер). Показать ветки на GitHub. У всех ✔ 5."],
-      ["45–55", "Перерыв", "Застрявшие — демонстрация своего экрана, по одному."],
-      ["55–70", "Свои данные", "Задание 6: CSV из 7 строк → add, commit, push. Картинка не в коммите (.gitignore). У всех (" + n + ") ✔ 6."],
-      ["70–85", "Pull request и review (К1)", "Все открывают PR своей ветки. Подробно разобрать на экране 1–2: Files changed → «+» у строки → комментарий (копится в черновике) → Submit review → Approve → Merge; остальные быстро одобрить и слить. Все: git checkout main, git pull (задание 7). Дальше review делают ученики на PR в К2: А — Захар → Илья → Геннадий → Захар; Б — Пётр → Лев → Леонид → Пётр; сливает автор после одобрения."],
-      ["85–105", "Командный конфликт (К2)", "По комнатам. Каждый: ветка девиз-имя → свой девиз в команды/А.md или Б.md → push → PR. Первый PR сливается, у остальных «Resolve conflicts»: договориться, оставить общий вариант, убрать метки → Commit merge → review → Merge."],
-      ["105–115", "Issues (К3)", "Каждый: New issue «[А] …» / «[Б] …» — идея проекта: что, для кого, какие данные. 👍 понравившимся идеям товарищей."],
-      ["115–120", "Домашка", "Цикл дома (задание 8), ещё идея в issues и комментарий к чужой, тренажёр 13–18."],
-    ];
-    $("flow").innerHTML = "<tr><th>Мин</th><th>Блок</th><th>Что происходит</th></tr>" + flow.map((r) => "<tr><td style='white-space:nowrap'>" + r[0] + "</td><td><b>" + esc(r[1]) + "</b></td><td>" + esc(r[2]) + "</td></tr>").join("");
+    let n = 0;
+    $("flowNav").innerHTML = FLOW.map((b, i) => "<a href='#fl" + i + "'>" + b[0] + "</a>").join("") + "<a href='#problems'>Проблемы</a>";
+    $("flow").innerHTML = FLOW.map((b, i) => "<div class='fl-block' id='fl" + i + "'><div class='fl-time'>" + b[0] + "<small>" + esc(b[1]) + "</small></div><div class='fl-body'><b>" + esc(b[2]) + "</b>" +
+      b[3].map((x) => {
+        if (x.cmd) return "<div class='fl-cmds'>" + x.cmd.map((c) => { const id = n++; return "<button type='button' class='fl-cmd" + (copied.has(id) ? " done" : "") + "' data-c='" + id + "'><code>" + esc(c) + "</code><span>" + (copied.has(id) ? "скопировано" : "копировать") + "</span></button>"; }).join("") + "</div>";
+        if (x.ol) return "<ol>" + x.ol.map((t) => "<li>" + t + "</li>").join("") + "</ol>";
+        if (x.warn) return "<div class='note'>" + x.warn + "</div>";
+        if (x.ready) return "<span class='fl-ready'>" + esc(x.ready) + "</span>";
+        return "<div class='muted'>" + x.note + "</div>";
+      }).join("") + "</div></div>").join("");
+    $("flow").querySelectorAll(".fl-cmd").forEach((btn) => (btn.onclick = () => {
+      const code = btn.querySelector("code"), text = code.textContent;
+      const done = () => { copied.add(+btn.dataset.c); btn.classList.add("done"); btn.querySelector("span").textContent = "скопировано"; };
+      const sel = () => { const r = document.createRange(); r.selectNodeContents(code); const s2 = getSelection(); s2.removeAllRanges(); s2.addRange(r); btn.querySelector("span").textContent = "Cmd+C"; };
+      try { navigator.clipboard.writeText(text).then(done, sel); } catch (e) { sel(); }
+    }));
   }
 
   // ---------- результаты опросов ----------
@@ -431,12 +477,12 @@
   async function start() {
     const [ps, kv, qz] = await Promise.all([
       rest("git_pupils?select=*&order=team.asc,sort.asc,name.asc"),
-      rest("git_teacher_kv?select=*&key=in.(prep,sent)"),
+      rest("git_teacher_kv?select=*&key=in.(prep3,sent)"),
       rest("git_quiz?select=session,q,revealed&id=eq.1"),
     ]);
     pupils = ps;
     const kvOf = (k) => { const r = kv.find((x) => x.key === k); return (r && r.value) || []; };
-    prepDone = kvOf("prep");
+    prepDone = kvOf("prep3");
     sentMarks = kvOf("sent");
     if (qz[0]) quiz = qz[0];
     await loadEvents();

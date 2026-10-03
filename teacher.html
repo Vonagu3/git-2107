@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261003093203">
+<link rel="stylesheet" href="quiz.css?v=20261003094002">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -90,6 +90,26 @@ table.res td.v { color: var(--muted); }
 table.res tr.pct td { font-size: 12px; color: var(--muted); border-top: 2px solid var(--line); }
 table.res tr.pct td.low { color: var(--err); font-weight: 700; }
 table.res th[title] { cursor: help; }
+.fl-nav { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; margin-top: 6px; }
+.fl-nav a { flex: none; text-decoration: none; font: 600 12px var(--mono); padding: 4px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); }
+.fl-nav a:hover { border-color: var(--accent); color: var(--accent); }
+.fl-block { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); scroll-margin-top: 48px; }
+.fl-block:first-child { border-top: 0; padding-top: 2px; }
+.fl-time { font: 600 14px var(--mono); color: var(--accent); }
+.fl-time small { display: block; font: 12px var(--sans); color: var(--muted); }
+.fl-body { display: grid; gap: 8px; min-width: 0; }
+.fl-body ol { margin: 0; padding-left: 20px; }
+.fl-cmds { display: grid; gap: 4px; }
+.fl-cmd { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; text-align: left; font: inherit; color: inherit; background: var(--chip); border: 1px solid transparent; border-radius: 6px; padding: 5px 8px 5px 10px; cursor: pointer; }
+.fl-cmd:hover { border-color: var(--accent); }
+.fl-cmd code { background: none; padding: 0; white-space: pre; overflow-x: auto; display: block; }
+.fl-cmd span { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.fl-cmd.done { background: color-mix(in srgb, var(--ok) 16%, transparent); }
+.fl-cmd.done span { color: var(--ok); }
+.fl-ready { justify-self: start; font-size: 13px; font-weight: 600; color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); padding: 2px 10px; border-radius: 999px; }
+table.probs td { vertical-align: top; font-size: 14px; }
+table.probs td:first-child { width: 40%; }
+@media (max-width: 600px) { .fl-block { grid-template-columns: 1fr; gap: 4px; } }
 @media (max-width: 700px) { h1 { font-size: 22px; } }
 </style>
 </head>
@@ -121,6 +141,7 @@ table.res th[title] { cursor: help; }
     <a id="lBranches" target="_blank" rel="noopener">Ветки учеников</a>
     <a id="lPulls" target="_blank" rel="noopener">Pull requests</a>
     <a id="lIssues" target="_blank" rel="noopener">Issues</a>
+    <a href="#lesson">Ход занятия ↓</a>
   </div>
 
   <h2 class="hide-on-show">Опрос в прямом эфире</h2>
@@ -154,8 +175,10 @@ table.res th[title] { cursor: help; }
   <h2>Подготовить заранее</h2>
   <div class="card"><ul class="check" id="prep"></ul></div>
 
-  <h2>Ход занятия</h2>
-  <div class="card wrap"><table id="flow"></table></div>
+  <h2 id="lesson">Ход занятия</h2>
+  <p class="lead">Нажмите на команду — она скопируется для чата MAX. Скопированные отмечаются зелёным.</p>
+  <nav class="fl-nav" id="flowNav"></nav>
+  <div class="card" id="flow"></div>
 
   <h2>Опрос (если проводите снова)</h2>
   <ol class="demo">
@@ -172,16 +195,35 @@ table.res th[title] { cursor: help; }
     <li>Код можно подобрать, прочитав код страницы, — это мотивация, а не экзамен. Настоящая проверка — <code>python проверить.py</code> и ветки на GitHub.</li>
   </ul>
 
-  <h2>Типовые проблемы</h2>
+  <h2 id="problems">Если у ученика…</h2>
+  <div class="card wrap"><table class="probs">
+    <tr><th>Видит</th><th>Что сделать</th></tr>
+    <tr><td><code>Repository not found</code> при clone</td><td>Не принял приглашение или вошёл не под тем аккаунтом</td></tr>
+    <tr><td><code>ModuleNotFoundError: No module named 'pandas'</code></td><td><code>python -m pip install -r requirements.txt</code></td></tr>
+    <tr><td>Mac: просит Username и Password</td><td>Username: логин, Password: classic-токен <code>ghp_…</code></td></tr>
+    <tr><td>Mac: 403 с токеном</td><td>Токен fine-grained (<code>github_pat_…</code>). Нужен classic с галочкой <code>repo</code>. Стереть запомненный: <code>printf "protocol=https\nhost=github.com\n\n" | git credential-osxkeychain erase</code></td></tr>
+    <tr><td>Windows: просит Username вместо окна входа</td><td>Не сработал Git Credential Manager. Переустановить Git с настройками по умолчанию или войти через VS Code: Accounts → Sign in with GitHub</td></tr>
+    <tr><td>Школьный ПК: push уходит от чужого аккаунта</td><td>Пуск → Диспетчер учётных данных → Учётные данные Windows → <code>git:https://github.com</code> → Удалить</td></tr>
+    <tr><td>403 при push</td><td>Не принято приглашение или в браузере чужой аккаунт</td></tr>
+    <tr><td>Терминал не видит <code>git</code> (Windows)</td><td>Не установлен или VS Code не перезапущен после установки</td></tr>
+    <tr><td><code>fatal: not a git repository</code></td><td>Не та папка: <code>cd git-praktika</code></td></tr>
+    <tr><td><code>has no upstream branch</code></td><td>Первый push ветки: <code>git push -u origin имя-ветки</code></td></tr>
+    <tr><td><code>rejected … fetch first</code></td><td>Сначала <code>git pull</code>, потом <code>git push</code></td></tr>
+    <tr><td><code>Need to specify how to reconcile divergent branches</code></td><td><code>git config --global pull.rebase false</code></td></tr>
+    <tr><td>Имена файлов кодами <code>\320\272…</code></td><td><code>git config --global core.quotepath false</code></td></tr>
+    <tr><td><code>python</code> не найден (Windows)</td><td>Не поставили «Add to PATH»: <code>py</code> вместо <code>python</code></td></tr>
+    <tr><td>Открылся Vim после <code>git commit</code></td><td><kbd>Esc</kbd>, <code>:wq</code>, <kbd>Enter</kbd>. Профилактика: <code>git config --global core.editor "code --wait"</code></td></tr>
+    <tr><td>Не видит <code>git-praktika</code> в своём профиле</td><td>Так и есть, открывать по ссылке из чата</td></tr>
+    <tr><td>«Pull request authors can't approve their own»</td><td>Это свой PR. Если чужой: обновить страницу и проверить аватар</td></tr>
+    <tr><td>Нет кнопки Resolve conflicts</td><td>Конфликт сложный для браузера. Решаете у себя на экране</td></tr>
+    <tr><td>Нажал Merge без одобрения</td><td>Запретить нельзя (бесплатный тариф). Повод объяснить, зачем в командах защищают main</td></tr>
+  </table></div>
+
+  <h2>Как помогать</h2>
   <ul>
-    <li>«fatal: not a git repository» — не в той папке, <code>cd git-praktika</code>.</li>
-    <li>Терминал не видит <code>git</code> на Windows — не установлен или не перезапущен VS Code после установки.</li>
-    <li><code>python</code> не найден на Windows — не поставили «Add to PATH»; использовать <code>py</code>.</li>
-    <li>push просит логин/пароль в терминале — не сработал Git Credential Manager. Переустановить Git for Windows с настройками по умолчанию или войти через VS Code (Accounts → Sign in with GitHub).</li>
-    <li>403 / «Repository not found» при clone или push — ученик не принял приглашение (репозиторий закрытый) или вошёл под другим аккаунтом.</li>
-    <li>«Need to specify how to reconcile divergent branches» — <code>git config --global pull.rebase false</code>.</li>
-    <li>Кириллица в имени ветки работает, но если где-то ломается — латиница.</li>
-    <li>Открылся Vim после <code>git commit</code> без <code>-m</code>: <kbd>Esc</kbd>, <code>:wq</code>, <kbd>Enter</kbd>. Профилактика: <code>git config --global core.editor "code --wait"</code>.</li>
+    <li>Смотрите на столбец «проверить.py» в таблице учеников, а не на экраны: там написано, где ученик застрял.</li>
+    <li>Не работает Git или вход: класс не ждёт. Командные задания можно сделать в браузере, через значок карандаша.</li>
+    <li>Отстаёте: задание 6 и issues переносите на дом. Командный конфликт не урезать.</li>
   </ul>
 
   <h2>Что сознательно не рассказываем</h2>
@@ -189,8 +231,8 @@ table.res th[title] { cursor: help; }
   </div>
 </div>
 </main>
-<script src="quiz.js?v=20261003093203"></script>
-<script src="engine.js?v=20261003093203"></script>
-<script src="teacher.js?v=20261003093203"></script>
+<script src="quiz.js?v=20261003094002"></script>
+<script src="engine.js?v=20261003094002"></script>
+<script src="teacher.js?v=20261003094002"></script>
 </body>
 </html>
