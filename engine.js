@@ -1529,7 +1529,7 @@
       setup: () => { const w = worldGithub(true); w.loggedIn = false; return w; },
       goals: [
         { text: "Создать свою ветку", test: (w) => H.otherBranch(w, "git-praktika").length > 0 },
-        { text: "Закоммитить новый файл в data/", test: (w) => { const r = H.repo(w, "git-praktika"); return H.otherBranch(w, "git-praktika").some((b) => Object.keys(H.tree(w, r.branches[b])).some((p) => p.startsWith("data/") && !(p in H.tree(w, r.branches.main)))); } },
+        { text: "Закоммитить новый файл в data/", test: (w) => { const r = H.repo(w, "git-praktika"); const base = H.tree(w, H.gh(w).branches.main); return H.otherBranch(w, "git-praktika").some((b) => Object.keys(H.tree(w, r.branches[b])).some((p) => p.startsWith("data/") && !(p in base))); } },
         { text: "Отправить ветку: git push -u origin <ветка>", test: (w) => Object.keys(H.gh(w).branches).some((b) => b !== "main") },
         { text: "main на GitHub не тронут", test: (w) => Object.keys(H.gh(w).branches).some((b) => b !== "main") && countBetween(w, null, H.gh(w).branches.main) === 1 },
       ],
