@@ -353,7 +353,7 @@
     ["105–115", "К3", "Issues: идеи проектов", [{ note: "Вкладка Issues → <b>New issue</b>. Название «[А] …» или «[Б] …». В описании: что сделать, для кого, какие данные нужны. Товарищи ставят 👍 понравившимся." }]],
     ["115–120", "домашка", "Домашнее задание", [
       { note: "Задание 8 (ещё один коммит с данными, ссылку в чат) и тренажёр 13–18." },
-      { note: "<b>Командная практика</b> 1,5–2 часа в своём репозитории: показать <a href='https://github.com/Vonagu3/praktika-shablon' target='_blank' rel='noopener'>praktika-shablon</a> и кнопку <b>Use this template</b>. Владельцы: А — Захар, Б — Пётр. Командам договориться о времени созвона." },
+      { note: "<b>Практика в парах</b> 1,5–2 часа в своём репозитории: показать <a href='https://github.com/Vonagu3/praktika-shablon' target='_blank' rel='noopener'>praktika-shablon</a> и кнопку <b>Use this template</b>. Пары и владельцы — в разделе «Практика в парах» ниже. Парам договориться о времени созвона." },
       C("https://github.com/Vonagu3/praktika-shablon")]],
   ];
   function renderFlow() {
