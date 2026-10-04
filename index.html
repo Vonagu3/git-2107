@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261004134352">
+<link rel="stylesheet" href="quiz.css?v=20261004135038">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -439,6 +439,9 @@ git push</pre>
 git pull</pre></li>
     <li>Merge нажимает автор PR, и только после Approve напарника.</li>
     <li>Застряли больше чем на 5 минут — пишите в чат: что делали и какую ошибку видите.</li>
+    <li><b>После каждой миссии каждый запускает проверку</b> в папке репозитория пары:
+      <pre class="cmd">python проверить.py</pre>
+      Скрипт покажет, что уже слито в main на GitHub и что делать дальше, а итог сам уйдёт руководителю по вашему личному ключу. Если внизу «Совет: python проверить.py --ключ…» — на этом компьютере ключа нет, выполните один раз <code>python проверить.py --ключ ВАШ_КЛЮЧ</code>.</li>
   </ol>
 
   <h3>Миссии</h3>
@@ -457,6 +460,7 @@ git pull</pre></li>
 
   <h3>Как понять, что всё сделано</h3>
   <ul>
+    <li><code>python проверить.py</code> у каждого — все 7 строк зелёные ✔.</li>
     <li>Вкладка <b>Pull requests → Closed</b>: 10 слитых PR, по 5 от каждого.</li>
     <li>Хотя бы в одном PR есть Request changes.</li>
     <li>В <code>идея.md</code> заполнены обе идеи.</li>
@@ -471,9 +475,9 @@ git pull</pre></li>
 
 </main>
 
-<script src="live.js?v=20261004134352"></script>
-<script src="quiz.js?v=20261004134352"></script>
-<script src="engine.js?v=20261004134352"></script>
+<script src="live.js?v=20261004135038"></script>
+<script src="quiz.js?v=20261004135038"></script>
+<script src="engine.js?v=20261004135038"></script>
 <script>
 (function () {
   "use strict";

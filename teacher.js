@@ -98,16 +98,17 @@
   const ago = (t) => { const m = Math.round((Date.now() - new Date(t)) / 60000); return m < 1 ? "только что" : m < 60 ? m + " мин назад" : new Date(t).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); };
 
   function progressOf(key) {
-    const lv = new Set(), last = { level: null, check: null };
+    const lv = new Set(), last = { level: null, check: null, pair: null };
     events.forEach((e) => {
       if (e.key !== key) return;
       if (e.kind === "level") { lv.add(e.payload.id); last.level = e.created_at; }
-      if (e.kind === "check") last.check = e;
+      // проверка практики в парах (шаблон praktika-shablon) приходит тем же видом check с пометкой t: "pair"
+      if (e.kind === "check") { if (e.payload.t === "pair") last.pair = e; else last.check = e; }
     });
-    return { levels: lv.size, levelAt: last.level, check: last.check };
+    return { levels: lv.size, levelAt: last.level, check: last.check, pair: last.pair };
   }
   function progHtml(p) {
-    if (!p.key) return ["<span class='muted'>нет ключа</span>", ""];
+    if (!p.key) return ["<span class='muted'>нет ключа</span>", "", ""];
     const g = progressOf(p.key);
     const tr = g.levels ? "<b>" + g.levels + "</b>/" + S.LEVELS.length + "<small>" + ago(g.levelAt) + "</small>" : "<span class='muted'>—</span>";
     let ch = "<span class='muted'>—</span>";
@@ -117,27 +118,33 @@
       ch = (c.fail ? "✔ " + okN + " · <span class='bad'>✘ " + c.fail + "</span>" : "<span class='ok'>✔ все " + okN + "</span>") +
         "<small>" + (c.fail && c.msg ? esc(c.msg) + " · " : "") + ago(g.check.created_at) + "</small>";
     }
-    return [tr, ch];
+    let pr = "<span class='muted'>—</span>";
+    if (g.pair) {
+      const c = g.pair.payload, N = 7;
+      pr = (c.repo ? esc(c.repo) + " · " : "") + (c.fail ? "<b>" + (c.ok || []).length + "</b>/" + N + " · <span class='bad'>✘ " + c.fail + "</span>" : "<span class='ok'>✔ все " + N + "</span>") +
+        "<small>" + (c.fail && c.msg ? esc(c.msg) + " · " : "") + ago(g.pair.created_at) + "</small>";
+    }
+    return [tr, ch, pr];
   }
 
   function renderPupils() {
     const byTeam = {};
     pupils.forEach((p) => { (byTeam[p.team || "—"] = byTeam[p.team || "—"] || []).push(p); });
-    let h = "<tr><th>Ученик</th><th>Ключ</th><th>Логин GitHub</th><th>Тренажёр</th><th>проверить.py</th><th>Заметка</th><th></th></tr>";
+    let h = "<tr><th>Ученик</th><th>Ключ</th><th>Логин GitHub</th><th>Тренажёр</th><th>проверить.py</th><th>Практика в парах</th><th>Заметка</th><th></th></tr>";
     Object.keys(byTeam).sort().forEach((team) => {
-      h += "<tr class='team-h'><td colspan='7'>Команда " + esc(team) + " · " + byTeam[team].length + " чел.</td></tr>";
+      h += "<tr class='team-h'><td colspan='8'>Команда " + esc(team) + " · " + byTeam[team].length + " чел.</td></tr>";
       byTeam[team].forEach((p) => {
         const pr = progHtml(p);
         h += "<tr data-id='" + p.id + "'><td>" + esc(p.name) + (p.klass ? "<div class='muted' style='font-size:12px'>" + esc(p.klass) + "</div>" : "") + "</td>" +
           "<td class='keycell'>" + (p.key ? esc(p.key) + " <button class='btn mini' data-link title='Скопировать личную ссылку'>копировать</button><br><a href='" + esc(linkOf(p)) + "' target='_blank' rel='noopener'>" + esc(linkOf(p).replace(/^https?:\/\//, "")) + "</a>" : "—") + "</td>" +
           "<td><input type='text' data-k='github' value='" + esc(p.github) + "' placeholder='логин'></td>" +
-          "<td class='prog'>" + pr[0] + "</td><td class='prog'>" + pr[1] + "</td>" +
+          "<td class='prog'>" + pr[0] + "</td><td class='prog'>" + pr[1] + "</td><td class='prog'>" + pr[2] + "</td>" +
           "<td><input type='text' data-k='note' value='" + esc(p.note) + "'></td>" +
           "<td><button class='btn mini' data-del>удалить</button></td></tr>";
       });
     });
     const noKey = pupils.filter((p) => !p.key).length;
-    $("pupils").innerHTML = h + (noKey ? "<tr><td colspan='7'><button class='btn' id='genKeys'>Выдать ключи (" + noKey + ")</button></td></tr>" : "");
+    $("pupils").innerHTML = h + (noKey ? "<tr><td colspan='8'><button class='btn' id='genKeys'>Выдать ключи (" + noKey + ")</button></td></tr>" : "");
     $("pupils").querySelectorAll("input").forEach((inp) => {
       inp.onchange = () => save(+inp.closest("tr").dataset.id, inp.dataset.k, inp.value);
     });
