@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261004133442">
+<link rel="stylesheet" href="quiz.css?v=20261004134352">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -451,15 +451,15 @@ git pull</pre></li>
       Каждый вписывает свои числа в свой столбец <code>неделя.csv</code>. Два раунда: в первом первым сливает Участник 1, а конфликт решает Участник 2, во втором — наоборот. Конфликт решаете <b>у себя</b>: <code>git pull origin main</code>, в VS Code собираете в каждой строке числа обоих, удаляете метки <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>, затем add, commit, push. Кнопки «Accept…» здесь не подходят — собирайте строку руками. В конце ведущий рисует график: <code>python 01_график.py неделя.csv</code>.</li>
     <li><h3>Миссия 3. Вопросы по git: просьба исправить · 25 мин</h3>
       Каждый пишет в <code>вопросы.md</code> вопрос и ответ. Напарник читает внимательно: всё верно — Approve, есть неточность — комментарий и <b>Request changes</b>. Автор исправляет в той же ветке и пушит — коммит сам появится в том же PR. Хотя бы одно Request changes в паре обязательно.</li>
-    <li><h3>Миссия 4. Идея проекта: issue закрывается сам · 25 мин</h3>
-      Каждый заводит issue со своей идеей проекта, вместе выбираете одну. Каждый пишет свой раздел в <code>идея.md</code>. Второй PR в описании содержит <code>Closes #N</code> (номер выбранной идеи) — после слияния issue закроется сам.</li>
+    <li><h3>Миссия 4. Идея проекта · 20 мин</h3>
+      Каждый пишет в <code>идея.md</code> свою идею проекта: что делаем и для кого, какие данные нужны, первый шаг. Ветка, PR, напарник делает review (непонятно — Request changes), автор сливает.</li>
   </ol>
 
   <h3>Как понять, что всё сделано</h3>
   <ul>
     <li>Вкладка <b>Pull requests → Closed</b>: 10 слитых PR, по 5 от каждого.</li>
     <li>Хотя бы в одном PR есть Request changes.</li>
-    <li>Issue с выбранной идеей закрыт.</li>
+    <li>В <code>идея.md</code> заполнены обе идеи.</li>
   </ul>
   <p>Ведущий последней миссии пишет в чат группы: «Пара … закончила практику», ссылку на репозиторий и картинку графика из миссии 2. Файл <code>идея.md</code> — черновик для выбора тем проектов на занятии 4.</p>
 
@@ -471,9 +471,9 @@ git pull</pre></li>
 
 </main>
 
-<script src="live.js?v=20261004133442"></script>
-<script src="quiz.js?v=20261004133442"></script>
-<script src="engine.js?v=20261004133442"></script>
+<script src="live.js?v=20261004134352"></script>
+<script src="quiz.js?v=20261004134352"></script>
+<script src="engine.js?v=20261004134352"></script>
 <script>
 (function () {
   "use strict";
