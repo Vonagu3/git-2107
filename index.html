@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261010222646">
+<link rel="stylesheet" href="quiz.css?v=20261010222821">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -199,7 +199,7 @@ pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px
     <div class="logo"><span class="dot"></span>Git-тренажёр</div>
     <nav id="nav">
       <button data-tab="live">Урок</button>
-      <button data-tab="lesson">Занятие 5</button>
+      <button data-tab="lesson">Практика в паре</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -219,13 +219,13 @@ pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px
   </div>
 </section>
 
-<!-- ================= ЗАНЯТИЕ 5: работа на занятии ================= -->
+<!-- ================= ПРАКТИКА В ПАРЕ: работа на занятии 5 ================= -->
 <section class="tab" id="tab-lesson">
   <div class="doc">
-  <h1>Занятие 5: задача → pull request → доработка</h1>
-  <p class="lead">Работа на занятии после показа. Сначала вдвоём в репозитории своей пары, потом каждый сам. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+  <h1>Практика в паре: от задачи до слияния</h1>
+  <p class="lead">Что делаем на занятии после показа руководителя. Часть 1 — вдвоём в репозитории своей пары: ставите друг другу задачи, делаете pull request, просите доработать и сливаете. Часть 2 — каждый сам: учимся отменять изменения и коммиты. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
 
-  <div class="note-box"><b>Правило занятия.</b> Задача → своя ветка → pull request → review напарника → слияние. Сливает автор, и только после Approve.</div>
+  <div class="note-box"><b>Главное правило.</b> Задача → своя ветка → pull request → review напарника → слияние. Сливает автор, и только после Approve.</div>
 
   <h2>1. В паре: идея проекта через задачу · 35 минут</h2>
   <p>Каждый пишет в <code>идея.md</code> свою идею проекта. Но не просто так: напарник ставит вам задачу, вы делаете её в своей ветке, напарник проверяет и просит доработать.</p>
@@ -621,9 +621,9 @@ git pull</pre></li>
 
 </main>
 
-<script src="live.js?v=20261010222646"></script>
-<script src="quiz.js?v=20261010222646"></script>
-<script src="engine.js?v=20261010222646"></script>
+<script src="live.js?v=20261010222821"></script>
+<script src="quiz.js?v=20261010222821"></script>
+<script src="engine.js?v=20261010222821"></script>
 <script>
 (function () {
   "use strict";
@@ -665,7 +665,7 @@ git pull</pre></li>
   document.querySelectorAll(".orglink").forEach((e) => { e.href = orgUrl; e.textContent = orgUrl.replace("https://", ""); });
   $("clonecmd").textContent = "git clone " + S.PRAKTIKA_URL + ".git\ncd git-praktika\npython -m pip install -r requirements.txt\npython 01_график.py";
 
-  // ---------- шаги с галочками (подключение, занятие 5) ----------
+  // ---------- шаги с галочками (подключение, практика в паре) ----------
   function checkSteps(listId, key) {
     const done = store.get(key, []);
     document.querySelectorAll("#" + listId + " > li").forEach((li, i) => {
