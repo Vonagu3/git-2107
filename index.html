@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261004135710">
+<link rel="stylesheet" href="quiz.css?v=20261010222646">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -199,6 +199,7 @@ pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px
     <div class="logo"><span class="dot"></span>Git-тренажёр</div>
     <nav id="nav">
       <button data-tab="live">Урок</button>
+      <button data-tab="lesson">Занятие 5</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -215,6 +216,151 @@ pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px
   <div class="doc" style="max-width:980px">
   <div class="card keybox" id="keybox"></div>
   <div class="card" id="liveq" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- ================= ЗАНЯТИЕ 5: работа на занятии ================= -->
+<section class="tab" id="tab-lesson">
+  <div class="doc">
+  <h1>Занятие 5: задача → pull request → доработка</h1>
+  <p class="lead">Работа на занятии после показа. Сначала вдвоём в репозитории своей пары, потом каждый сам. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+
+  <div class="note-box"><b>Правило занятия.</b> Задача → своя ветка → pull request → review напарника → слияние. Сливает автор, и только после Approve.</div>
+
+  <h2>1. В паре: идея проекта через задачу · 35 минут</h2>
+  <p>Каждый пишет в <code>идея.md</code> свою идею проекта. Но не просто так: напарник ставит вам задачу, вы делаете её в своей ветке, напарник проверяет и просит доработать.</p>
+  <p>У пары ещё нет репозитория? Сначала миссия 0 на странице шаблона: <a href="https://github.com/Vonagu3/praktika-shablon" target="_blank" rel="noopener">github.com/Vonagu3/praktika-shablon</a> — и напишите руководителю.</p>
+
+  <ol class="steps" id="l5pair">
+    <li><h3>Поставить задачу напарнику</h3>
+      <p>На GitHub в репозитории пары: вкладка <b>Issues → New issue</b>.</p>
+      <p>Название: <code>Идея проекта: ИМЯ НАПАРНИКА</code></p>
+      <p>Описание — список из трёх пунктов:</p>
+      <pre class="cmd">- [ ] Что делаем и для кого
+- [ ] Какие данные нужны и откуда
+- [ ] Первый шаг</pre>
+      <p>Справа <b>Assignees</b> → выберите напарника. Нажмите <b>Create</b>.</p>
+      <p>В итоге задач две. Найдите ту, где ответственный — вы, и запомните её номер: он стоит после названия, например <code>#3</code>.</p>
+    </li>
+    <li><h3>Сделать свою задачу в ветке</h3>
+      <pre class="cmd">git checkout main
+git pull
+git checkout -b идея-имя</pre>
+      <p>В <code>идея.md</code> заполните три строки в своём разделе, сохраните.</p>
+      <pre class="cmd">git add .
+git commit -m "Идея: имя"
+git push -u origin идея-имя</pre>
+    </li>
+    <li><h3>Открыть pull request и привязать задачу</h3>
+      <p>На GitHub: жёлтая плашка <b>Compare &amp; pull request</b>. Плашки нет — <b>Pull requests → New pull request</b> → compare: ваша ветка.</p>
+      <p>В описании напишите одну строку со своим номером задачи:</p>
+      <pre class="cmd">Closes #3</pre>
+      <p><b>Create pull request</b>. Справа в блоке <b>Development</b> должна появиться ваша задача. Сами не сливаете.</p>
+    </li>
+    <li><h3>Проверить pull request напарника</h3>
+      <p>Откройте PR напарника → <b>Files changed</b>. Читайте как человек со стороны:</p>
+      <ul>
+        <li>понятно, для кого проект?</li>
+        <li>понятно, откуда взять данные?</li>
+        <li>первый шаг можно сделать за неделю?</li>
+      </ul>
+      <p><b>Владелец репозитория обязательно просит доработать.</b> Наведите на строку → синий <b>+</b> → напишите, что уточнить. Затем <b>Review changes</b> (или <b>Submit review</b>), в поле — список:</p>
+      <pre class="cmd">Доработать:
+- [ ] что именно поправить</pre>
+      <p>Выберите <b>Request changes</b> → <b>Submit review</b>.</p>
+      <p>Второй участник: всё понятно — <b>Approve</b>, непонятно — тоже Request changes.</p>
+      <p>Замечание пишите так, чтобы по нему можно было сделать: не «переделай», а «напиши, где возьмёшь данные о погоде».</p>
+    </li>
+    <li><h3>Доработать и слить</h3>
+      <p>Вас попросили доработать — исправляете <b>в той же ветке</b>, новый PR не нужен:</p>
+      <pre class="cmd">git add .
+git commit -m "Идея: доработал по замечаниям"
+git push</pre>
+      <p>В своём PR: у каждого комментария <b>Resolve conversation</b>. Справа <b>Reviewers</b> → круглая стрелка рядом с напарником: «посмотри ещё раз».</p>
+      <p>Напарник: <b>Approve</b>. Автор: <b>Merge pull request → Confirm merge</b>.</p>
+    </li>
+    <li><h3>Проверить, что всё закрылось</h3>
+      <ul>
+        <li><b>Issues → Closed</b>: две задачи. Их никто не закрывал руками — это сделало <code>Closes</code>.</li>
+        <li><b>Pull requests → Closed</b>: два слитых PR с идеями.</li>
+        <li>Хотя бы в одном PR есть красный значок <b>Changes requested</b>.</li>
+      </ul>
+      <p>Оба обновляют main у себя:</p>
+      <pre class="cmd">git checkout main
+git pull</pre>
+    </li>
+  </ol>
+  <p><b>Закончили раньше?</b> Сделайте тем же способом миссию 3: задача напарнику «Вопрос по git: имя», ветка <code>вопросы-имя</code>, файл <code>вопросы.md</code>.</p>
+
+  <h2>2. Каждый сам: тренировка отмены · 10 минут</h2>
+  <p>В папке репозитория пары, в ветке, которая никуда не сливается. <b>Push здесь не делаем.</b></p>
+  <pre class="cmd">git checkout main
+git pull
+git checkout -b проба-имя</pre>
+
+  <ol class="steps" id="l5undo">
+    <li><h3>Вернуть испорченный файл</h3>
+      <p>Сотрите пару строк в <code>визитка.md</code>, сохраните.</p>
+      <pre class="cmd">git status
+git restore визитка.md</pre>
+      <p>Файл стал как был. Осторожно: то, что вы напечатали, пропадает насовсем.</p>
+    </li>
+    <li><h3>Убрать лишний файл из коммита</h3>
+      <p>Создайте файл <code>лишний.txt</code>, напишите в нём что угодно.</p>
+      <pre class="cmd">git add .
+git status
+git restore --staged лишний.txt
+git status</pre>
+      <p>Файл стал красным: он на месте, но в коммит не пойдёт. Удалите его.</p>
+    </li>
+    <li><h3>Исправить сообщение коммита</h3>
+      <p>Допишите строку в конец <code>визитка.md</code>, сохраните.</p>
+      <pre class="cmd">git add .
+git commit -m "Проба с опечаткйо"
+git commit --amend -m "Проба"
+git log --oneline -3</pre>
+      <p>Коммит один, сообщение новое.</p>
+    </li>
+    <li><h3>Убрать коммит целиком</h3>
+      <pre class="cmd">git reset --hard HEAD~1
+git log --oneline -3</pre>
+      <p>Коммита «Проба» нет, строки в файле тоже.</p>
+    </li>
+    <li><h3>Удалить пробную ветку</h3>
+      <pre class="cmd">git checkout main
+git branch -D проба-имя</pre>
+      <p>Напишите в чат группы «готово».</p>
+    </li>
+  </ol>
+
+  <h2>Шпаргалка: где ошибка → что делать</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Где ошибка</th><th>Команда</th></tr>
+    <tr><td>В файле, ещё не было <code>git add</code></td><td><code>git restore файл</code> — изменения пропадут</td></tr>
+    <tr><td>Лишнее попало после <code>git add</code></td><td><code>git restore --staged файл</code></td></tr>
+    <tr><td>Опечатка в сообщении, push не было</td><td><code>git commit --amend -m "…"</code></td></tr>
+    <tr><td>Лишний коммит, push не было</td><td><code>git reset --soft HEAD~1</code> — работа останется<br><code>git reset --hard HEAD~1</code> — пропадёт и работа</td></tr>
+    <tr><td>Уже был push</td><td><code>git revert HEAD --no-edit</code>, потом <code>git push</code></td></tr>
+    <tr><td>Уже слито в main</td><td>Кнопка <b>Revert</b> в слитом pull request</td></tr>
+    <tr><td>Запутались в конфликте после <code>git pull</code></td><td><code>git merge --abort</code> — всё вернётся как до pull</td></tr>
+  </table></div>
+  <p>До push можно переписывать как угодно. После push — не стираем, а добавляем исправление сверху.</p>
+
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что видите</th><th>Что делать</th></tr>
+    <tr><td>В Assignees нет напарника</td><td>Напарник не принял приглашение в репозиторий. Владелец: Settings → Collaborators. Напарник: письмо на почте или страница репозитория.</td></tr>
+    <tr><td>Пункт Request changes серый</td><td>Вы открыли свой PR. Просить доработать можно только чужой.</td></tr>
+    <tr><td>Задача не закрылась после слияния</td><td><code>Closes #номер</code> написано в комментарии, а не в описании PR, или номер не тот. Закройте задачу кнопкой <b>Close issue</b>.</td></tr>
+    <tr><td>Галочки в описании задачи не появились</td><td>Перед <code>[ ]</code> нужны дефис и пробел, внутри скобок — пробел: <code>- [ ] текст</code>.</td></tr>
+    <tr><td>Merge зелёный, хотя просили доработать</td><td>GitHub в вашем репозитории не запрещает. Не нажимайте до Approve — это договорённость пары.</td></tr>
+    <tr><td>Жёлтая плашка «Hidden character warning»</td><td>Ничего страшного: ветка названа русскими буквами.</td></tr>
+    <tr><td>В PR видны чужие изменения</td><td>Ветка создана не от свежего main. В своей ветке: <code>git pull --no-edit origin main</code>, затем <code>git push</code>.</td></tr>
+    <tr><td><code>rejected … fetch first</code> при push</td><td>Сначала <code>git pull</code>, потом <code>git push</code>.</td></tr>
+    <tr><td><code>Need to specify how to reconcile divergent branches</code></td><td><code>git config --global pull.rebase false</code>, затем снова <code>git pull</code>.</td></tr>
+    <tr><td>После commit открылся странный редактор</td><td>Забыли <code>-m</code>. Нажмите <code>Esc</code>, наберите <code>:wq</code>, Enter.</td></tr>
+  </table></div>
+  <p>Застряли дольше трёх минут — пишите в чат группы: что делали и какую ошибку видите.</p>
   </div>
 </section>
 
@@ -475,9 +621,9 @@ git pull</pre></li>
 
 </main>
 
-<script src="live.js?v=20261004135710"></script>
-<script src="quiz.js?v=20261004135710"></script>
-<script src="engine.js?v=20261004135710"></script>
+<script src="live.js?v=20261010222646"></script>
+<script src="quiz.js?v=20261010222646"></script>
+<script src="engine.js?v=20261010222646"></script>
 <script>
 (function () {
   "use strict";
@@ -511,7 +657,7 @@ git pull</pre></li>
   }
   document.querySelectorAll("#nav button").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
   const hashTab = location.hash.replace("#", "");
-  showTab(["live", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab : store.get("tab", "train"));
+  showTab(["live", "lesson", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab : store.get("tab", "train"));
 
   // ---------- приглашение ----------
   const orgUrl = S.PRAKTIKA_URL + "/invitations";
@@ -519,23 +665,28 @@ git pull</pre></li>
   document.querySelectorAll(".orglink").forEach((e) => { e.href = orgUrl; e.textContent = orgUrl.replace("https://", ""); });
   $("clonecmd").textContent = "git clone " + S.PRAKTIKA_URL + ".git\ncd git-praktika\npython -m pip install -r requirements.txt\npython 01_график.py";
 
-  // ---------- шаги подключения ----------
-  const ghDone = store.get("gh", []);
-  document.querySelectorAll("#ghsteps > li").forEach((li, i) => {
-    const lab = document.createElement("label");
-    lab.innerHTML = '<input type="checkbox"> готово';
-    const cb = lab.querySelector("input");
-    cb.checked = ghDone.includes(i);
-    li.classList.toggle("done", cb.checked);
-    cb.onchange = () => {
-      const k = ghDone.indexOf(i);
-      if (cb.checked && k < 0) ghDone.push(i);
-      if (!cb.checked && k >= 0) ghDone.splice(k, 1);
+  // ---------- шаги с галочками (подключение, занятие 5) ----------
+  function checkSteps(listId, key) {
+    const done = store.get(key, []);
+    document.querySelectorAll("#" + listId + " > li").forEach((li, i) => {
+      const lab = document.createElement("label");
+      lab.innerHTML = '<input type="checkbox"> готово';
+      const cb = lab.querySelector("input");
+      cb.checked = done.includes(i);
       li.classList.toggle("done", cb.checked);
-      store.set("gh", ghDone);
-    };
-    li.appendChild(lab);
-  });
+      cb.onchange = () => {
+        const k = done.indexOf(i);
+        if (cb.checked && k < 0) done.push(i);
+        if (!cb.checked && k >= 0) done.splice(k, 1);
+        li.classList.toggle("done", cb.checked);
+        store.set(key, done);
+      };
+      li.appendChild(lab);
+    });
+  }
+  checkSteps("ghsteps", "gh");
+  checkSteps("l5pair", "l5pair");
+  checkSteps("l5undo", "l5undo");
 
   // ================= ТРЕНАЖЁР =================
   const L = S.LEVELS;
