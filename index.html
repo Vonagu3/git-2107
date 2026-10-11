@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261010222821">
+<link rel="stylesheet" href="quiz.css?v=20261011183230">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -223,9 +223,40 @@ pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px
 <section class="tab" id="tab-lesson">
   <div class="doc">
   <h1>Практика в паре: от задачи до слияния</h1>
-  <p class="lead">Что делаем на занятии после показа руководителя. Часть 1 — вдвоём в репозитории своей пары: ставите друг другу задачи, делаете pull request, просите доработать и сливаете. Часть 2 — каждый сам: учимся отменять изменения и коммиты. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+  <p class="lead">Что делаем на занятии после показа руководителя. Сначала владелец включает правила ветки main. Часть 1 — вдвоём в репозитории своей пары: ставите друг другу задачи, делаете pull request, просите доработать и сливаете. Часть 2 — каждый сам: учимся отменять изменения и коммиты. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
 
   <div class="note-box"><b>Главное правило.</b> Задача → своя ветка → pull request → review напарника → слияние. Сливает автор, и только после Approve.</div>
+
+  <h2>Сначала: правила ветки main · 5 минут</h2>
+  <p>Делает <b>владелец репозитория</b>, один раз. Напарник смотрит его экран. После этого GitHub сам не даст слить pull request без Approve напарника и с нерешёнными замечаниями.</p>
+  <p>Имена в репозитории уже должны быть вписаны и отправлены (миссия 0): после включения правила прямой <code>git push</code> в main перестанет работать — только через pull request.</p>
+  <ol class="steps" id="l5rules">
+    <li><h3>Открыть создание правила</h3>
+      <p>В репозитории пары на GitHub: <b>Settings → Rules → Rulesets → New ruleset → New branch ruleset</b>.</p>
+    </li>
+    <li><h3>Назвать и включить</h3>
+      <p><b>Ruleset name</b>: <code>main</code></p>
+      <p><b>Enforcement status</b>: выберите <b>Active</b>.</p>
+      <p><b>Bypass list</b> не трогайте, он должен остаться пустым: иначе владелец сможет сливать в обход правила.</p>
+    </li>
+    <li><h3>Выбрать ветку</h3>
+      <p><b>Target branches → Add target → Include default branch</b>. Так правило относится к ветке main.</p>
+    </li>
+    <li><h3>Поставить три галочки</h3>
+      <p>Найдите и включите <b>Require a pull request before merging</b>. Внутри откроются настройки:</p>
+      <ul>
+        <li><b>Required approvals</b>: <code>1</code> — нужен один Approve;</li>
+        <li><b>Dismiss stale pull request approvals when new commits are pushed</b> — после нового коммита Approve нужно получить заново;</li>
+        <li><b>Require conversation resolution before merging</b> — все замечания должны быть отмечены Resolve conversation.</li>
+      </ul>
+      <p>Остальное не меняйте. Внизу страницы <b>Create</b>.</p>
+    </li>
+    <li><h3>Проверить</h3>
+      <p>В списке <b>Rulesets</b> появилась строка <code>main</code> со статусом <b>Active</b>.</p>
+      <p>Если вверху жёлтая плашка «Your rulesets won't be enforced on this private repository» — правило сохранено, но GitHub его не применяет: в закрытом репозитории на бесплатном тарифе правила не действуют, только в публичном. Скажите руководителю и идите дальше: тогда «сливаем только после Approve» остаётся договорённостью пары.</p>
+    </li>
+  </ol>
+  <p>Как понять, что правило работает: в открытом pull request внизу написано <b>Review required</b> и <b>Merging is blocked</b>, кнопка Merge серая, пока напарник не поставит Approve.</p>
 
   <h2>1. В паре: идея проекта через задачу · 35 минут</h2>
   <p>Каждый пишет в <code>идея.md</code> свою идею проекта. Но не просто так: напарник ставит вам задачу, вы делаете её в своей ветке, напарник проверяет и просит доработать.</p>
@@ -353,7 +384,9 @@ git branch -D проба-имя</pre>
     <tr><td>Пункт Request changes серый</td><td>Вы открыли свой PR. Просить доработать можно только чужой.</td></tr>
     <tr><td>Задача не закрылась после слияния</td><td><code>Closes #номер</code> написано в комментарии, а не в описании PR, или номер не тот. Закройте задачу кнопкой <b>Close issue</b>.</td></tr>
     <tr><td>Галочки в описании задачи не появились</td><td>Перед <code>[ ]</code> нужны дефис и пробел, внутри скобок — пробел: <code>- [ ] текст</code>.</td></tr>
-    <tr><td>Merge зелёный, хотя просили доработать</td><td>GitHub в вашем репозитории не запрещает. Не нажимайте до Approve — это договорённость пары.</td></tr>
+    <tr><td>Merge зелёный, хотя просили доработать</td><td>Правило ветки не действует: репозиторий закрытый или правило не Active. Не нажимайте до Approve — это договорённость пары.</td></tr>
+    <tr><td>Approve есть, а Merge серый</td><td>Не все замечания решены: вкладка Conversation → <b>Resolve conversation</b> у каждого комментария. Или после Approve был новый коммит — напарник ставит Approve ещё раз.</td></tr>
+    <tr><td><code>git push</code> в main отклонён: <code>protected branch</code> или <code>rule violations</code></td><td>Так работает правило: в main только через pull request. Создайте ветку и откройте PR.</td></tr>
     <tr><td>Жёлтая плашка «Hidden character warning»</td><td>Ничего страшного: ветка названа русскими буквами.</td></tr>
     <tr><td>В PR видны чужие изменения</td><td>Ветка создана не от свежего main. В своей ветке: <code>git pull --no-edit origin main</code>, затем <code>git push</code>.</td></tr>
     <tr><td><code>rejected … fetch first</code> при push</td><td>Сначала <code>git pull</code>, потом <code>git push</code>.</td></tr>
@@ -621,9 +654,9 @@ git pull</pre></li>
 
 </main>
 
-<script src="live.js?v=20261010222821"></script>
-<script src="quiz.js?v=20261010222821"></script>
-<script src="engine.js?v=20261010222821"></script>
+<script src="live.js?v=20261011183230"></script>
+<script src="quiz.js?v=20261011183230"></script>
+<script src="engine.js?v=20261011183230"></script>
 <script>
 (function () {
   "use strict";
@@ -685,6 +718,7 @@ git pull</pre></li>
     });
   }
   checkSteps("ghsteps", "gh");
+  checkSteps("l5rules", "l5rules");
   checkSteps("l5pair", "l5pair");
   checkSteps("l5undo", "l5undo");
 
