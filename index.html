@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261011183230">
+<link rel="stylesheet" href="quiz.css?v=20261013154335">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -223,7 +223,7 @@ pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px
 <section class="tab" id="tab-lesson">
   <div class="doc">
   <h1>Практика в паре: от задачи до слияния</h1>
-  <p class="lead">Что делаем на занятии после показа руководителя. Сначала владелец включает правила ветки main. Часть 1 — вдвоём в репозитории своей пары: ставите друг другу задачи, делаете pull request, просите доработать и сливаете. Часть 2 — каждый сам: учимся отменять изменения и коммиты. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+  <p class="lead">Что делаем на занятии после показа руководителя. Сначала владелец включает правила ветки main. Часть 1 — вдвоём в репозитории своей пары: ставите друг другу задачи, делаете pull request, просите доработать и сливаете. Часть 2 — каждый сам: учимся отменять изменения и коммиты. Часть 3 — справка: как исправить историю, когда push уже был. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
 
   <div class="note-box"><b>Главное правило.</b> Задача → своя ветка → pull request → review напарника → слияние. Сливает автор, и только после Approve.</div>
 
@@ -364,6 +364,82 @@ git branch -D проба-имя</pre>
     </li>
   </ol>
 
+  <h2>3. Уже был push: как исправить историю</h2>
+  <p>Справка на случай, когда ошибка уже на GitHub. Сначала ответьте на два вопроса — от них зависит способ.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Вопрос</th><th>Ответ</th><th>Что делать</th></tr>
+    <tr><td rowspan="2">Ветка уже слита в main?</td><td>Да</td><td>Историю не трогаем: случай 5</td></tr>
+    <tr><td>Нет</td><td>Смотрите следующий вопрос</td></tr>
+    <tr><td rowspan="2">В ветке работает кто-то кроме вас?</td><td>Да</td><td>Случай 5 или сначала договориться с напарником</td></tr>
+    <tr><td>Нет, ветка только ваша</td><td>Можно переписать: случаи 1–4</td></tr>
+  </table></div>
+  <div class="note-box"><b>Переписать историю</b> значит заменить коммиты на GitHub другими. Обычный <code>git push</code> этого не даст, нужен <code>git push --force-with-lease</code>. Он безопаснее, чем <code>--force</code>: откажется, если на GitHub появились чужие коммиты, которых у вас нет.</div>
+
+  <ol class="steps">
+    <li><h3>Опечатка в сообщении последнего коммита</h3>
+      <pre class="cmd">git commit --amend -m "Правильное сообщение"
+git push --force-with-lease</pre>
+    </li>
+    <li><h3>В последнем коммите ошибка в файле или не хватает файла</h3>
+      <p>Исправьте файл и сохраните. Затем добавьте исправление в тот же коммит:</p>
+      <pre class="cmd">git add .
+git commit --amend --no-edit
+git show HEAD
+git push --force-with-lease</pre>
+      <p><code>--amend</code> заменяет последний коммит новым, <code>--no-edit</code> оставляет старое сообщение. <code>git show HEAD</code> — проверить, что в коммите теперь то, что нужно.</p>
+    </li>
+    <li><h3>Последний коммит лишний целиком</h3>
+      <p>Работа ещё нужна — коммит исчезнет, а изменения останутся в файлах:</p>
+      <pre class="cmd">git reset --soft HEAD~1</pre>
+      <p>Работа не нужна — исчезнут и коммит, и изменения:</p>
+      <pre class="cmd">git reset --hard HEAD~1</pre>
+      <p>Потом в обоих случаях:</p>
+      <pre class="cmd">git push --force-with-lease</pre>
+    </li>
+    <li><h3>Ошибка в коммите, после которого есть другие</h3>
+      <p><code>--amend</code> здесь не поможет: он правит только последний коммит. Если ошибка обычная — просто исправьте её новым коммитом сверху, историю можно не трогать.</p>
+      <p>Если ошибки в истории быть не должно, найдите коммит <b>перед</b> ошибочным и скопируйте его номер из первой колонки:</p>
+      <pre class="cmd">git log --oneline -6</pre>
+      <p>Разберите всё, что было после него, обратно на изменения (вместо <code>НОМЕР</code> — скопированный номер):</p>
+      <pre class="cmd">git reset --soft НОМЕР</pre>
+      <p>Файлы остались как были, пропали только коммиты. Исправьте ошибку, сохраните и соберите один новый коммит:</p>
+      <pre class="cmd">git add .
+git commit -m "Что сделано"
+git push --force-with-lease</pre>
+      <p>Несколько коммитов склеятся в один — это нормально.</p>
+    </li>
+    <li><h3>Ветка уже слита в main или в ней работает напарник</h3>
+      <p>Не переписываем: у других уже есть эти коммиты. Добавляем сверху коммит, который отменяет ошибочный.</p>
+      <p>В общей ветке:</p>
+      <pre class="cmd">git revert HEAD --no-edit
+git push</pre>
+      <p>В main — кнопка <b>Revert</b> в слитом pull request: GitHub сам откроет новый PR с отменой. Переписать main и не получится: правило ветки отклонит такой push.</p>
+    </li>
+    <li><h3>В коммит попал пароль или токен</h3>
+      <p><b>Сначала замените сам пароль или токен на новый</b> там, где его выдали. Всё, что побывало на GitHub, считается украденным, даже если прошла минута.</p>
+      <p>Потом уберите его из истории: он в последнем коммите — случай 2, глубже — случай 4.</p>
+      <p>Новый коммит «убрал токен» не помогает: в текущем файле токена уже нет, но коммит, где он был, остаётся в истории, и его видно на вкладке Commits.</p>
+      <p>Даже после чистки старый коммит ещё долго открывается на GitHub по прямой ссылке. Поэтому главный шаг — первый.</p>
+    </li>
+  </ol>
+
+  <h3>После того как переписали</h3>
+  <ul>
+    <li>До <code>git push --force-with-lease</code> команда <code>git status</code> пишет <code>have diverged</code> и советует <code>git pull</code>. <b>Не делайте pull</b>: он вернёт старые коммиты обратно в ветку. Нужен именно <code>git push --force-with-lease</code>.</li>
+    <li>Открытый pull request обновится сам. Approve напарника сбросится — попросите посмотреть ещё раз.</li>
+    <li>Если напарник успел скачать вашу ветку, у него осталась старая история. Он выполняет у себя (вместо <code>ветка</code> — имя ветки):
+      <pre class="cmd">git fetch
+git checkout ветка
+git reset --hard origin/ветка</pre></li>
+  </ul>
+
+  <h3>Передумали или сделали хуже</h3>
+  <p>Git записывает каждое перемещение по истории. Этот журнал есть только на вашем компьютере:</p>
+  <pre class="cmd">git reflog -8</pre>
+  <p>Верхняя строка — где вы сейчас, вторая (<code>HEAD@{1}</code>) — где были до последней команды. Вернуться на одно действие назад:</p>
+  <pre class="cmd">git reset --hard HEAD@{1}</pre>
+  <p>Так возвращается и коммит, убранный через <code>git reset --hard</code>. Не вернётся только то, что ни разу не было в коммите.</p>
+
   <h2>Шпаргалка: где ошибка → что делать</h2>
   <div class="tablewrap"><table>
     <tr><th>Где ошибка</th><th>Команда</th></tr>
@@ -371,11 +447,14 @@ git branch -D проба-имя</pre>
     <tr><td>Лишнее попало после <code>git add</code></td><td><code>git restore --staged файл</code></td></tr>
     <tr><td>Опечатка в сообщении, push не было</td><td><code>git commit --amend -m "…"</code></td></tr>
     <tr><td>Лишний коммит, push не было</td><td><code>git reset --soft HEAD~1</code> — работа останется<br><code>git reset --hard HEAD~1</code> — пропадёт и работа</td></tr>
-    <tr><td>Уже был push</td><td><code>git revert HEAD --no-edit</code>, потом <code>git push</code></td></tr>
+    <tr><td>Уже был push, ветка только ваша и не слита</td><td>Исправить как до push, потом <code>git push --force-with-lease</code> — часть 3</td></tr>
+    <tr><td>Уже был push, в ветке работает напарник</td><td><code>git revert HEAD --no-edit</code>, потом <code>git push</code></td></tr>
     <tr><td>Уже слито в main</td><td>Кнопка <b>Revert</b> в слитом pull request</td></tr>
+    <tr><td>В коммит попал пароль или токен</td><td>Сначала заменить его на новый, потом чистить историю — часть 3, случай 6</td></tr>
+    <tr><td>Отменили не то</td><td><code>git reflog</code>, затем <code>git reset --hard HEAD@{1}</code></td></tr>
     <tr><td>Запутались в конфликте после <code>git pull</code></td><td><code>git merge --abort</code> — всё вернётся как до pull</td></tr>
   </table></div>
-  <p>До push можно переписывать как угодно. После push — не стираем, а добавляем исправление сверху.</p>
+  <p>До push можно переписывать как угодно. После push переписываем только свою неслитую ветку, а в общей ветке и в main добавляем исправление сверху.</p>
 
   <h2>Если что-то пошло не так</h2>
   <div class="tablewrap"><table>
@@ -654,9 +733,9 @@ git pull</pre></li>
 
 </main>
 
-<script src="live.js?v=20261011183230"></script>
-<script src="quiz.js?v=20261011183230"></script>
-<script src="engine.js?v=20261011183230"></script>
+<script src="live.js?v=20261013154335"></script>
+<script src="quiz.js?v=20261013154335"></script>
+<script src="engine.js?v=20261013154335"></script>
 <script>
 (function () {
   "use strict";
