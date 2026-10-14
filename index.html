@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261013155010">
+<link rel="stylesheet" href="quiz.css?v=20261014125304">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -169,7 +169,7 @@ dialog textarea { width: 100%; height: 360px; border: 0; padding: 12px 16px; fon
 .steps > li.done::before { content: "✓"; background: var(--ok); color: #fff; }
 .steps h3 { margin: 2px 0 6px; }
 .steps label { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; color: var(--muted); cursor: pointer; margin-top: 6px; }
-pre.cmd { background: var(--term-bg); color: var(--term-ink); padding: 10px 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+pre.cmd { font-variant-ligatures: none; background: var(--term-bg); color: var(--term-ink); padding: 10px 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
 .note-box { border-left: 4px solid var(--accent); background: var(--chip); padding: 8px 12px; border-radius: 0 8px 8px 0; margin: 10px 0; }
 .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .cheat td:first-child { white-space: nowrap; font-family: var(--mono); font-size: 13px; }
@@ -713,78 +713,174 @@ git push</pre></div>
 <!-- ================= ДОМАШКА ================= -->
 <section class="tab" id="tab-hw">
   <div class="doc">
-  <h1>Домашнее задание к занятию 4</h1>
-  <p class="lead">Срок — до следующего занятия. Застряли — пишите в чат группы в MAX заранее, а не в день занятия.</p>
+  <h1 id="proj">Домашнее задание к занятию 7</h1>
+  <p class="lead">Командой: репозиторий проекта с README, задачами и доской GitHub Projects. Около 1,5 часа, часть — вдвоём в созвоне. Срок — до следующего занятия. Застряли — пишите в чат группы в MAX заранее, а не в день занятия.</p>
+  <p>Каждую задачу проводим по всему пути: <b>Todo → In Progress → pull request → Approve → Done</b>. Состав команд и кто владелец репозитория — в чате группы.</p>
+  <div class="note-box"><b>Репозиторий открытый</b> — его видит любой человек в интернете. Поэтому в нём работает правило ветки main. И поэтому: токены и ключи — только в <code>.env</code>, а в README, задачах и коммитах — только имя или ник, без фамилии, школы и класса.</div>
+  <p><b>Готово, когда:</b> README со всеми разделами; 10 задач с метками, все на доске; 4 слитых pull request с <code>Closes</code> — по 2 от каждого, у каждого Approve напарника; хотя бы одно Request changes; задачи по README и примерам в Done, задачи по проекту в Todo. Владелец присылает ссылку на репозиторий в чат группы.</p>
 
-  <h2>1. Личный цикл (каждый)</h2>
-  <p>Если на занятии не всё получилось — пройдите дома вкладку «Подключение к GitHub» и задания 1–7 из <code>ЗАДАНИЯ.md</code> в репозитории <code>git-praktika</code>.</p>
-  <p>Задание 8 — для всех:</p>
-  <pre class="cmd">git checkout имя-фамилия
-git pull origin main
-# добавьте в свой CSV ещё один день измерений
-git add .
-git commit -m "Добавил ещё один день"
+  <ol class="steps" id="l6proj">
+    <li><h3>Посмотреть хорошие README · каждый</h3>
+      <p>Откройте <a href="https://github.com/matiassingers/awesome-readme" target="_blank" rel="noopener">github.com/matiassingers/awesome-readme</a>. Раздел <b>Examples</b> — список хороших README, после каждой ссылки написано, чем он хорош.</p>
+      <p>Откройте 2–3 любых и выпишите себе 3 приёма, которые возьмёте в свой README. Не знаете, с чего начать:</p>
+      <ul>
+        <li><a href="https://github.com/ma-shamshiri/Pacman-Game" target="_blank" rel="noopener">Pacman-Game</a> — игра: GIF, список файлов и что в каждом;</li>
+        <li><a href="https://github.com/feberts/python-game-server" target="_blank" rel="noopener">python-game-server</a> — схема «как устроено» в самом начале;</li>
+        <li><a href="https://github.com/karan/joe" target="_blank" rel="noopener">joe</a> — коротко и понятно;</li>
+        <li><a href="https://github.com/GTruf/Driver-Drowsiness-Detector" target="_blank" rel="noopener">Driver-Drowsiness-Detector</a> — проект с ИИ.</li>
+      </ul>
+      <p>Ссылки и приёмы пока сохраните у себя — в шаге 8 они пойдут в задачу.</p>
+    </li>
+    <li><h3>Создать репозиторий · владелец</h3>
+      <p>GitHub → <b>New repository</b>. Название латиницей, по сути проекта, например <code>shagi-bot</code>.</p>
+      <p><b>Public</b> · галочка <b>Add a README file</b> · <b>Add .gitignore → Python</b> → <b>Create repository</b>.</p>
+      <p><b>Settings → Collaborators → Add people</b>: напарник и <code>Vonagu3</code>. Напарник принимает приглашение (письмо на почте). Оба клонируют:</p>
+      <pre class="cmd">git clone ССЫЛКА
+cd название-репозитория</pre>
+    </li>
+    <li><h3>Включить правило для main · владелец</h3>
+      <p>Как на занятии 5 (вкладка «Практика в паре», раздел «Сначала: правила ветки main»):</p>
+      <ul>
+        <li><b>Settings → Rules → Rulesets → New ruleset → New branch ruleset</b>;</li>
+        <li><b>Ruleset name</b>: <code>main</code>, <b>Enforcement status</b>: <b>Active</b>, <b>Bypass list</b> оставить пустым;</li>
+        <li><b>Target branches → Add target → Include default branch</b>;</li>
+        <li><b>Require a pull request before merging</b>, внутри: <b>Required approvals</b> <code>1</code>, <b>Dismiss stale pull request approvals when new commits are pushed</b>, <b>Require conversation resolution before merging</b>;</li>
+        <li>внизу <b>Create</b>.</li>
+      </ul>
+      <p>Жёлтой плашки про private быть не должно: репозиторий открытый, правило работает по-настоящему.</p>
+      <p><b>Проверка.</b> Напарник пробует отправить коммит прямо в main:</p>
+      <pre class="cmd">git commit --allow-empty -m "Проверка правила"
 git push</pre>
-  <p>Запустите <code>python проверить.py</code> — все строки должны быть зелёными ✔. Задание 8 покажет ссылку на коммит — пришлите её в чат.</p>
-
-  <h2>2. Практика в парах (вдвоём в созвоне, 1,5–2 часа)</h2>
-  <p>Главная часть домашки. Вы работаете парами, каждая пара — в <b>своём репозитории</b>. Руководитель в работе не участвует: вы сами делаете review и сами сливаете pull request'ы.</p>
-  <div class="note-box"><b>Полное задание с командами</b> — на странице шаблона: <a href="https://github.com/Vonagu3/praktika-shablon" target="_blank" rel="noopener">github.com/Vonagu3/praktika-shablon</a>. Ниже — коротко, чтобы понять, что вас ждёт.</div>
-
-  <h3>Сначала договоритесь</h3>
-  <ol>
-    <li>Пары, их номера и кто в паре владелец репозитория (<b>Участник 1</b>) — в чате группы. Второй — <b>Участник 2</b>, напарник.</li>
-    <li>Сегодня-завтра напишите в чат день и время созвона вашей пары.</li>
-    <li>В созвоне каждый работает в своём терминале, а <b>ведущий</b> показывает экран и читает задание вслух. Ведущий меняется на каждой миссии. Review вашего PR делает напарник.</li>
-  </ol>
-
-  <h3>Правила на всю практику</h3>
-  <ol>
-    <li>Каждое изменение — через свою ветку и pull request. Прямо в <code>main</code> пушим только в миссии 0.</li>
-    <li>Перед новой веткой всегда обновляем main:
+      <p>GitHub должен отказать: <code>rule violations</code>. Отказал — правило работает. Уберите пробный коммит:</p>
+      <pre class="cmd">git reset --hard origin/main</pre>
+    </li>
+    <li><h3>Проверить своё имя в коммитах · каждый</h3>
+      <p>Имя автора каждого коммита в открытом репозитории видно всем.</p>
+      <pre class="cmd">git config user.name</pre>
+      <p>Если там имя и фамилия — поменяйте на имя или ник:</p>
+      <pre class="cmd">git config --global user.name "Имя"</pre>
+    </li>
+    <li><h3>Создать метки · владелец</h3>
+      <p><b>Issues → Labels → New label</b>. Две метки: <code>документация</code> и <code>идея</code>. Цвет — любой.</p>
+    </li>
+    <li><h3>Завести задачи · каждый по 5</h3>
+      <p><b>Issues → New issue</b>. У каждой задачи справа <b>Assignees</b> — вы, <b>Labels</b> — метка.</p>
+      <div class="tablewrap"><table>
+        <tr><th>Задача</th><th>Кто</th><th>Метка</th></tr>
+        <tr><td>Примеры README — Имя</td><td>каждый свою</td><td>документация</td></tr>
+        <tr><td>README: что это, для кого, что умеет</td><td>владелец</td><td>документация</td></tr>
+        <tr><td>README: план</td><td>владелец</td><td>документация</td></tr>
+        <tr><td>README: как это будет работать</td><td>напарник</td><td>документация</td></tr>
+        <tr><td>README: частые вопросы и команда</td><td>напарник</td><td>документация</td></tr>
+        <tr><td>2 настоящие задачи по проекту, например «Бот отвечает на /start»</td><td>каждый свои</td><td>идея</td></tr>
+      </table></div>
+      <p>В описании каждой задачи три части:</p>
+      <pre class="cmd">Что сделать: …
+Зачем: …
+Готово, когда:
+- [ ] …
+- [ ] …</pre>
+      <p>«Готово, когда» пишите так, чтобы напарник мог проверить: не «сделать красиво», а «в README есть схема, на ней бот и база».</p>
+    </li>
+    <li><h3>Сделать доску · владелец</h3>
+      <ul>
+        <li>Аватар → <b>Your projects → New project</b> → шаблон <b>Board</b> → название как у репозитория → <b>Create project</b>.</li>
+        <li>В репозитории: вкладка <b>Projects → Link a project</b> → выбрать доску.</li>
+        <li>На доске внизу колонки Todo: <b>+ Add item</b> → набрать <code>#</code> → выбрать репозиторий → отметить все 10 задач.</li>
+        <li>На доске <b>⋯ → Workflows</b>: включены <b>Item closed</b> и <b>Pull request merged</b>. Они сами отправляют карточку в Done.</li>
+        <li><b>⋯ → Settings → Manage access</b> → пригласить напарника. Доска принадлежит не репозиторию, а владельцу: не пригласили — напарник её не видит.</li>
+      </ul>
+    </li>
+    <li><h3>Закрыть «Примеры README» · каждый свою</h3>
+      <p>Карточку — в <b>In Progress</b>. В задаче напишите комментарий: ссылки на 2–3 README и 3 приёма из шага 1. Затем <b>Close issue</b>.</p>
+      <p>Посмотрите на доску: карточка <b>сама</b> уехала в Done.</p>
+    </li>
+    <li><h3>Написать README · каждый свои 2 задачи</h3>
+      <p>Каждая задача — своя ветка и свой pull request. Образец README — ниже, под шагами. Карточку — в <b>In Progress</b>, затем:</p>
       <pre class="cmd">git checkout main
-git pull</pre></li>
-    <li>Merge нажимает автор PR, и только после Approve напарника.</li>
-    <li>Застряли больше чем на 5 минут — пишите в чат: что делали и какую ошибку видите.</li>
-    <li><b>После каждой миссии каждый запускает проверку</b> в папке репозитория пары:
-      <pre class="cmd">python проверить.py</pre>
-      Скрипт покажет, что уже слито в main на GitHub и что делать дальше, а итог сам уйдёт руководителю по вашему личному ключу. Если внизу «Совет: python проверить.py --ключ…» — на этом компьютере ключа нет, выполните один раз <code>python проверить.py --ключ ВАШ_КЛЮЧ</code>.</li>
+git pull
+git checkout -b readme-opisanie</pre>
+      <p>Названия веток: <code>readme-opisanie</code>, <code>readme-plan</code> — у владельца; <code>readme-shema</code>, <code>readme-faq</code> — у напарника.</p>
+      <p>Допишите свой раздел в <code>README.md</code>, сохраните.</p>
+      <pre class="cmd">git add README.md
+git commit -m "README: что это, для кого, что умеет"
+git push -u origin readme-opisanie</pre>
+      <p>Pull request, в описании: <code>Closes #номер</code>. Напарник проверяет по «Готово, когда» из задачи: всё выполнено — <b>Approve</b>, нет — <b>Request changes</b> с тем, что доделать. Автор: <b>Merge</b>.</p>
+      <p>Карточка сама уезжает в Done. <b>Руками в Done не таскаем.</b></p>
+      <p>Оба правят один файл, поэтому возможен конфликт в README. Решаете как в миссии 2: оставляете оба раздела.</p>
+    </li>
+    <li><h3>Проверить итог</h3>
+      <ul>
+        <li>На доске в Done — 6 карточек: примеры и README. В Todo — 4 задачи по проекту: с них начнём работу.</li>
+        <li><b>Pull requests → Closed</b>: 4 слитых PR, у каждого Approve, хотя бы у одного — Changes requested.</li>
+        <li>README на главной странице репозитория: все разделы на месте, схема нарисована.</li>
+      </ul>
+      <p>Владелец присылает ссылку на репозиторий в чат группы.</p>
+    </li>
   </ol>
 
-  <h3>Миссии</h3>
-  <ol class="steps">
-    <li><h3>Миссия 0. Репозиторий пары · 10 мин</h3>
-      Участник 1 на странице шаблона нажимает <b>Use this template → Create a new repository</b>, называет <code>praktika-1</code>, <code>praktika-2</code> или <code>praktika-3</code> (номер пары), выбирает <b>Private</b>. Затем <b>Settings → Collaborators</b>: добавляет напарника и руководителя <code>Vonagu3</code>. Напарник принимает приглашение. Владелец клонирует, вписывает имена (Ctrl/Cmd+Shift+H — замена во всех файлах) и пушит в main. Напарник делает <code>git clone</code>.</li>
-    <li><h3>Миссия 1. Визитка пары · 15 мин</h3>
-      Каждый в своей ветке <code>визитка-имя</code> заполняет свой раздел в <code>визитка.md</code>, открывает PR, напарник ставит Approve, автор сливает. Оба правят один файл — а конфликта нет.</li>
-    <li><h3>Миссия 2. Неделя пары: конфликт · 40 мин</h3>
-      Каждый вписывает свои числа в свой столбец <code>неделя.csv</code>. Два раунда: в первом первым сливает Участник 1, а конфликт решает Участник 2, во втором — наоборот. Конфликт решаете <b>у себя</b>: <code>git pull origin main</code>, в VS Code собираете в каждой строке числа обоих, удаляете метки <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>, затем add, commit, push. Кнопки «Accept…» здесь не подходят — собирайте строку руками. В конце ведущий рисует график: <code>python 01_график.py неделя.csv</code>.</li>
-    <li><h3>Миссия 3. Вопросы по git: просьба исправить · 25 мин</h3>
-      Каждый пишет в <code>вопросы.md</code> вопрос и ответ. Напарник читает внимательно: всё верно — Approve, есть неточность — комментарий и <b>Request changes</b>. Автор исправляет в той же ветке и пушит — коммит сам появится в том же PR. Хотя бы одно Request changes в паре обязательно.</li>
-    <li><h3>Миссия 4. Идея проекта · 20 мин</h3>
-      Каждый пишет в <code>идея.md</code> свою идею проекта: что делаем и для кого, какие данные нужны, первый шаг. Ветка, PR, напарник делает review (непонятно — Request changes), автор сливает.</li>
-  </ol>
+  <h2>Образец README</h2>
+  <p>Скопируйте в свой <code>README.md</code> и замените текст на свой. Схему <code>mermaid</code> GitHub рисует сам. Вместо неё можно вставить фото рисунка от руки: перетащите картинку в окно редактора на GitHub.</p>
+  <pre class="cmd"># Шаги-бот 🚶
 
-  <h3>Как понять, что всё сделано</h3>
-  <ul>
-    <li><code>python проверить.py</code> у каждого — все 7 строк зелёные ✔.</li>
-    <li>Вкладка <b>Pull requests → Closed</b>: 10 слитых PR, по 5 от каждого.</li>
-    <li>Хотя бы в одном PR есть Request changes.</li>
-    <li>В <code>идея.md</code> заполнены обе идеи.</li>
-  </ul>
-  <p>Ведущий последней миссии пишет в чат группы: «Пара … закончила практику», ссылку на репозиторий и картинку графика из миссии 2. Файл <code>идея.md</code> — черновик для выбора тем проектов на занятии 4.</p>
+Бот в MAX, который считает шаги класса и устраивает соревнование.
 
-  <h2>3. Тренажёр (кто не прошёл)</h2>
-  <p>Уровни 13–18 — по своей личной ссылке: забрать чужое, отказ push, конфликты, сценарии. Они как раз помогут в миссии 2.</p>
-  <div id="hwCard"></div>
+## Что это
+Две-три фразы: какую проблему решает и почему это интересно.
+
+## Для кого
+Кто будет пользоваться и в какой ситуации.
+
+## Что умеет
+- первое
+- второе
+- третье
+
+## Как это будет работать
+```mermaid
+flowchart LR
+    Ученик --&gt;|пишет шаги| Бот
+    Бот --&gt;|сохраняет| База[(Supabase)]
+    Бот --&gt;|раз в неделю| Рейтинг
+```
+
+## Как запустить
+Заполним, когда будет код.
+
+## План
+- [ ] первая версия: …
+- [ ] потом: …
+
+## Частые вопросы
+**Вопрос, который точно зададут?**
+Ответ.
+
+## Команда
+- Имя — что делает
+- Имя — что делает</pre>
+
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что видите</th><th>Что делать</th></tr>
+    <tr><td>Нет вкладки Projects в репозитории</td><td>Settings → Features → галочка <b>Projects</b>.</td></tr>
+    <tr><td>Напарник не видит доску</td><td>Доска принадлежит владельцу: <b>⋯ → Settings → Manage access</b> → пригласить.</td></tr>
+    <tr><td>В Add item не находится задача</td><td>Сначала наберите <code>#</code>, потом выберите репозиторий. Доска должна быть связана с репозиторием: Projects → Link a project.</td></tr>
+    <tr><td>Слили PR, а карточка не уехала в Done</td><td>В описании PR нет <code>Closes #номер</code> или номер не тот. Либо на доске выключен workflow Pull request merged. Закройте задачу кнопкой <b>Close issue</b>.</td></tr>
+    <tr><td>Перетащили карточку в Done, вернули — задача так и закрыта</td><td>Так устроена доска. Откройте задачу → <b>Reopen issue</b>. В Done руками не таскаем.</td></tr>
+    <tr><td>Нет кнопки Merge, написано Review required</td><td>Так и задумано: нужен Approve напарника. Правило работает.</td></tr>
+    <tr><td>Rulesets пишет, что правило не будет работать</td><td>Репозиторий закрытый. Settings → внизу <b>Change visibility</b> → Public.</td></tr>
+    <tr><td>Схема mermaid не рисуется, видно текст</td><td>Первая строка блока — ровно <code>```mermaid</code>, без пробелов перед ней.</td></tr>
+    <tr><td>Не видно кнопки Labels</td><td>Вкладка <b>Issues</b> → кнопка <b>Labels</b> рядом с поиском.</td></tr>
+  </table></div>
+  <div id="hwCard" hidden></div>
   </div>
 </section>
 
 </main>
 
-<script src="live.js?v=20261013155010"></script>
-<script src="quiz.js?v=20261013155010"></script>
-<script src="engine.js?v=20261013155010"></script>
+<script src="live.js?v=20261014125304"></script>
+<script src="quiz.js?v=20261014125304"></script>
+<script src="engine.js?v=20261014125304"></script>
 <script>
 (function () {
   "use strict";
@@ -818,7 +914,11 @@ git pull</pre></li>
   }
   document.querySelectorAll("#nav button").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
   const hashTab = location.hash.replace("#", "");
-  showTab(["live", "lesson", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab : store.get("tab", "train"));
+  // #proj и другие якоря внутри вкладки: открыть эту вкладку и прокрутить к разделу
+  const hashSec = hashTab && document.getElementById(hashTab)?.closest(".tab");
+  showTab(["live", "lesson", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
+    : hashSec ? hashSec.id.replace("tab-", "") : store.get("tab", "train"));
+  if (hashSec) document.getElementById(hashTab).scrollIntoView();
 
   // ---------- приглашение ----------
   const orgUrl = S.PRAKTIKA_URL + "/invitations";
@@ -850,6 +950,7 @@ git pull</pre></li>
   checkSteps("l5pair", "l5pair");
   checkSteps("l5undo", "l5undo");
   checkSteps("l5push", "l5push");
+  checkSteps("l6proj", "l6proj");
 
   // ================= ТРЕНАЖЁР =================
   const L = S.LEVELS;
