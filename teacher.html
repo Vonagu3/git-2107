@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261014125424">
+<link rel="stylesheet" href="quiz.css?v=20261018171115">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -129,8 +129,8 @@ table.probs td:first-child { width: 40%; }
 <div id="app" hidden>
   <div class="top hide-on-show">
     <div>
-      <h1>Занятие 3 — руководителю</h1>
-      <p class="lead">Данные учеников хранятся в Supabase и видны только после входа. Полный план — <code>Урок_3_github/План_урока.md</code>.</p>
+      <h1>Занятие 7 — руководителю</h1>
+      <p class="lead">Данные учеников хранятся в Supabase и видны только после входа. Блок stash и патч — <code>Урок_7/Stash_и_патч.md</code>.</p>
     </div>
     <div class="right"><span id="who"></span><button class="btn" id="logout">Выйти</button></div>
   </div>
@@ -177,7 +177,7 @@ table.probs td:first-child { width: 40%; }
   <div class="card"><ul class="check" id="prep"></ul></div>
 
   <h2 id="lesson">Ход занятия</h2>
-  <p class="lead">Нажмите на команду — она скопируется для чата MAX. Скопированные отмечаются зелёным.</p>
+  <p class="lead">Нажмите на команду — она скопируется: для своего терминала или для чата группы в Telegram. Скопированные отмечаются зелёным. Ученики делают практику по своей странице, вкладка «Практика».</p>
   <nav class="fl-nav" id="flowNav"></nav>
   <div class="card" id="flow"></div>
 
@@ -196,20 +196,30 @@ table.probs td:first-child { width: 40%; }
     <li>Код можно подобрать, прочитав код страницы, — это мотивация, а не экзамен. Настоящая проверка — <code>python проверить.py</code> и ветки на GitHub.</li>
   </ul>
 
-  <h2 id="practice">Практика в парах (дома, после занятия)</h2>
+  <h2 id="practice">Практика учеников на занятии 7</h2>
   <div class="card">
-    <p style="margin:0 0 8px">Каждая пара создаёт свой закрытый репозиторий из шаблона <a href="https://github.com/Vonagu3/praktika-shablon" target="_blank" rel="noopener">Vonagu3/praktika-shablon</a> и приглашает вас. Задание — в README шаблона: миссии 0–4, 1,5–2 часа в созвоне. Прогресс — в столбце «Практика в парах» таблицы учеников: ученик запускает <code>python проверить.py</code> в репозитории пары, 7 шагов (миссия 0, визитка, оба PR недели, свой конфликт, вопрос, идея, пара закончила). Request changes скрипт не видит — его смотреть на GitHub. Пары ученикам сообщить в чате (на странице учеников имён нет).</p>
+    <p style="margin:0 0 8px">У каждого — своя страница, вкладка <b>Практика</b>: часть 1 — stash (каждый сам, в папке репозитория своей команды, push не делаем), часть 2 — патч в паре через личку Telegram (по желанию). Галочки шагов ученик ставит у себя, вам они не приходят — ориентир «готово» в чате.</p>
     <table class="probs">
-      <tr><th>Пара</th><th>Владелец (Участник 1)</th><th>Напарник (Участник 2)</th><th>Что проверить</th></tr>
-      <tr><td>1 · <code>praktika-1</code></td><td>Захар</td><td>Илья <span class="muted">(не был на занятии 3)</span></td><td rowspan="3">Приглашение от владельца пришло вам (иначе репозитория не видно). Pull requests → Closed: 10 слитых PR, по 5 от каждого. В миссии 2 конфликт решал каждый (merge-коммиты от обоих). Хотя бы одно Request changes (миссия 3). В <code>идея.md</code> две идеи (к выбору тем на занятии 4). В чате — ссылка и картинка графика.</td></tr>
-      <tr><td>2 · <code>praktika-2</code></td><td>Геннадий</td><td>Лев <span class="muted">(не был на занятии 3)</span></td></tr>
-      <tr><td>3 · <code>praktika-3</code></td><td>Пётр</td><td>Леонид</td></tr>
+      <tr><th>Команда</th><th>Владелец репозитория</th><th>Напарник</th></tr>
+      <tr><td>1</td><td>Индира</td><td>Гена</td></tr>
+      <tr><td>2</td><td>Захар</td><td>Петя</td></tr>
+      <tr><td>3</td><td>Леонид</td><td>Илья</td></tr>
     </table>
   </div>
 
   <h2 id="problems">Если у ученика…</h2>
   <div class="card wrap"><table class="probs">
     <tr><th>Видит</th><th>Что сделать</th></tr>
+    <tr><td><code>git stash</code> пишет <code>No local changes to save</code></td><td>Файл не сохранён (Ctrl+S) или правку уже закоммитили. В шаге с новым файлом — так и задумано</td></tr>
+    <tr><td>При <code>git checkout main</code> ошибки не было</td><td>Пропущен коммит в шаге «Коммит в ветке». Stash всё равно сделать</td></tr>
+    <tr><td><code>git stash pop</code> пишет про конфликт</td><td>Тот же файл успели поменять ещё раз: <code>git restore README.md</code> и снова <code>git stash pop</code>. Не выходит — показать экран</td></tr>
+    <tr><td>Сделал <code>pop</code> не в той ветке</td><td>Изменения легли туда: <code>git stash</code>, перейти в нужную ветку, <code>git stash pop</code></td></tr>
+    <tr><td>В начале практики <code>git status</code> не чистый</td><td>Недоделанная домашка — как раз случай для stash: <code>git stash -u</code>, практика, в конце <code>git stash pop</code> в своей ветке</td></tr>
+    <tr><td><code>rm</code> не найдена</td><td>Это cmd на Windows: <code>del test.txt</code> или терминал в VS Code (PowerShell, Git Bash)</td></tr>
+    <tr><td><code>git apply</code>: <code>No valid patches in input</code></td><td>Патч сохранён через <code>&gt;</code> в PowerShell. Пересохранить: <code>git diff --output=../my.patch</code></td></tr>
+    <tr><td><code>git apply</code>: <code>patch does not apply</code></td><td>Файл у напарника уже другой в тех же строках, или он не на свежем main: <code>git restore README.md</code>, <code>git checkout main</code>, <code>git pull</code>, снова <code>--check</code></td></tr>
+    <tr><td>Патч пустой или нет нового файла</td><td><code>git restore</code> сделали до <code>--output</code>, либо файл новый: сначала <code>git add</code>, потом <code>git diff --cached --output=../my.patch</code></td></tr>
+    <tr><td><code>can't open patch</code></td><td>Не там лежит файл: положить <code>my.patch</code> рядом с папкой репозитория, не внутрь</td></tr>
     <tr><td><code>Repository not found</code> при clone</td><td>Не принял приглашение или вошёл не под тем аккаунтом</td></tr>
     <tr><td><code>ModuleNotFoundError: No module named 'pandas'</code></td><td><code>python -m pip install -r requirements.txt</code></td></tr>
     <tr><td>Mac: просит Username и Password</td><td>Username: логин, Password: classic-токен <code>ghp_…</code></td></tr>
@@ -233,18 +243,18 @@ table.probs td:first-child { width: 40%; }
 
   <h2>Как помогать</h2>
   <ul>
-    <li>Смотрите на столбец «проверить.py» в таблице учеников, а не на экраны: там написано, где ученик застрял.</li>
-    <li>Не работает Git или вход: класс не ждёт. Командные задания можно сделать в браузере, через значок карандаша.</li>
-    <li>Отстаёте: задание 6 и issues переносите на дом. Командный конфликт не урезать.</li>
+    <li>Застрявший присылает в чат скрин терминала с последней командой и ответом git — по нему видно, на каком шаге.</li>
+    <li>Нет склонированного репозитория команды: практику stash можно сделать в любом своём репозитории, хоть в учебном.</li>
+    <li>Отстаёте: патч в парах убрать, показ патча оставить. Практику stash не урезать.</li>
   </ul>
 
   <h2>Что сознательно не рассказываем</h2>
-  <p>Rebase, теги, stash, <code>git reset</code>, SSH-ключи. Конфликты на настоящем GitHub ученики сами не устраивают — только в тренажёре и на разборе на экране.</p>
+  <p>Rebase, теги, SSH-ключи, <code>git stash -p</code> и <code>git stash -a</code>, <code>git am</code> и <code>git format-patch</code>.</p>
   </div>
 </div>
 </main>
-<script src="quiz.js?v=20261014125424"></script>
-<script src="engine.js?v=20261014125424"></script>
-<script src="teacher.js?v=20261014125424"></script>
+<script src="quiz.js?v=20261018171115"></script>
+<script src="engine.js?v=20261018171115"></script>
+<script src="teacher.js?v=20261018171115"></script>
 </body>
 </html>

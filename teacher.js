@@ -296,13 +296,12 @@
 
   // ---------- чек-лист (git_teacher_kv, ключ prep) ----------
   const PREP = [
-    "Все 6 логинов GitHub приглашены в git-praktika (прислать логины Claude или Settings → Collaborators → Add people), приглашения приняты.",
-    "У ребят стоят Git, Python, VS Code и библиотеки: python -m pip install pandas matplotlib.",
-    "У кого Mac: сделан classic-токен с галочкой repo (fine-grained даёт 403).",
-    "Глянуть столбец «Тренажёр» в таблице учеников.",
-    "Свежий клон для показа в ~/Desktop/демо (не стартовый_репозиторий).",
-    "Ссылка " + REPO + " в чате MAX: в профиле у ребят репозитория не видно.",
-    "Две комнаты или два чата для команд (на 85–105 мин).",
+    "Папка ~/Desktop/2107/Git/Vonagu3/praktik-demo: git checkout main, git pull, git status чистый, git stash list пустой.",
+    "Папка ~/Desktop/2107/Git/KruzhokProg/praktik-demo переведена на main (стояла на задача-1-визитка): git checkout main, git pull.",
+    "Рядом нет старого ~/Desktop/2107/Git/Vonagu3/my.patch (если есть — rm).",
+    "Два окна VS Code подписаны: Vonagu3 и KruzhokProg — перед каждой правкой смотреть путь в заголовке.",
+    "У ребят склонированы репозитории команд из домашки (без них практика stash не начнётся).",
+    "Ссылка на страницу учеников, вкладка «Практика», готова для чата группы в Telegram.",
     "Демонстрировать окно, а не весь экран; эту страницу — только в «Режиме показа».",
   ];
   let prepDone = [];
@@ -313,55 +312,64 @@
       if (cb.checked && k < 0) prepDone.push(i);
       if (!cb.checked && k >= 0) prepDone.splice(k, 1);
       try {
-        await rest("git_teacher_kv?on_conflict=key", { method: "POST", body: JSON.stringify({ key: "prep3", value: prepDone, updated_at: new Date().toISOString() }), headers: { Prefer: "resolution=merge-duplicates,return=minimal" } });
+        await rest("git_teacher_kv?on_conflict=key", { method: "POST", body: JSON.stringify({ key: "prep7", value: prepDone, updated_at: new Date().toISOString() }), headers: { Prefer: "resolution=merge-duplicates,return=minimal" } });
       } catch (e) { alert("Не сохранилось: " + e.message); }
     }));
   }
 
-  // ---------- ход занятия: команды копируются кликом для чата MAX ----------
+  // ---------- ход занятия: команды копируются кликом (терминал или чат группы в Telegram) ----------
   const copied = new Set();
   const C = (...cmds) => ({ cmd: cmds });
+  const DEMO = "~/Desktop/2107/Git/Vonagu3/praktik-demo";
+  const KRUZ = "~/Desktop/2107/Git/KruzhokProg/praktik-demo";
   const FLOW = [
-    ["0–25", "задания 1–2", "Подключение", [
-      C('git config --global user.name "Имя Фамилия"', 'git config --global user.email "почта@как.на.github"', "git config --global pull.rebase false", "git config --global core.quotepath false", "cd Desktop", "git clone " + REPO + ".git", "cd git-praktika"),
-      { note: "VS Code: File → Open Folder → <code>git-praktika</code>, затем Terminal → New Terminal." },
-      C("python -m pip install -r requirements.txt", "python проверить.py --ключ ВАШ_КЛЮЧ", "python проверить.py"),
-      { note: "На Windows вместо <code>python</code> может быть <code>py</code>, на Mac <code>python3</code>. Рабочий стол в OneDrive: <code>cd OneDrive\\Desktop</code>." },
-      { ready: "Все готовы: у всех ✔ 2" }]],
-    ["25–45", "задания 3–5", "Своя ветка и первый push", [
-      C("git checkout -b имя-фамилия"),
-      { note: "В <code>01_график.py</code>, строка 57: поменять заголовок или цвет, сохранить." },
-      C("python 01_график.py", "git status", "git add .", 'git commit -m "Поменял заголовок графика"', "git push -u origin имя-фамилия", "python проверить.py"),
-      { note: "Показать на GitHub вкладку Branches: вот ваши ветки." },
-      { ready: "Все готовы: ✔ 5" }]],
-    ["45–55", "перерыв", "Перерыв", [{ note: "Застрявшие показывают свой экран, разбираете по одному." }]],
-    ["55–70", "задание 6", "Свои данные", [
-      { note: "Новый файл <code>data/имя_что-измерял.csv</code>: заголовок и 7 строк, во втором столбце числа (дробные через точку)." },
-      C("дата,шаги\n2026-09-21,6400\n2026-09-22,7100", "python 01_график.py data/имя_что-измерял.csv", "git add .", 'git commit -m "Добавил свои данные"', "git push", "python проверить.py"),
-      { note: "Показать: <code>график_*.png</code> нет в <code>git status</code>, его не пускает <code>.gitignore</code>." },
-      { ready: "Все готовы: ✔ 6" }]],
-    ["70–85", "PR, затем К1", "Pull request и review: сначала вы на экране", [
-      { ol: ["Все открывают PR своей ветки: жёлтая плашка → <b>Compare &amp; pull request</b>. Название понятное: «Захар: заголовок и мои шаги», а не «Update …».",
-        "Вы подробно разбираете 1–2 PR: <b>Files changed</b> → синий «+» у строки → комментарий. Он копится в черновике, кнопки «Start a review» больше нет.",
-        "<b>Submit review</b> → <b>Approve</b> → <b>Submit review</b> → вкладка Conversation → <b>Merge pull request</b> → <b>Confirm merge</b>.",
-        "Остальные PR быстро одобрить и слить."] },
-      C("git checkout main", "git pull", "python проверить.py"),
-      { note: "Дальше review делают ребята (на PR в К2), сливает автор после одобрения соседа. <b>А:</b> Захар → Илья → Геннадий → Захар. <b>Б:</b> Пётр → Лев → Леонид → Пётр." },
-      { ready: "Все готовы: ✔ 7" }]],
-    ["85–105", "К2", "Командный конфликт, в комнатах", [
-      C("git checkout main", "git pull", "git checkout -b девиз-имя"),
-      { note: "В <code>команды/А.md</code> или <code>команды/Б.md</code> вписать свой вариант в строку «Девиз команды»." },
-      C("git add .", 'git commit -m "Мой вариант девиза"', "git push -u origin девиз-имя"),
-      { ol: ["Каждый открывает PR. Первый сливается чисто, у остальных «This branch has conflicts».",
-        "<b>Resolve conflicts</b> → договориться → оставить одну строку девиза → удалить <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>.",
-        "<b>Mark as resolved</b> → <b>Commit merge</b> → review соседа → автор нажимает <b>Merge</b>."] },
-      { warn: "<b>Ловите на ревью:</b> две строки «Девиз команды» подряд. Метки удалены, а договорённости нет. GitHub такое пропускает." },
-      { ready: "Готово: в main в каждом файле команды одна строка девиза" }]],
-    ["105–115", "К3", "Issues: идеи проектов", [{ note: "Вкладка Issues → <b>New issue</b>. Название «[А] …» или «[Б] …». В описании: что сделать, для кого, какие данные нужны. Товарищи ставят 👍 понравившимся." }]],
-    ["115–120", "домашка", "Домашнее задание", [
-      { note: "Задание 8 (ещё один коммит с данными, ссылку в чат) и тренажёр 13–18." },
-      { note: "<b>Практика в парах</b> 1,5–2 часа в своём репозитории: показать <a href='https://github.com/Vonagu3/praktika-shablon' target='_blank' rel='noopener'>praktika-shablon</a> и кнопку <b>Use this template</b>. Пары и владельцы — в разделе «Практика в парах» ниже. Парам договориться о времени созвона." },
-      C("https://github.com/Vonagu3/praktika-shablon")]],
+    ["0–1", "зачем", "Зачем stash", [
+      { note: "Сказать: «Вы дописываете README в своей ветке, остановились на середине. Пишет напарник: „глянь мой PR“. Или нужно срочно обновить main. Коммитить полуготовое не хочется. Для этого есть карман — <code>git stash</code>»." }]],
+    ["1–10", "показ", "Показ stash · папка Vonagu3", [
+      C("cd " + DEMO, "git checkout main", "git pull", "git checkout -b stash-demo"),
+      { note: "Дописать в конец <code>README.md</code> строку <code>Черновик раздела</code>, сохранить и закоммитить:" },
+      C("git add README.md", 'git commit -m "Начал раздел в README"'),
+      { note: "Дописать ещё строку <code># недописано</code>, сохранить. <b>Не коммитить.</b>" },
+      C("git status", "git checkout main"),
+      { warn: "Ждём ошибку <code>Your local changes … would be overwritten by checkout. Please commit your changes or stash them</code>. Сказать: «Git защищает вашу работу: в main этот файл другой. Он сам подсказывает два выхода: закоммитить или спрятать»." },
+      C("git stash", "git status", "git checkout main", "git pull", "git checkout stash-demo", "git stash list", "git stash show -p", "git stash pop"),
+      { note: "После <code>git stash</code> — nothing to commit, строка пропала; <code>show -p</code> показывает, что в кармане, не доставая; после <code>pop</code> строка вернулась. Сказать: «<code>stash</code> убрал незакоммиченное в карман, <code>pop</code> достал обратно»." }]],
+    ["10–14", "ловушки", "Ловушка 1: новый файл · ловушка 2 словами", [
+      C("git restore README.md"),
+      { note: "Создать файл <code>zametka.txt</code> с любым текстом." },
+      C("git stash", "git stash -u", "git stash pop", "rm zametka.txt", "git status"),
+      { note: "Обычный <code>stash</code> пишет <code>No local changes to save</code>: новые файлы сами в карман не попадают, нужен <code>-u</code> — «и новые файлы тоже». Про <code>rm</code>: удаляет файл с диска, незакоммиченный не вернуть; <code>git restore</code> новый файл не уберёт." },
+      { warn: "<b>Ловушка 2, словами:</b> «Если файл в обеих ветках одинаковый, git пускает в другую ветку без ошибки, и недописанное переезжает с вами. Перед <code>git commit</code> смотрим <code>git status</code>, первая строка — <code>On branch …</code>». Если забыли <code>rm</code> и <code>zametka.txt</code> переехал в main — это живая иллюстрация: показать <code>git status</code>." },
+      C("git checkout main", "git branch -D stash-demo"),
+      { note: "Большая <code>-D</code>: коммит не влит в main, <code>-d</code> откажет с <code>not fully merged</code>. На GitHub удалять нечего — ветку не пушили." }]],
+    ["14–24", "практика", "Практика stash: каждый сам", [
+      { note: "Ученики открывают свою страницу → вкладка <b>Практика</b> → часть 1. Работают в папке репозитория своей команды, push не делают." },
+      C(SITE + "#lesson"),
+      { note: "Первого, кто написал «готово», спросить вслух: «Почему в шаге 4 обычный <code>git stash</code> не сработал?» Частые остановки — в таблице «Если у ученика…» ниже." },
+      { ready: "Все написали «готово»" },
+      C("Нужно переключить ветку, а работа не дописана:\ngit stash       — спрятать (git stash -u — вместе с новыми файлами)\ngit stash pop   — вернуть, в той же ветке, где прятали\ngit stash list  — что лежит в кармане\nrm файл         — удалить файл (в cmd на Windows: del файл)")]],
+    ["24–31", "показ", "Патч-файл · две папки", [
+      { note: "Сказать: «stash — карман на вашем компьютере. Патч — тот же карман, но файлом: можно отправить напарнику в Telegram, перенести со школьного компьютера домой»." },
+      { note: "<b>Vonagu3 («вы»).</b> Дописать в <b>самый конец</b> README.md строку <code>Эта строка переехала патчем.</code>, сохранить, не коммитить." },
+      C("cd " + DEMO, "git diff", "git diff --output=../my.patch", "cat ../my.patch", "git restore README.md"),
+      { warn: "<code>git restore</code> — строго <b>после</b> <code>--output</code>, иначе патч пустой. <code>--output</code> в терминале ничего не пишет — это нормально. Открыть <code>my.patch</code> в VS Code: «обычный текст, <code>+</code> добавили, <code>-</code> удалили»." },
+      { note: "<b>KruzhokProg («напарник»).</b>" },
+      C("cd " + KRUZ, "git apply --check ../../Vonagu3/my.patch", "git apply ../../Vonagu3/my.patch", "git diff"),
+      { note: "«Правка переехала без коммита, без push и без PR». Теперь — когда не ложится:" },
+      C("git restore README.md"),
+      { note: "README.md <b>из папки KruzhokProg</b>: дописать в самый конец <code>Другая строка у напарника.</code>, сохранить." },
+      C("git apply ../../Vonagu3/my.patch"),
+      { warn: "Ждём <code>error: patch failed: README.md:168</code> · <code>patch does not apply</code>. Сказать: «Пока я отправлял патч, напарник дописал в то же место. Патч помнит строки вокруг правки — поэтому сначала <code>--check</code>». Если правка в другом месте файла — патч ляжет, ошибка только на одних и тех же строках." },
+      C("git restore README.md", "rm ../../Vonagu3/my.patch"),
+      { ol: ["<code>--output=</code>, а не <code>&gt;</code>: в Windows PowerShell <code>&gt;</code> портит кодировку, <code>git apply</code> пишет <code>No valid patches in input</code>.",
+        "Новые файлы в патч не попадают: сначала <code>git add</code>, потом <code>git diff --cached --output=../my.patch</code>.",
+        "Патч кладём вне репозитория (<code>../</code>), чтобы не закоммитить.",
+        "В патче весь текст правок — с токеном не отправлять.",
+        "Патч не заменяет PR: он для «глянь недописанное» и «перенести домой»."] },
+      C("Отдать недописанные правки файлом:\ngit diff --output=../my.patch       — сохранить правки в файл\ngit apply --check ../my.patch       — проверить, ляжет ли\ngit apply ../my.patch               — применить")]],
+    ["31–38", "по желанию", "Патч в парах", [
+      { note: "Только если есть запас: время уходит на пересылку. Вкладка <b>Практика</b> → часть 2. Владелец сохраняет патч и шлёт напарнику в личку Telegram, напарник применяет и присылает скрин <code>git diff</code>." },
+      { ready: "Все пары прислали скрин" }]],
   ];
   function renderFlow() {
     let n = 0;
@@ -487,12 +495,12 @@
   async function start() {
     const [ps, kv, qz] = await Promise.all([
       rest("git_pupils?select=*&order=team.asc,sort.asc,name.asc"),
-      rest("git_teacher_kv?select=*&key=in.(prep3,sent)"),
+      rest("git_teacher_kv?select=*&key=in.(prep7,sent)"),
       rest("git_quiz?select=session,q,revealed&id=eq.1"),
     ]);
     pupils = ps;
     const kvOf = (k) => { const r = kv.find((x) => x.key === k); return (r && r.value) || []; };
-    prepDone = kvOf("prep3");
+    prepDone = kvOf("prep7");
     sentMarks = kvOf("sent");
     if (qz[0]) quiz = qz[0];
     await loadEvents();

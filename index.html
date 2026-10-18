@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261014125424">
+<link rel="stylesheet" href="quiz.css?v=20261018171115">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -199,7 +199,7 @@ pre.cmd { font-variant-ligatures: none; background: var(--term-bg); color: var(-
     <div class="logo"><span class="dot"></span>Git-тренажёр</div>
     <nav id="nav">
       <button data-tab="live">Урок</button>
-      <button data-tab="lesson">Практика в паре</button>
+      <button data-tab="lesson">Практика</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -219,10 +219,121 @@ pre.cmd { font-variant-ligatures: none; background: var(--term-bg); color: var(-
   </div>
 </section>
 
-<!-- ================= ПРАКТИКА В ПАРЕ: работа на занятии 5 ================= -->
+<!-- ================= ПРАКТИКА: занятие 7 (stash, патч), ниже — занятия 5–6 ================= -->
 <section class="tab" id="tab-lesson">
   <div class="doc">
-  <h1>Практика в паре: от задачи до слияния</h1>
+  <h1>Практика на занятии 7: карман git stash и патч-файл</h1>
+  <p class="lead">Часть 1 — каждый сам: прячем недописанную работу в карман и достаём обратно. Часть 2 — в паре, если останется время: передаём недописанные правки напарнику файлом. Всё в папке репозитория своей команды. <b>Push не делаем.</b> Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+
+  <div class="note-box"><b>Зачем.</b> Вы дописываете README в своей ветке, остановились на середине. Пишет напарник: «глянь мой PR». Коммитить полуготовое не хочется — прячем в карман: <code>git stash</code>.</div>
+
+  <h2>1. Каждый сам: карман git stash · 10 минут</h2>
+  <ol class="steps" id="l7stash">
+    <li><h3>Подготовка</h3>
+      <p>Откройте в VS Code папку репозитория своей команды.</p>
+      <pre class="cmd">git status</pre>
+      <p>Если там не <code>nothing to commit</code> — напишите в чат группы, прежде чем идти дальше.</p>
+      <pre class="cmd">git checkout main
+git pull
+git checkout -b proba-imya</pre>
+      <p>Вместо <code>imya</code> — своё имя латиницей.</p>
+    </li>
+    <li><h3>Коммит в ветке</h3>
+      <p>Допишите строку в конец <code>README.md</code>, сохраните.</p>
+      <pre class="cmd">git add README.md
+git commit -m "Проба stash"</pre>
+      <p>Теперь README в вашей ветке не такой, как в main.</p>
+    </li>
+    <li><h3>Карман</h3>
+      <p>Допишите ещё одну строку в <code>README.md</code>, сохраните. <b>Не коммитьте.</b></p>
+      <pre class="cmd">git checkout main</pre>
+      <p>Какая ошибка? Git не пускает: недописанное пропало бы. Он сам подсказывает — закоммитить или спрятать.</p>
+      <pre class="cmd">git stash
+git status</pre>
+      <p>Чисто? Строка из файла пропала?</p>
+      <pre class="cmd">git checkout main
+git checkout proba-imya
+git stash list
+git stash pop</pre>
+      <p>Теперь пустило. В кармане лежала одна запись, после <code>pop</code> строка вернулась в файл.</p>
+    </li>
+    <li><h3>Новый файл</h3>
+      <p>Создайте файл <code>test.txt</code> с любым текстом.</p>
+      <pre class="cmd">git stash</pre>
+      <p>Что пишет? Новые файлы, которые git ещё не отслеживает, сами в карман не попадают. Для них ключ <code>-u</code> — «и новые файлы тоже».</p>
+      <pre class="cmd">git stash -u
+git stash pop
+rm test.txt
+git status</pre>
+      <p>После <code>-u</code> файл исчез, после <code>pop</code> вернулся, после <code>rm</code> удалён насовсем. <code>test.txt</code> больше нет в списке. Осторожно: <code>rm</code> удаляет файл с диска, незакоммиченный уже не вернуть.</p>
+    </li>
+    <li><h3>Убрать за собой</h3>
+      <pre class="cmd">git restore README.md
+git status
+git checkout main
+git branch -D proba-imya</pre>
+      <p>Должно быть <code>nothing to commit, working tree clean</code>. Большая <code>-D</code> — потому что коммит «Проба stash» не слит в main. Напишите в чат группы «готово».</p>
+    </li>
+  </ol>
+
+  <div class="note-box"><b>Привычка.</b> Если файл в обеих ветках одинаковый, git пускает в другую ветку без ошибки, и недописанное переезжает с вами. Перед <code>git commit</code> смотрите <code>git status</code>: первая строка — <code>On branch …</code>.</div>
+
+  <h2>2. В паре: патч-файл · 7 минут, если останется время</h2>
+  <p>stash — карман на вашем компьютере. Патч — тот же карман, но файлом: его можно отправить напарнику или перенести со школьного компьютера домой.</p>
+  <ol class="steps" id="l7patch">
+    <li><h3>Владелец: сохранить правки в файл</h3>
+      <pre class="cmd">git checkout main
+git pull</pre>
+      <p>Допишите строку в конец <code>README.md</code>, сохраните. <b>Не коммитьте.</b></p>
+      <pre class="cmd">git diff --output=../my.patch
+git restore README.md</pre>
+      <p>В терминале ничего не выведется — так и должно быть. Файл <code>my.patch</code> появился рядом с папкой репозитория. <code>git restore</code> — только после <code>--output</code>, иначе патч будет пустым. Отправьте <code>my.patch</code> напарнику в личку Telegram.</p>
+    </li>
+    <li><h3>Напарник: применить</h3>
+      <pre class="cmd">git checkout main
+git pull</pre>
+      <p>Положите <code>my.patch</code> в папку <b>над</b> репозиторием — рядом с ним, не внутрь.</p>
+      <pre class="cmd">git apply --check ../my.patch
+git apply ../my.patch
+git diff</pre>
+      <p>После <code>--check</code> тишина — значит, ляжет. В <code>git diff</code> строка напарника. Скрин — в чат группы.</p>
+    </li>
+    <li><h3>Оба: убрать за собой</h3>
+      <pre class="cmd">git restore README.md
+rm ../my.patch</pre>
+      <p>Напишите в чат группы «готово».</p>
+    </li>
+  </ol>
+  <div class="note-box">Сохраняйте патч только через <code>git diff --output=…</code>, а не <code>git diff &gt; my.patch</code>: в Windows PowerShell <code>&gt;</code> портит файл. В патче весь текст правок — с паролем или токеном его не отправляем. И патч не заменяет pull request: настоящая работа идёт через ветку и PR.</div>
+
+  <h2>Шпаргалка: stash и патч</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td><code>git stash</code></td><td>Спрятать незакоммиченные правки в карман</td></tr>
+    <tr><td><code>git stash -u</code></td><td>То же, вместе с новыми файлами</td></tr>
+    <tr><td><code>git stash list</code></td><td>Что лежит в кармане</td></tr>
+    <tr><td><code>git stash pop</code></td><td>Достать и вернуть в файлы — в той же ветке, где прятали</td></tr>
+    <tr><td><code>rm файл</code></td><td>Удалить файл (в cmd на Windows: <code>del файл</code>)</td></tr>
+    <tr><td><code>git diff --output=../my.patch</code></td><td>Сохранить правки в файл</td></tr>
+    <tr><td><code>git apply --check ../my.patch</code></td><td>Проверить, ляжет ли патч</td></tr>
+    <tr><td><code>git apply ../my.patch</code></td><td>Применить патч</td></tr>
+  </table></div>
+
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что видите</th><th>Что делать</th></tr>
+    <tr><td><code>git stash</code>: <code>No local changes to save</code></td><td>Файл не сохранён (Ctrl+S) или правку уже закоммитили. В шаге «Новый файл» — так и задумано.</td></tr>
+    <tr><td>При <code>git checkout main</code> ошибки не было</td><td>Пропущен шаг «Коммит в ветке». Stash всё равно сделайте.</td></tr>
+    <tr><td><code>git stash pop</code> пишет про конфликт</td><td><code>git restore README.md</code> и снова <code>git stash pop</code>. Не выходит — пишите в чат.</td></tr>
+    <tr><td>Сделали <code>pop</code> не в той ветке</td><td><code>git stash</code>, перейти в нужную ветку, <code>git stash pop</code>.</td></tr>
+    <tr><td><code>rm</code> не найдена</td><td>Вы в cmd на Windows: <code>del test.txt</code>. Или откройте терминал в VS Code.</td></tr>
+    <tr><td><code>git apply</code>: <code>No valid patches in input</code></td><td>Патч сохранён через <code>&gt;</code>. Владелец сохраняет заново: <code>git diff --output=../my.patch</code>.</td></tr>
+    <tr><td><code>git apply</code>: <code>patch does not apply</code></td><td>У вас эти строки README уже другие. <code>git restore README.md</code>, <code>git checkout main</code>, <code>git pull</code> и снова <code>--check</code>.</td></tr>
+    <tr><td><code>can't open patch</code></td><td><code>my.patch</code> лежит не там: положите его рядом с папкой репозитория.</td></tr>
+  </table></div>
+  <p>Застряли дольше трёх минут — пишите в чат группы: что делали и какую ошибку видите.</p>
+
+  <h1 style="margin-top:40px">Для повторения · занятия 5–6: от задачи до слияния</h1>
   <p class="lead">Что делаем на занятии после показа руководителя. Сначала владелец включает правила ветки main. Часть 1 — вдвоём в репозитории своей пары: ставите друг другу задачи, делаете pull request, просите доработать и сливаете. Часть 2 — каждый сам: учимся отменять изменения и коммиты. Часть 3 — каждый сам: исправляем историю, когда push уже был. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
 
   <div class="note-box"><b>Главное правило.</b> Задача → своя ветка → pull request → review напарника → слияние. Сливает автор, и только после Approve.</div>
@@ -878,9 +989,9 @@ flowchart LR
 
 </main>
 
-<script src="live.js?v=20261014125424"></script>
-<script src="quiz.js?v=20261014125424"></script>
-<script src="engine.js?v=20261014125424"></script>
+<script src="live.js?v=20261018171115"></script>
+<script src="quiz.js?v=20261018171115"></script>
+<script src="engine.js?v=20261018171115"></script>
 <script>
 (function () {
   "use strict";
@@ -951,6 +1062,8 @@ flowchart LR
   checkSteps("l5undo", "l5undo");
   checkSteps("l5push", "l5push");
   checkSteps("l6proj", "l6proj");
+  checkSteps("l7stash", "l7stash");
+  checkSteps("l7patch", "l7patch");
 
   // ================= ТРЕНАЖЁР =================
   const L = S.LEVELS;
