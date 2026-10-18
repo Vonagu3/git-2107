@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261018171610">
+<link rel="stylesheet" href="quiz.css?v=20261018193511">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -824,174 +824,203 @@ git push</pre></div>
 <!-- ================= ДОМАШКА ================= -->
 <section class="tab" id="tab-hw">
   <div class="doc">
-  <h1 id="proj">Домашнее задание к занятию 7</h1>
-  <p class="lead">Командой: репозиторий проекта с README, задачами и доской GitHub Projects. Около 1,5 часа, часть — вдвоём в созвоне. Срок — до следующего занятия. Застряли — пишите в чат группы в Telegram заранее, а не в день занятия.</p>
-  <p>Каждую задачу проводим по всему пути: <b>Todo → In Progress → pull request → Approve → Done</b>. Состав команд и кто владелец репозитория — в чате группы.</p>
-  <div class="note-box"><b>Репозиторий открытый</b> — его видит любой человек в интернете. Поэтому в нём работает правило ветки main. И поэтому: токены и ключи — только в <code>.env</code>, а в README, задачах и коммитах — только имя или ник, без фамилии, школы и класса.</div>
-  <p><b>Готово, когда:</b> README со всеми разделами; 10 задач с метками, все на доске; 4 слитых pull request с <code>Closes</code> — по 2 от каждого, у каждого Approve напарника; хотя бы одно Request changes; задачи по README и примерам в Done, задачи по проекту в Todo. Владелец присылает ссылку на репозиторий в чат группы.</p>
+  <span id="proj"></span><span id="hw7"></span>
+  <h1 id="hw8">Домашнее задание к занятию 8: повторяем весь git</h1>
+  <p class="lead">Командой из трёх человек, 2 часа в созвоне, в репозитории проекта владельца. Кто Участник 1 (владелец), 2 и 3 — сказано в чате группы в Telegram. Работа устроена кругом, поэтому у каждого одинаковый набор: 3 задачи, 3 pull request, 3 review. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+  <div class="note-box"><b>Круг review:</b> pull request Участника 1 проверяет Участник 2, pull request Участника 2 — Участник 3, pull request Участника 3 — Участник 1. В main напрямую не пушим: всё через pull request с Approve.</div>
+  <p><b>Готово, когда:</b> 9 слитых pull request с <code>Closes</code> — по 3 от каждого, у каждого Approve; 3 Request changes — по одному от каждого ревьюера; в main три документа в папке <code>docs/</code> и все трое в разделе «Команда» README; 9 задач на доске в Done; файла <code>.env</code> нет в репозитории; скрины <code>git log</code> от всех троих в чате.</p>
 
-  <ol class="steps" id="l6proj">
-    <li><h3>Посмотреть хорошие README · каждый</h3>
-      <p>Откройте <a href="https://github.com/matiassingers/awesome-readme" target="_blank" rel="noopener">github.com/matiassingers/awesome-readme</a>. Раздел <b>Examples</b> — список хороших README, после каждой ссылки написано, чем он хорош.</p>
-      <p>Откройте 2–3 любых и выпишите себе 3 приёма, которые возьмёте в свой README. Не знаете, с чего начать:</p>
-      <ul>
-        <li><a href="https://github.com/ma-shamshiri/Pacman-Game" target="_blank" rel="noopener">Pacman-Game</a> — игра: GIF, список файлов и что в каждом;</li>
-        <li><a href="https://github.com/feberts/python-game-server" target="_blank" rel="noopener">python-game-server</a> — схема «как устроено» в самом начале;</li>
-        <li><a href="https://github.com/karan/joe" target="_blank" rel="noopener">joe</a> — коротко и понятно;</li>
-        <li><a href="https://github.com/GTruf/Driver-Drowsiness-Detector" target="_blank" rel="noopener">Driver-Drowsiness-Detector</a> — проект с ИИ.</li>
-      </ul>
-      <p>Ссылки и приёмы пока сохраните у себя — в шаге 8 они пойдут в задачу.</p>
+  <h2>0. Подготовка · 15 минут</h2>
+  <ol class="steps" id="l7hw0">
+    <li><h3>Пригласить нового участника · владелец</h3>
+      <p>В репозитории: <b>Settings → Collaborators → Add people</b> — пригласить нового участника команды.</p>
+      <p>На доске проекта: <b>⋯ → Settings → Manage access</b> — пригласить его же.</p>
     </li>
-    <li><h3>Создать репозиторий · владелец</h3>
-      <p>GitHub → <b>New repository</b>. Название латиницей, по сути проекта, например <code>shagi-bot</code>.</p>
-      <p><b>Public</b> · галочка <b>Add a README file</b> · <b>Add .gitignore → Python</b> → <b>Create repository</b>.</p>
-      <p><b>Settings → Collaborators → Add people</b>: напарник и <code>Vonagu3</code>. Напарник принимает приглашение (письмо на почте). Оба клонируют:</p>
-      <pre class="cmd">git clone ССЫЛКА
-cd название-репозитория</pre>
+    <li><h3>Скачать репозиторий · новый участник</h3>
+      <p>Принять приглашение: письмо на почте или страница репозитория. Затем:</p>
+      <pre class="cmd">cd Desktop
+git clone https://github.com/ЛОГИН_ВЛАДЕЛЬЦА/РЕПОЗИТОРИЙ.git</pre>
+      <p>Открыть папку в VS Code: File → Open Folder, затем Terminal → New Terminal.</p>
     </li>
-    <li><h3>Включить правило для main · владелец</h3>
-      <p>Как на занятии 5 (вкладка «Практика в паре», раздел «Сначала: правила ветки main»):</p>
-      <ul>
-        <li><b>Settings → Rules → Rulesets → New ruleset → New branch ruleset</b>;</li>
-        <li><b>Ruleset name</b>: <code>main</code>, <b>Enforcement status</b>: <b>Active</b>, <b>Bypass list</b> оставить пустым;</li>
-        <li><b>Target branches → Add target → Include default branch</b>;</li>
-        <li><b>Require a pull request before merging</b>, внутри: <b>Required approvals</b> <code>1</code>, <b>Dismiss stale pull request approvals when new commits are pushed</b>, <b>Require conversation resolution before merging</b>;</li>
-        <li>внизу <b>Create</b>.</li>
-      </ul>
-      <p>Жёлтой плашки про private быть не должно: репозиторий открытый, правило работает по-настоящему.</p>
-      <p><b>Проверка.</b> Напарник пробует отправить коммит прямо в main:</p>
-      <pre class="cmd">git commit --allow-empty -m "Проверка правила"
+    <li><h3>Имя и свежий main · каждый</h3>
+      <pre class="cmd">git config --global user.name "Имя"
+git checkout main
+git pull</pre>
+      <p>Только имя или ник, без фамилии: репозиторий открытый.</p>
+    </li>
+    <li><h3>Проверить правило main · новый участник</h3>
+      <p>Допишите строку в README.md, сохраните.</p>
+      <pre class="cmd">git add .
+git commit -m "Проверка правила"
 git push</pre>
-      <p>GitHub должен отказать: <code>rule violations</code>. Отказал — правило работает. Уберите пробный коммит:</p>
+      <p>GitHub должен отказать: <code>protected branch</code> или <code>rule violations</code>. Уберите пробный коммит:</p>
       <pre class="cmd">git reset --hard origin/main</pre>
+      <p>Если push прошёл — правило не работает, напишите владельцу и в чат.</p>
     </li>
-    <li><h3>Проверить своё имя в коммитах · каждый</h3>
-      <p>Имя автора каждого коммита в открытом репозитории видно всем.</p>
-      <pre class="cmd">git config user.name</pre>
-      <p>Если там имя и фамилия — поменяйте на имя или ник:</p>
-      <pre class="cmd">git config --global user.name "Имя"</pre>
+    <li><h3>Секрет не попадает в git · каждый</h3>
+      <p>Создайте в папке репозитория файл <code>.env</code> со строкой <code>TOKEN=12345</code>.</p>
+      <pre class="cmd">git status</pre>
+      <p><code>.env</code> в списке быть не должно. Если он там — в <code>.gitignore</code> нет строки <code>.env</code>: владелец добавляет её через ветку и pull request. Сам <code>.env</code> не коммитим никогда.</p>
     </li>
-    <li><h3>Создать метки · владелец</h3>
-      <p><b>Issues → Labels → New label</b>. Две метки: <code>документация</code> и <code>идея</code>. Цвет — любой.</p>
-    </li>
-    <li><h3>Завести задачи · каждый по 5</h3>
-      <p><b>Issues → New issue</b>. У каждой задачи справа <b>Assignees</b> — вы, <b>Labels</b> — метка.</p>
-      <div class="tablewrap"><table>
-        <tr><th>Задача</th><th>Кто</th><th>Метка</th></tr>
-        <tr><td>Примеры README — Имя</td><td>каждый свою</td><td>документация</td></tr>
-        <tr><td>README: что это, для кого, что умеет</td><td>владелец</td><td>документация</td></tr>
-        <tr><td>README: план</td><td>владелец</td><td>документация</td></tr>
-        <tr><td>README: как это будет работать</td><td>напарник</td><td>документация</td></tr>
-        <tr><td>README: частые вопросы и команда</td><td>напарник</td><td>документация</td></tr>
-        <tr><td>2 настоящие задачи по проекту, например «Бот отвечает на /start»</td><td>каждый свои</td><td>идея</td></tr>
-      </table></div>
-      <p>В описании каждой задачи три части:</p>
+  </ol>
+
+  <h2>1. Документ проекта · 35 минут · каждый свой</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Кто</th><th>Файл</th><th>Что внутри</th><th>Ветка</th></tr>
+    <tr><td>Участник 1</td><td><code>docs/scenarii.md</code></td><td>3 сценария: как человек пользуется проектом, по шагам</td><td><code>docs-scenarii</code></td></tr>
+    <tr><td>Участник 2</td><td><code>docs/dannye.md</code></td><td>Таблица: что храним, пример, откуда берём — не меньше 5 строк</td><td><code>docs-dannye</code></td></tr>
+    <tr><td>Участник 3</td><td><code>docs/plan.md</code></td><td>Этапы до конференции: что, кто, когда — списком <code>- [ ] …</code></td><td><code>docs-plan</code></td></tr>
+  </table></div>
+  <ol class="steps" id="l7hw1">
+    <li><h3>Задача</h3>
+      <p>Issues → <b>New issue</b>: «Документ: …» (например «Документ: сценарии»). Assignees — себя, метка <b>документация</b>. В описании:</p>
       <pre class="cmd">Что сделать: …
 Зачем: …
 Готово, когда:
 - [ ] …
 - [ ] …</pre>
-      <p>«Готово, когда» пишите так, чтобы напарник мог проверить: не «сделать красиво», а «в README есть схема, на ней бот и база».</p>
+      <p>Карточку на доске — в <b>In Progress</b>.</p>
     </li>
-    <li><h3>Сделать доску · владелец</h3>
-      <ul>
-        <li>Аватар → <b>Your projects → New project</b> → шаблон <b>Board</b> → название как у репозитория → <b>Create project</b>.</li>
-        <li>В репозитории: вкладка <b>Projects → Link a project</b> → выбрать доску.</li>
-        <li>На доске внизу колонки Todo: <b>+ Add item</b> → набрать <code>#</code> → выбрать репозиторий → отметить все 10 задач.</li>
-        <li>На доске <b>⋯ → Workflows</b>: включены <b>Item closed</b> и <b>Pull request merged</b>. Они сами отправляют карточку в Done.</li>
-        <li><b>⋯ → Settings → Manage access</b> → пригласить напарника. Доска принадлежит не репозиторию, а владельцу: не пригласили — напарник её не видит.</li>
-      </ul>
-    </li>
-    <li><h3>Закрыть «Примеры README» · каждый свою</h3>
-      <p>Карточку — в <b>In Progress</b>. В задаче напишите комментарий: ссылки на 2–3 README и 3 приёма из шага 1. Затем <b>Close issue</b>.</p>
-      <p>Посмотрите на доску: карточка <b>сама</b> уехала в Done.</p>
-    </li>
-    <li><h3>Написать README · каждый свои 2 задачи</h3>
-      <p>Каждая задача — своя ветка и свой pull request. Образец README — ниже, под шагами. Карточку — в <b>In Progress</b>, затем:</p>
+    <li><h3>Ветка, коммит, pull request</h3>
       <pre class="cmd">git checkout main
 git pull
-git checkout -b readme-opisanie</pre>
-      <p>Названия веток: <code>readme-opisanie</code>, <code>readme-plan</code> — у владельца; <code>readme-shema</code>, <code>readme-faq</code> — у напарника.</p>
-      <p>Допишите свой раздел в <code>README.md</code>, сохраните.</p>
-      <pre class="cmd">git add README.md
-git commit -m "README: что это, для кого, что умеет"
-git push -u origin readme-opisanie</pre>
-      <p>Pull request, в описании: <code>Closes #номер</code>. Напарник проверяет по «Готово, когда» из задачи: всё выполнено — <b>Approve</b>, нет — <b>Request changes</b> с тем, что доделать. Автор: <b>Merge</b>.</p>
-      <p>Карточка сама уезжает в Done. <b>Руками в Done не таскаем.</b></p>
-      <p>Оба правят один файл, поэтому возможен конфликт в README. Решаете как в миссии 2: оставляете оба раздела.</p>
+git checkout -b docs-scenarii</pre>
+      <p>Ветка — своя из таблицы. Создайте папку <code>docs</code> и в ней свой файл, напишите содержание, сохраните.</p>
+      <pre class="cmd">git add .
+git commit -m "Документ: сценарии"
+git push -u origin docs-scenarii</pre>
+      <p>Откройте pull request, в описании — <code>Closes #номер</code> своей задачи.</p>
     </li>
-    <li><h3>Проверить итог</h3>
-      <ul>
-        <li>На доске в Done — 6 карточек: примеры и README. В Todo — 4 задачи по проекту: с них начнём работу.</li>
-        <li><b>Pull requests → Closed</b>: 4 слитых PR, у каждого Approve, хотя бы у одного — Changes requested.</li>
-        <li>README на главной странице репозитория: все разделы на месте, схема нарисована.</li>
-      </ul>
-      <p>Владелец присылает ссылку на репозиторий в чат группы.</p>
+    <li><h3>Review по кругу — через stash</h3>
+      <p>Сначала начните свою доработку: допишите строку в <b>свой</b> документ, сохраните, <b>не коммитьте</b>. Теперь спрячьте её и откройте ветку автора у себя:</p>
+      <pre class="cmd">git stash
+git fetch
+git checkout ветка-автора</pre>
+      <p>Имя ветки — вверху страницы его pull request. Прочитайте файл в VS Code. Вернитесь к себе:</p>
+      <pre class="cmd">git checkout своя-ветка
+git stash pop</pre>
+      <p>Ваша строка вернулась.</p>
+    </li>
+    <li><h3>Request changes</h3>
+      <p>В pull request автора: <b>Files changed</b> → «+» у строки → замечание. Хотя бы одно, по делу: чего не хватает по «Готово, когда». <b>Submit review → Request changes</b>.</p>
+    </li>
+    <li><h3>Доработать и слить</h3>
+      <p>Автор исправляет по замечанию новым коммитом:</p>
+      <pre class="cmd">git add .
+git commit -m "Доработал по замечаниям"
+git push</pre>
+      <p>Автор нажимает <b>Resolve conversation</b>. Ревьюер проверяет и ставит <b>Approve</b>. Автор: <b>Merge</b>. Карточка сама уезжает в Done.</p>
     </li>
   </ol>
 
-  <h2>Образец README</h2>
-  <p>Скопируйте в свой <code>README.md</code> и замените текст на свой. Схему <code>mermaid</code> GitHub рисует сам. Вместо неё можно вставить фото рисунка от руки: перетащите картинку в окно редактора на GitHub.</p>
-  <pre class="cmd"># Шаги-бот 🚶
+  <h2>2. Конфликт · 25 минут · все в одном месте README</h2>
+  <ol class="steps" id="l7hw2">
+    <li><h3>Задача и ветка</h3>
+      <p>Issue «README: я в разделе Команда — Имя», Assignees — себя.</p>
+      <pre class="cmd">git checkout main
+git pull
+git checkout -b komanda-imya</pre>
+    </li>
+    <li><h3>Строка в README</h3>
+      <p>В README.md <b>сразу под строкой</b> <code>## Команда</code> вставьте:</p>
+      <pre class="cmd">- Имя — за что отвечаю в проекте</pre>
+      <pre class="cmd">git add .
+git commit -m "Я в разделе Команда"
+git push -u origin komanda-imya</pre>
+      <p>Pull request с <code>Closes #номер</code>, review по кругу.</p>
+    </li>
+    <li><h3>Сливать строго по очереди: 1 → 2 → 3</h3>
+      <p>Участник 1 сливает первым. У Участников 2 и 3 GitHub покажет конфликт. Решаем <b>у себя</b>:</p>
+      <pre class="cmd">git checkout komanda-imya
+git pull origin main</pre>
+      <p>В README.md оставить <b>все</b> строки команды и удалить метки <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Сохранить.</p>
+      <pre class="cmd">git add README.md
+git commit -m "Решил конфликт в README"
+git push</pre>
+      <p>Конфликт исчез — ревьюер проверяет, что ничьё имя не пропало, автор сливает.</p>
+    </li>
+    <li><h3>Проверить итог · Участник 1</h3>
+      <p>На GitHub в main открыть README: в разделе «Команда» все трое. Кого-то нет — сказать в созвоне, тот возвращает строку новой веткой и pull request.</p>
+    </li>
+  </ol>
 
-Бот в MAX, который считает шаги класса и устраивает соревнование.
+  <h2>3. Патч и исправление коммита · 30 минут</h2>
+  <p>Правку предлагаете в документ того, чей pull request вы проверяли: Участник 2 — в файл Участника 1, Участник 3 — в файл Участника 2, Участник 1 — в файл Участника 3.</p>
+  <ol class="steps" id="l7hw3">
+    <li><h3>Сделать патч · автор правки</h3>
+      <pre class="cmd">git checkout main
+git pull</pre>
+      <p>Исправьте или допишите что-то в чужом документе, сохраните, <b>не коммитьте</b>.</p>
+      <pre class="cmd">git diff --output=../patch-imya.patch
+git restore .</pre>
+      <p>Вместо <code>imya</code> — своё имя. Создайте issue «Правка от Имя в docs/…», Assignees — <b>владелец этого файла</b>. Файл патча (он рядом с папкой репозитория) отправьте ему в личку Telegram.</p>
+    </li>
+    <li><h3>Применить патч · владелец файла</h3>
+      <pre class="cmd">git checkout main
+git pull
+git checkout -b patch-imya</pre>
+      <p>Вместо <code>imya</code> — имя автора правки. Положите файл патча <b>рядом</b> с папкой репозитория, не внутрь.</p>
+      <pre class="cmd">git apply --check ../patch-imya.patch
+git apply ../patch-imya.patch
+git diff</pre>
+      <p>После <code>--check</code> тишина — значит, ляжет.</p>
+    </li>
+    <li><h3>Коммит с опечаткой — и исправить</h3>
+      <p>Опечатку делаем нарочно:</p>
+      <pre class="cmd">git add .
+git commit -m "Правка от Имя с апечаткой"
+git commit --amend -m "Правка от Имя"
+git log --oneline -3</pre>
+      <p>Коммит один, сообщение новое. Исправили до push — поэтому переписывать на GitHub нечего.</p>
+    </li>
+    <li><h3>Pull request и уборка</h3>
+      <pre class="cmd">git push -u origin patch-imya</pre>
+      <p>Pull request с <code>Closes #номер</code>. Review делает автор патча: его правка легла как надо? Approve → Merge. Затем:</p>
+      <pre class="cmd">rm ../patch-imya.patch</pre>
+    </li>
+  </ol>
 
-## Что это
-Две-три фразы: какую проблему решает и почему это интересно.
-
-## Для кого
-Кто будет пользоваться и в какой ситуации.
-
-## Что умеет
-- первое
-- второе
-- третье
-
-## Как это будет работать
-```mermaid
-flowchart LR
-    Ученик --&gt;|пишет шаги| Бот
-    Бот --&gt;|сохраняет| База[(Supabase)]
-    Бот --&gt;|раз в неделю| Рейтинг
-```
-
-## Как запустить
-Заполним, когда будет код.
-
-## План
-- [ ] первая версия: …
-- [ ] потом: …
-
-## Частые вопросы
-**Вопрос, который точно зададут?**
-Ответ.
-
-## Команда
-- Имя — что делает
-- Имя — что делает</pre>
+  <h2>4. Итог · 10 минут</h2>
+  <ol class="steps" id="l7hw4">
+    <li><h3>Доска</h3>
+      <p>Все 9 задач в Done. Какая-то осталась — значит, в её pull request не было <code>Closes</code>: закройте задачу кнопкой <b>Close issue</b>.</p>
+    </li>
+    <li><h3>История · каждый</h3>
+      <pre class="cmd">git checkout main
+git pull
+git log --oneline --graph -20</pre>
+      <p>Скрин — в чат группы. Видны ветки, которые сходятся в main, и два коммита с решением конфликта.</p>
+    </li>
+    <li><h3>Ссылка · владелец</h3>
+      <p>Ссылку на репозиторий — в чат группы.</p>
+    </li>
+  </ol>
 
   <h2>Если что-то пошло не так</h2>
   <div class="tablewrap"><table>
     <tr><th>Что видите</th><th>Что делать</th></tr>
-    <tr><td>Нет вкладки Projects в репозитории</td><td>Settings → Features → галочка <b>Projects</b>.</td></tr>
-    <tr><td>Напарник не видит доску</td><td>Доска принадлежит владельцу: <b>⋯ → Settings → Manage access</b> → пригласить.</td></tr>
-    <tr><td>В Add item не находится задача</td><td>Сначала наберите <code>#</code>, потом выберите репозиторий. Доска должна быть связана с репозиторием: Projects → Link a project.</td></tr>
-    <tr><td>Слили PR, а карточка не уехала в Done</td><td>В описании PR нет <code>Closes #номер</code> или номер не тот. Либо на доске выключен workflow Pull request merged. Закройте задачу кнопкой <b>Close issue</b>.</td></tr>
-    <tr><td>Перетащили карточку в Done, вернули — задача так и закрыта</td><td>Так устроена доска. Откройте задачу → <b>Reopen issue</b>. В Done руками не таскаем.</td></tr>
-    <tr><td>Нет кнопки Merge, написано Review required</td><td>Так и задумано: нужен Approve напарника. Правило работает.</td></tr>
-    <tr><td>Rulesets пишет, что правило не будет работать</td><td>Репозиторий закрытый. Settings → внизу <b>Change visibility</b> → Public.</td></tr>
-    <tr><td>Схема mermaid не рисуется, видно текст</td><td>Первая строка блока — ровно <code>```mermaid</code>, без пробелов перед ней.</td></tr>
-    <tr><td>Не видно кнопки Labels</td><td>Вкладка <b>Issues</b> → кнопка <b>Labels</b> рядом с поиском.</td></tr>
+    <tr><td>Новый участник не видит доску</td><td>Доска личная: владелец ⋯ → Settings → Manage access → пригласить.</td></tr>
+    <tr><td><code>git checkout ветка-автора</code>: такой ветки нет</td><td>Сначала <code>git fetch</code>. Имя ветки — вверху страницы pull request.</td></tr>
+    <tr><td>Сделали <code>git stash pop</code> не в той ветке</td><td><code>git stash</code>, перейти в свою ветку, <code>git stash pop</code>.</td></tr>
+    <tr><td>Approve есть, а Merge серый</td><td>Не все замечания решены: <b>Resolve conversation</b>. Или после Approve был новый коммит — ревьюер ставит Approve ещё раз.</td></tr>
+    <tr><td><code>git pull origin main</code> открыл редактор</td><td>Это сообщение merge-коммита. В VS Code — закрыть вкладку. В Vim — <code>Esc</code>, <code>:wq</code>, Enter.</td></tr>
+    <tr><td>Конфликт решили, а на GitHub всё ещё conflicts</td><td>Забыли <code>git push</code> после коммита решения.</td></tr>
+    <tr><td><code>git apply</code>: <code>patch does not apply</code></td><td>Вы не на свежем main или файл уже поменяли. <code>git checkout main</code>, <code>git pull</code>, новая ветка, снова <code>--check</code>. Не выходит — автор делает патч заново от свежего main.</td></tr>
+    <tr><td><code>No valid patches in input</code></td><td>Патч сохранён через <code>&gt;</code>. Автор сохраняет заново: <code>git diff --output=../patch-imya.patch</code>.</td></tr>
+    <tr><td><code>can't open patch</code></td><td>Файл патча лежит не там: положите его рядом с папкой репозитория.</td></tr>
+    <tr><td>После <code>--amend</code> git просит pull</td><td>Push уже был до <code>--amend</code>. В своей ветке: <code>git push --force-with-lease</code>, Approve потом поставят заново.</td></tr>
+    <tr><td>Push в main прошёл</td><td>Правило ветки не работает: владелец, Settings → Rules → Rulesets → main → Active.</td></tr>
+    <tr><td><code>rm</code> не найдена</td><td>Вы в cmd на Windows: <code>del</code> вместо <code>rm</code>. Или терминал в VS Code.</td></tr>
   </table></div>
-  <div id="hwCard" hidden></div>
+  <p>Застряли дольше пяти минут — пишите в чат группы: что делали и какую ошибку видите.</p>
   </div>
 </section>
 
 </main>
 
-<script src="live.js?v=20261018171610"></script>
-<script src="quiz.js?v=20261018171610"></script>
-<script src="engine.js?v=20261018171610"></script>
+<script src="live.js?v=20261018193511"></script>
+<script src="quiz.js?v=20261018193511"></script>
+<script src="engine.js?v=20261018193511"></script>
 <script>
 (function () {
   "use strict";
@@ -1061,7 +1090,11 @@ flowchart LR
   checkSteps("l5pair", "l5pair");
   checkSteps("l5undo", "l5undo");
   checkSteps("l5push", "l5push");
-  checkSteps("l6proj", "l6proj");
+  checkSteps("l7hw0", "l7hw0");
+  checkSteps("l7hw1", "l7hw1");
+  checkSteps("l7hw2", "l7hw2");
+  checkSteps("l7hw3", "l7hw3");
+  checkSteps("l7hw4", "l7hw4");
   checkSteps("l7stash", "l7stash");
   checkSteps("l7patch", "l7patch");
 

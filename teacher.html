@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261018171610">
+<link rel="stylesheet" href="quiz.css?v=20261018193511">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -196,14 +196,13 @@ table.probs td:first-child { width: 40%; }
     <li>Код можно подобрать, прочитав код страницы, — это мотивация, а не экзамен. Настоящая проверка — <code>python проверить.py</code> и ветки на GitHub.</li>
   </ul>
 
-  <h2 id="practice">Практика учеников на занятии 7</h2>
+  <h2 id="practice">Команды и домашка к занятию 8</h2>
   <div class="card">
-    <p style="margin:0 0 8px">У каждого — своя страница, вкладка <b>Практика</b>: часть 1 — stash (каждый сам, в папке репозитория своей команды, push не делаем), часть 2 — патч в паре через личку Telegram (по желанию). Галочки шагов ученик ставит у себя, вам они не приходят — ориентир «готово» в чате.</p>
+    <p style="margin:0 0 8px">С занятия 7 — две команды по 3 человека, работают в репозитории владельца (из домашки занятия 6). Домашка — повторение всего git за 2 часа в созвоне, у учеников вкладка <b>Домашка</b> (<code>#hw</code>), полный текст и проверка — <code>Урок_7/Домашнее_задание.md</code>. Круг review: PR 1 проверяет 2, PR 2 — 3, PR 3 — 1; патч — в обратную сторону.</p>
     <table class="probs">
-      <tr><th>Команда</th><th>Владелец репозитория</th><th>Напарник</th></tr>
-      <tr><td>1</td><td>Индира</td><td>Гена</td></tr>
-      <tr><td>2</td><td>Захар</td><td>Петя</td></tr>
-      <tr><td>3</td><td>Леонид</td><td>Илья</td></tr>
+      <tr><th>Команда</th><th>Участник 1 (владелец)</th><th>Участник 2</th><th>Участник 3 (новый в репозитории)</th><th>Что проверить после срока</th></tr>
+      <tr><td>1</td><td>Захар</td><td>Петя</td><td>Илья</td><td rowspan="2">9 слитых PR с <code>Closes</code>, по 3 от каждого, у каждого Approve; 3 Request changes; в main <code>docs/scenarii.md</code>, <code>docs/dannye.md</code>, <code>docs/plan.md</code>; в README «Команда» трое; два merge-коммита с решением конфликта; нет <code>.env</code>; 9 задач в Done; скрины <code>git log --graph</code> в чате.</td></tr>
+      <tr><td>2</td><td>Гена</td><td>Индира</td><td>Леонид</td></tr>
     </table>
   </div>
 
@@ -253,8 +252,8 @@ table.probs td:first-child { width: 40%; }
   </div>
 </div>
 </main>
-<script src="quiz.js?v=20261018171610"></script>
-<script src="engine.js?v=20261018171610"></script>
-<script src="teacher.js?v=20261018171610"></script>
+<script src="quiz.js?v=20261018193511"></script>
+<script src="engine.js?v=20261018193511"></script>
+<script src="teacher.js?v=20261018193511"></script>
 </body>
 </html>
