@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261018193511">
+<link rel="stylesheet" href="quiz.css?v=20261018194437">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -834,7 +834,7 @@ git push</pre></div>
   <ol class="steps" id="l7hw0">
     <li><h3>Пригласить нового участника · владелец</h3>
       <p>В репозитории: <b>Settings → Collaborators → Add people</b> — пригласить нового участника команды.</p>
-      <p>На доске проекта: <b>⋯ → Settings → Manage access</b> — пригласить его же.</p>
+      <p>На доске проекта: <b>⋯ → Settings → Manage access</b> — пригласить его же. Это делает тот, кто создавал доску, — если не владелец репозитория, то он.</p>
     </li>
     <li><h3>Скачать репозиторий · новый участник</h3>
       <p>Принять приглашение: письмо на почте или страница репозитория. Затем:</p>
@@ -844,9 +844,10 @@ git clone https://github.com/ЛОГИН_ВЛАДЕЛЬЦА/РЕПОЗИТОРИ�
     </li>
     <li><h3>Имя и свежий main · каждый</h3>
       <pre class="cmd">git config --global user.name "Имя"
+git config --global pull.rebase false
 git checkout main
 git pull</pre>
-      <p>Только имя или ник, без фамилии: репозиторий открытый.</p>
+      <p>Только имя или ник, без фамилии: репозиторий открытый. Вторая строка нужна для конфликта в части 2: без неё <code>git pull</code> может отказаться работать.</p>
     </li>
     <li><h3>Проверить правило main · новый участник</h3>
       <p>Допишите строку в README.md, сохраните.</p>
@@ -879,7 +880,7 @@ git push</pre>
 Готово, когда:
 - [ ] …
 - [ ] …</pre>
-      <p>Карточку на доске — в <b>In Progress</b>.</p>
+      <p>Справа в задаче: <b>Projects</b> → выберите доску команды — иначе карточки на доске не будет. На доске перетащите карточку в <b>In Progress</b>.</p>
     </li>
     <li><h3>Ветка, коммит, pull request</h3>
       <pre class="cmd">git checkout main
@@ -916,13 +917,13 @@ git push</pre>
   <h2>2. Конфликт · 25 минут · все в одном месте README</h2>
   <ol class="steps" id="l7hw2">
     <li><h3>Задача и ветка</h3>
-      <p>Issue «README: я в разделе Команда — Имя», Assignees — себя.</p>
+      <p>Issue «README: я в разделе Команда — Имя»: Assignees — себя, метка <b>документация</b>, справа <b>Projects</b> → доска команды.</p>
       <pre class="cmd">git checkout main
 git pull
 git checkout -b komanda-imya</pre>
     </li>
     <li><h3>Строка в README</h3>
-      <p>В README.md <b>сразу под строкой</b> <code>## Команда</code> вставьте:</p>
+      <p>В README.md <b>сразу под строкой</b> <code>## Команда</code> вставьте свою строку. Строки, которые там уже есть с прошлой домашки, удалите — их заменят новые. Раздела нет — допишите в конец README строку <code>## Команда</code>, под ней свою.</p>
       <pre class="cmd">- Имя — за что отвечаю в проекте</pre>
       <pre class="cmd">git add .
 git commit -m "Я в разделе Команда"
@@ -953,7 +954,7 @@ git pull</pre>
       <p>Исправьте или допишите что-то в чужом документе, сохраните, <b>не коммитьте</b>.</p>
       <pre class="cmd">git diff --output=../patch-imya.patch
 git restore .</pre>
-      <p>Вместо <code>imya</code> — своё имя. Создайте issue «Правка от Имя в docs/…», Assignees — <b>владелец этого файла</b>. Файл патча (он рядом с папкой репозитория) отправьте ему в личку Telegram.</p>
+      <p>Вместо <code>imya</code> — своё имя. Создайте issue «Правка от Имя в docs/…»: Assignees — <b>владелец этого файла</b>, метка <b>документация</b>, справа <b>Projects</b> → доска команды. Файл патча (он рядом с папкой репозитория) отправьте ему в личку Telegram.</p>
     </li>
     <li><h3>Применить патч · владелец файла</h3>
       <pre class="cmd">git checkout main
@@ -975,7 +976,7 @@ git log --oneline -3</pre>
     </li>
     <li><h3>Pull request и уборка</h3>
       <pre class="cmd">git push -u origin patch-imya</pre>
-      <p>Pull request с <code>Closes #номер</code>. Review делает автор патча: его правка легла как надо? Approve → Merge. Затем:</p>
+      <p>Pull request с <code>Closes #номер</code>. Review делает автор патча: его правка легла как надо? Approve → Merge. Затем оба — и владелец файла, и автор патча — удаляют у себя файл патча:</p>
       <pre class="cmd">rm ../patch-imya.patch</pre>
     </li>
   </ol>
@@ -999,6 +1000,8 @@ git log --oneline --graph -20</pre>
   <h2>Если что-то пошло не так</h2>
   <div class="tablewrap"><table>
     <tr><th>Что видите</th><th>Что делать</th></tr>
+    <tr><td><code>Need to specify how to reconcile divergent branches</code></td><td><code>git config --global pull.rebase false</code>, затем снова <code>git pull origin main</code>.</td></tr>
+    <tr><td>Задачи нет на доске</td><td>В задаче справа <b>Projects</b> → выбрать доску команды.</td></tr>
     <tr><td>Новый участник не видит доску</td><td>Доска личная: владелец ⋯ → Settings → Manage access → пригласить.</td></tr>
     <tr><td><code>git checkout ветка-автора</code>: такой ветки нет</td><td>Сначала <code>git fetch</code>. Имя ветки — вверху страницы pull request.</td></tr>
     <tr><td>Сделали <code>git stash pop</code> не в той ветке</td><td><code>git stash</code>, перейти в свою ветку, <code>git stash pop</code>.</td></tr>
@@ -1018,9 +1021,9 @@ git log --oneline --graph -20</pre>
 
 </main>
 
-<script src="live.js?v=20261018193511"></script>
-<script src="quiz.js?v=20261018193511"></script>
-<script src="engine.js?v=20261018193511"></script>
+<script src="live.js?v=20261018194437"></script>
+<script src="quiz.js?v=20261018194437"></script>
+<script src="engine.js?v=20261018194437"></script>
 <script>
 (function () {
   "use strict";
