@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261018194437">
+<link rel="stylesheet" href="quiz.css?v=20261018194804">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -832,6 +832,20 @@ git push</pre></div>
 
   <h2>0. Подготовка · 15 минут</h2>
   <ol class="steps" id="l7hw0">
+    <li><h3>Репозиторий команды · владелец</h3>
+      <p><b>Репозиторий уже есть с прошлой домашки</b> и он у вас — переходите к шагу 2.</p>
+      <p><b>Репозиторий у другого участника команды.</b> Тот, у кого он сейчас: Settings → в самом низу <b>Transfer ownership</b> → логин владельца → подтвердить. Задачи, pull request и правило main переедут вместе с ним. Владелец принимает передачу по письму, потом проверяет Settings → Collaborators: прежнего хозяина там нет — пригласить. Свою папку на компьютере прежний хозяин перенастраивает: <code>git remote set-url origin https://github.com/ЛОГИН_ВЛАДЕЛЬЦА/РЕПОЗИТОРИЙ.git</code> (или просто клонирует заново).</p>
+      <details><summary><b>Репозитория нет</b> — создать (около 15 минут)</summary>
+        <ol>
+          <li><b>New repository</b> → название латиницей по сути проекта (например <code>shagi-bot</code>) → <b>Public</b> → галочка <b>Add a README file</b> → <b>.gitignore: Python</b> → Create repository.</li>
+          <li><b>Правило для main:</b> Settings → Rules → Rulesets → New ruleset → New branch ruleset. Ruleset name: <code>main</code>, Enforcement status: <b>Active</b>. Target branches → Add target → <b>Include default branch</b>. Галочки: <b>Restrict deletions</b>, <b>Require a pull request before merging</b> (Required approvals: <b>1</b>), <b>Block force pushes</b> → Create.</li>
+          <li><b>Метка:</b> Issues → Labels → New label → <code>документация</code>.</li>
+          <li><b>Доска:</b> аватар → Your projects → New project → <b>Board</b>, название как у репозитория. В репозитории: вкладка Projects → <b>Link a project</b>. На доске ⋯ → Workflows: включены <b>Item closed</b> и <b>Pull request merged</b>.</li>
+          <li><b>В README</b> добавьте раздел <code>## Команда</code> — пустой, его заполните в части 2.</li>
+        </ol>
+        <p>Приглашение в шаге 2 тогда получают оба участника, а шаги 3–4 делают оба.</p>
+      </details>
+    </li>
     <li><h3>Пригласить нового участника · владелец</h3>
       <p>В репозитории: <b>Settings → Collaborators → Add people</b> — пригласить нового участника команды.</p>
       <p>На доске проекта: <b>⋯ → Settings → Manage access</b> — пригласить его же. Это делает тот, кто создавал доску, — если не владелец репозитория, то он.</p>
@@ -1021,9 +1035,9 @@ git log --oneline --graph -20</pre>
 
 </main>
 
-<script src="live.js?v=20261018194437"></script>
-<script src="quiz.js?v=20261018194437"></script>
-<script src="engine.js?v=20261018194437"></script>
+<script src="live.js?v=20261018194804"></script>
+<script src="quiz.js?v=20261018194804"></script>
+<script src="engine.js?v=20261018194804"></script>
 <script>
 (function () {
   "use strict";
