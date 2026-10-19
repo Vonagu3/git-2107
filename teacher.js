@@ -329,7 +329,7 @@
     ["15–21", "показ", "История файла · папка istoriya-demo", [
       C("cd " + DEMO, "code .", "git log --oneline --graph --all"),
       { note: "«Это программа-копилка, её писали четверо, 20 коммитов. Сбоку ветки — понадобятся во второй половине». Выход из log — <code>q</code>." },
-      C("git log --oneline README.md", "git log -p README.md", "git show 059d412", "git show --stat 059d412"),
+      C("git log --oneline README.md", "git log -p README.md", "git show 059d412", "git show --stat bdc5510"),
       { note: "Показать <code>-</code> и <code>+</code>: «минус — было, плюс — стало: цель сменилась с наушников на велосипед». Хеш — из <code>git log --oneline</code>, хватит 7 символов." },
       { note: "Вопрос классу: «Кто написал функцию <code>trati</code>?» Листать долго:" },
       C('git log -S "def trati" --oneline'),
