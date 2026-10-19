@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261018200455">
+<link rel="stylesheet" href="quiz.css?v=20261019220903">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -770,54 +770,170 @@ python проверить.py 5      # только задание 5</pre>
 <section class="tab" id="tab-cheat">
   <div class="doc">
   <h1>Шпаргалка</h1>
-  <p class="lead">Все команды вводятся в терминале VS Code, находясь в папке репозитория.</p>
+  <p class="lead">Все команды вводятся в терминале VS Code, находясь в папке репозитория. Слова <code>файл</code>, <code>имя</code>, <code>ветка</code> заменяйте на свои. В тренажёре работают основные команды; <code>stash</code>, <code>reset</code>, <code>revert</code>, <code>reflog</code> и патчи — только в настоящем терминале.</p>
+
   <div class="cols2">
     <div class="card"><h3>Один раз на компьютере</h3>
-<pre class="cmd">git config --global user.name "Имя Фамилия"
-git config --global user.email "почта"
+<pre class="cmd">git config --global user.name "Имя"
+git config --global user.email "почта@как.на.github"
 git config --global pull.rebase false
-git clone &lt;ссылка&gt;</pre></div>
-    <div class="card"><h3>Каждый день</h3>
-<pre class="cmd">git pull
+git config --global core.quotepath false
+git config --global core.editor "code --wait"</pre>
+      <p class="muted" style="margin:6px 0 0">Имя — без фамилии или ник: оно видно всем в открытых репозиториях. <code>quotepath</code> — чтобы русские имена файлов не превращались в коды, <code>core.editor</code> — чтобы вместо Vim открывался VS Code.</p></div>
+    <div class="card"><h3>Задача от начала до конца</h3>
+<pre class="cmd">git checkout main
+git pull
+git checkout -b moya-zadacha
+… правим файлы …
 git status
 git add .
 git commit -m "Что сделал"
-git push</pre></div>
+git push -u origin moya-zadacha</pre>
+      <p class="muted" style="margin:6px 0 0">Дальше на GitHub: pull request с <code>Closes #номер</code> → review → Approve → Merge. Следующие push в эту ветку — просто <code>git push</code>.</p></div>
   </div>
-  <h2>Все команды тренажёра</h2>
+
+  <h2>Смотреть: ничего не ломают</h2>
   <div class="tablewrap"><table class="cheat">
     <tr><th>Команда</th><th>Что делает</th></tr>
-    <tr><td>git status</td><td>Что изменилось. Ничего не ломает — вводите сколько угодно.</td></tr>
-    <tr><td>git add файл<br>git add .</td><td>Отметить файл (или всё) для следующего коммита.</td></tr>
-    <tr><td>git commit -m "..."</td><td>Сохранить версию с подписью. Подпись — по-русски, глаголом: «Добавил файл с шагами».</td></tr>
-    <tr><td>git log --oneline</td><td>История кратко. <code>git log</code> — с авторами и датами.</td></tr>
-    <tr><td>git show a1b2c3d</td><td>Что поменялось в коммите.</td></tr>
-    <tr><td>git diff</td><td>Что изменено, но ещё не добавлено. <code>git diff --staged</code> — что уже в индексе.</td></tr>
-    <tr><td>git restore файл</td><td>Отменить несохранённые правки в файле (вернуть как в последнем коммите).</td></tr>
-    <tr><td>git restore --staged файл</td><td>Убрать файл из индекса, правки остаются.</td></tr>
-    <tr><td>git rm --cached файл</td><td>Перестать хранить файл в git, но оставить в папке.</td></tr>
-    <tr><td>git branch</td><td>Список веток, <code>*</code> — текущая. <code>git branch -a</code> — вместе с ветками GitHub.</td></tr>
-    <tr><td>git checkout -b имя</td><td>Создать ветку и перейти в неё (то же: <code>git switch -c имя</code>).</td></tr>
-    <tr><td>git checkout имя</td><td>Перейти в ветку (то же: <code>git switch имя</code>).</td></tr>
-    <tr><td>git merge имя</td><td>Слить ветку в текущую. <code>git merge --abort</code> — отменить слияние с конфликтом.</td></tr>
-    <tr><td>git clone ссылка</td><td>Скачать репозиторий с GitHub. Один раз.</td></tr>
-    <tr><td>git remote -v</td><td>Куда смотрит origin.</td></tr>
-    <tr><td>git push -u origin имя</td><td>Первый push новой ветки. Дальше — просто <code>git push</code>.</td></tr>
-    <tr><td>git pull</td><td>Забрать и слить изменения с GitHub.</td></tr>
-    <tr><td>git fetch</td><td>Только узнать, что нового на GitHub, ничего не сливая.</td></tr>
+    <tr><td>git status</td><td>Что изменилось и в какой вы ветке (первая строка <code>On branch …</code>). Вводите перед каждым коммитом.</td></tr>
+    <tr><td>git diff</td><td>Что изменено, но ещё не добавлено через <code>git add</code>.</td></tr>
+    <tr><td>git diff --staged</td><td>Что уже добавлено и пойдёт в коммит.</td></tr>
+    <tr><td>git diff main --stat</td><td>Какие файлы в вашей ветке отличаются от main.</td></tr>
+    <tr><td>git log --oneline</td><td>История кратко: номер и сообщение. <code>git log --oneline -5</code> — последние 5.</td></tr>
+    <tr><td>git log --oneline --graph</td><td>История с ветками: видно, где ветки расходятся и сходятся.</td></tr>
+    <tr><td>git log</td><td>Подробно: с автором и датой. Выход — клавиша <code>q</code>.</td></tr>
+    <tr><td>git show a1b2c3d</td><td>Что поменялось в коммите с этим номером.</td></tr>
+    <tr><td>git branch</td><td>Ваши ветки, <code>*</code> — текущая. <code>git branch -a</code> — вместе с ветками на GitHub.</td></tr>
+    <tr><td>git remote -v</td><td>Куда смотрит <code>origin</code> — адрес репозитория на GitHub.</td></tr>
+    <tr><td>git reflog</td><td>Журнал всех ваших действий. Спасает, когда «всё пропало».</td></tr>
   </table></div>
+
+  <h2>Сохранять</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td>git add файл<br>git add .</td><td>Отметить файл (или всё) для следующего коммита.</td></tr>
+    <tr><td>git commit -m "..."</td><td>Сохранить версию с подписью. Подпись — по-русски, глаголом, по делу: «Добавил таблицу данных», а не «fix».</td></tr>
+    <tr><td>git commit --amend -m "..."</td><td>Переделать последний коммит: новое сообщение и всё, что добавили через <code>git add</code>. Только до push.</td></tr>
+  </table></div>
+
+  <h2>Ветки</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td>git checkout -b имя</td><td>Создать ветку от текущей и перейти в неё. Название — латиницей, через дефис: <code>docs-plan</code>.</td></tr>
+    <tr><td>git checkout имя</td><td>Перейти в ветку. Чужую ветку с GitHub — после <code>git fetch</code>.</td></tr>
+    <tr><td>git switch имя<br>git switch -c имя</td><td>То же, что <code>checkout</code> и <code>checkout -b</code>, более новые команды.</td></tr>
+    <tr><td>git merge имя</td><td>Слить ветку <code>имя</code> в текущую.</td></tr>
+    <tr><td>git branch -d имя</td><td>Удалить ветку, если она уже слита.</td></tr>
+    <tr><td>git branch -D имя</td><td>Удалить ветку, даже если не слита. Её коммиты пропадут.</td></tr>
+    <tr><td>git push origin --delete имя</td><td>Удалить ветку на GitHub.</td></tr>
+  </table></div>
+
+  <h2>GitHub: забрать и отправить</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td>git clone ссылка</td><td>Скачать репозиторий. Ссылка — зелёная кнопка <b>&lt;&gt; Code</b> → HTTPS. Один раз.</td></tr>
+    <tr><td>git pull</td><td>Забрать изменения текущей ветки с GitHub и слить.</td></tr>
+    <tr><td>git pull origin main</td><td>Забрать свежий main в свою ветку. Так решают конфликт pull request у себя.</td></tr>
+    <tr><td>git fetch</td><td>Только узнать, что нового на GitHub (новые ветки), ничего не сливая.</td></tr>
+    <tr><td>git push -u origin имя</td><td>Первый push новой ветки. Дальше — просто <code>git push</code>.</td></tr>
+    <tr><td>git push --force-with-lease</td><td>Отправить переписанную историю (после <code>--amend</code> или <code>reset</code>). Только в своей неслитой ветке. Откажет, если на GitHub есть чужие коммиты.</td></tr>
+    <tr><td>git remote set-url origin ссылка</td><td>Поменять адрес репозитория, например после передачи владельцу.</td></tr>
+  </table></div>
+
+  <h2>Отменить</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Где ошибка</th><th>Команда</th></tr>
+    <tr><td>Испортил файл, <code>git add</code> не было</td><td><code>git restore файл</code> — вернуть как в последнем коммите. Напечатанное пропадёт. <code>git restore .</code> — все файлы.</td></tr>
+    <tr><td>Лишнее попало в <code>git add</code></td><td><code>git restore --staged файл</code> — убрать из коммита, файл остаётся.</td></tr>
+    <tr><td>Файл уже хранится в git, а не должен</td><td><code>git rm --cached файл</code> — перестать хранить, в папке оставить. Потом добавить его в <code>.gitignore</code>.</td></tr>
+    <tr><td>Опечатка в сообщении, push не было</td><td><code>git commit --amend -m "…"</code></td></tr>
+    <tr><td>Лишний коммит, push не было</td><td><code>git reset --soft HEAD~1</code> — коммит убрать, правки оставить.<br><code>git reset --hard HEAD~1</code> — убрать вместе с правками.</td></tr>
+    <tr><td>Всё запутал, хочу как на GitHub</td><td><code>git reset --hard origin/main</code> — ветка станет как main на GitHub. Незакоммиченное пропадёт.</td></tr>
+    <tr><td>Push был, ветка только ваша и не слита</td><td>Исправить как до push, затем <code>git push --force-with-lease</code>.</td></tr>
+    <tr><td>Push был, в ветке работает кто-то ещё</td><td><code>git revert HEAD --no-edit</code>, затем <code>git push</code> — новый коммит, отменяющий последний.</td></tr>
+    <tr><td>Уже слито в main</td><td>Кнопка <b>Revert</b> в слитом pull request → новый pull request с отменой.</td></tr>
+    <tr><td>Отменил не то</td><td><code>git reflog</code>, найти нужную строку, затем <code>git reset --hard "HEAD@{1}"</code> (номер — из журнала).</td></tr>
+    <tr><td>В коммит попал пароль или токен</td><td>Сначала заменить его на новый (старый считать украденным), потом чистить историю.</td></tr>
+  </table></div>
+  <p>До push можно переписывать как угодно. После push переписываем только свою неслитую ветку; в общей ветке и в main — исправление сверху.</p>
+
+  <h2>Карман: git stash</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td>git stash</td><td>Спрятать незакоммиченные правки — папка станет как после последнего коммита.</td></tr>
+    <tr><td>git stash -u</td><td>То же, вместе с новыми файлами.</td></tr>
+    <tr><td>git stash list</td><td>Что лежит в кармане.</td></tr>
+    <tr><td>git stash show -p</td><td>Какие строки в кармане, не доставая.</td></tr>
+    <tr><td>git stash pop</td><td>Достать и вернуть в файлы — в той ветке, где прятали.</td></tr>
+  </table></div>
+  <p>Нужен, когда уходите из ветки с недописанным: посмотреть чужой pull request, обновить main. Git иногда сам не пустит (<code>Please commit your changes or stash them</code>), а иногда молча перенесёт правки с вами — поэтому перед коммитом смотрите <code>git status</code>.</p>
+
+  <h2>Патч: правки файлом</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td>git diff --output=../my.patch</td><td>Сохранить незакоммиченные правки в файл рядом с папкой репозитория. Не через <code>&gt;</code>: в PowerShell файл испортится.</td></tr>
+    <tr><td>git diff --cached --output=../my.patch</td><td>То же для правок после <code>git add</code> — так в патч попадают новые файлы.</td></tr>
+    <tr><td>git apply --check ../my.patch</td><td>Проверить, ляжет ли патч. Тишина — ляжет.</td></tr>
+    <tr><td>git apply ../my.patch</td><td>Применить патч к файлам.</td></tr>
+  </table></div>
+
   <h2>Конфликт</h2>
   <p>Git остановился и написал <code>CONFLICT</code>. В файле появились метки:</p>
 <pre class="cmd">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
 ваша версия строки
 =======
 версия из другой ветки
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; шаги</pre>
-  <p>Оставьте правильный вариант (или напишите общий), удалите три строки-метки, сохраните, затем <code>git add файл</code> и <code>git commit -m "Решил конфликт"</code>. В VS Code над конфликтом есть кнопки «Accept Current / Incoming / Both».</p>
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; ветка</pre>
+  <ol>
+    <li>В VS Code над конфликтом кнопки <b>Accept Current</b> (ваше), <b>Accept Incoming</b> (чужое), <b>Accept Both</b> (оба). Или оставьте правильный вариант вручную.</li>
+    <li>Проверьте, что меток <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> не осталось и ничего чужого не стёрто. Сохраните.</li>
+    <li><code>git add файл</code>, затем <code>git commit -m "Решил конфликт"</code>, затем <code>git push</code>.</li>
+  </ol>
+  <p>Запутались — <code>git merge --abort</code>: всё вернётся как до слияния.</p>
+
+  <h2>На GitHub</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что нужно</th><th>Где</th></tr>
+    <tr><td>Пригласить в репозиторий</td><td>Settings → Collaborators → Add people</td></tr>
+    <tr><td>Задача</td><td>Issues → New issue. Справа: Assignees, Labels, Projects. Список с галочками: <code>- [ ] текст</code></td></tr>
+    <tr><td>Pull request</td><td>Жёлтая плашка <b>Compare &amp; pull request</b> или вкладка Pull requests → New. В описании <code>Closes #номер</code> — задача закроется при слиянии</td></tr>
+    <tr><td>Review</td><td>Files changed → «+» у строки → комментарий → <b>Submit review</b>: Comment, Approve или Request changes</td></tr>
+    <tr><td>Замечание исправлено</td><td>Conversation → <b>Resolve conversation</b></td></tr>
+    <tr><td>Слить</td><td><b>Merge pull request → Confirm merge</b>. Сливает автор, после Approve</td></tr>
+    <tr><td>Отменить слитое</td><td>Слитый pull request → кнопка <b>Revert</b></td></tr>
+    <tr><td>Защитить main</td><td>Settings → Rules → Rulesets: Require a pull request (1 approval), Block force pushes, Restrict deletions</td></tr>
+    <tr><td>Доска</td><td>Аватар → Your projects → New project → Board; в репозитории Projects → Link a project; доступ: ⋯ → Settings → Manage access</td></tr>
+    <tr><td>Передать репозиторий</td><td>Settings → внизу Transfer ownership</td></tr>
+  </table></div>
+
+  <h2>Markdown: как писать README и документы</h2>
+<pre class="cmd"># Заголовок        ## Подзаголовок
+**жирный**  *курсив*  `команда`
+- пункт списка
+1. нумерованный пункт
+- [ ] задача с галочкой
+[текст ссылки](https://адрес)
+
+| Столбец | Столбец |
+|---|---|
+| ячейка | ячейка |</pre>
+
   <h2>Что не кладём в репозиторий</h2>
-  <p>Папку <code>venv</code>, файлы больше 50 МБ, пароли и ключи (<code>.env</code>), картинки, которые скрипт создаёт сам. Для этого есть файл <code>.gitignore</code> — одна строка на шаблон: <code>*.png</code>, <code>venv/</code>.</p>
+  <p>Пароли и токены (<code>.env</code>), папку <code>venv</code>, <code>__pycache__</code>, файлы больше 50 МБ, картинки, которые скрипт создаёт сам. Для этого файл <code>.gitignore</code> — одна строка на шаблон: <code>.env</code>, <code>venv/</code>, <code>*.png</code>. В открытом репозитории — только имена или ники, без фамилий, школы и класса.</p>
+
   <h2>Команды терминала</h2>
-  <p><code>ls</code> (Windows: <code>dir</code>) — список файлов, <code>cd папка</code> — войти, <code>cd ..</code> — выйти, <code>cat файл</code> — показать файл. В тренажёре ещё есть <code>edit файл</code> — открыть в редакторе.</p>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td>ls</td><td>Список файлов (cmd на Windows: <code>dir</code>).</td></tr>
+    <tr><td>cd папка<br>cd ..</td><td>Войти в папку / выйти на уровень выше. <code>cd Desktop</code> (OneDrive: <code>cd OneDrive\Desktop</code>).</td></tr>
+    <tr><td>mkdir папка</td><td>Создать папку.</td></tr>
+    <tr><td>cat файл</td><td>Показать файл (cmd: <code>type</code>).</td></tr>
+    <tr><td>rm файл</td><td>Удалить файл насовсем (cmd: <code>del</code>).</td></tr>
+    <tr><td>code .</td><td>Открыть текущую папку в VS Code.</td></tr>
+    <tr><td>Esc, :wq, Enter</td><td>Выйти из Vim, если он открылся после <code>git commit</code> без <code>-m</code>.</td></tr>
+    <tr><td>q</td><td>Выйти из длинного вывода <code>git log</code> или <code>git diff</code>.</td></tr>
+  </table></div>
+  <p>В тренажёре ещё есть <code>edit файл</code> — открыть в редакторе.</p>
   </div>
 </section>
 
@@ -851,12 +967,14 @@ git push</pre></div>
       <p>На доске проекта: <b>⋯ → Settings → Manage access</b> — пригласить его же. Это делает тот, кто создавал доску, — если не владелец репозитория, то он.</p>
     </li>
     <li><h3>Скачать репозиторий · новый участник</h3>
-      <p>Принять приглашение: письмо на почте или страница репозитория. Затем:</p>
+      <p>Принять приглашение: письмо на почте или страница репозитория. Ссылку для скачивания возьмите на странице репозитория: зелёная кнопка <b>&lt;&gt; Code</b> → HTTPS → скопировать.</p>
       <pre class="cmd">cd Desktop
-git clone https://github.com/ЛОГИН_ВЛАДЕЛЬЦА/РЕПОЗИТОРИЙ.git</pre>
+git clone ССЫЛКА</pre>
+      <p>Рабочий стол в OneDrive (Windows): <code>cd OneDrive\Desktop</code>.</p>
       <p>Открыть папку в VS Code: File → Open Folder, затем Terminal → New Terminal.</p>
     </li>
     <li><h3>Имя и свежий main · каждый</h3>
+      <p>В VS Code открыта папка репозитория команды, терминал внизу.</p>
       <pre class="cmd">git config --global user.name "Имя"
 git config --global pull.rebase false
 git checkout main
@@ -875,7 +993,9 @@ git push</pre>
     <li><h3>Секрет не попадает в git · каждый</h3>
       <p>Создайте в папке репозитория файл <code>.env</code> со строкой <code>TOKEN=12345</code>.</p>
       <pre class="cmd">git status</pre>
-      <p><code>.env</code> в списке быть не должно. Если он там — в <code>.gitignore</code> нет строки <code>.env</code>: владелец добавляет её через ветку и pull request. Сам <code>.env</code> не коммитим никогда.</p>
+      <p><code>.env</code> в списке быть не должно. Если он там — в <code>.gitignore</code> нет строки <code>.env</code>: скажите владельцу, он добавляет её через ветку и pull request. Проверили — удалите файл, для домашки он больше не нужен:</p>
+      <pre class="cmd">rm .env</pre>
+      <p>Иначе дальше <code>git add .</code> может случайно отправить его на GitHub.</p>
     </li>
   </ol>
 
@@ -886,35 +1006,58 @@ git push</pre>
     <tr><td>Участник 2</td><td><code>docs/dannye.md</code></td><td>Таблица: что храним, пример, откуда берём — не меньше 5 строк</td><td><code>docs-dannye</code></td></tr>
     <tr><td>Участник 3</td><td><code>docs/plan.md</code></td><td>Этапы до конференции: что, кто, когда — списком <code>- [ ] …</code></td><td><code>docs-plan</code></td></tr>
   </table></div>
+  <details><summary><b>Как это может выглядеть</b> — образцы для каждого документа</summary>
+  <p><b>Сценарии</b> (<code>docs/scenarii.md</code>):</p>
+  <pre class="cmd"># Сценарии
+
+## 1. Ученик записывает шаги
+1. Открывает бота и пишет /start.
+2. Бот спрашивает, сколько шагов он прошёл сегодня.
+3. Ученик отправляет число, бот отвечает: «Записал!»</pre>
+  <p><b>Данные</b> (<code>docs/dannye.md</code>) — таблица в Markdown: строки через <code>|</code>, вторая строка — чёрточки:</p>
+  <pre class="cmd"># Данные
+
+| Что храним | Пример | Откуда берём |
+|---|---|---|
+| Имя ученика | Петя | пишет сам при /start |
+| Шаги за день | 7400 | ученик присылает боту |</pre>
+  <p><b>План</b> (<code>docs/plan.md</code>):</p>
+  <pre class="cmd"># План работ
+
+- [ ] Бот отвечает на /start — Петя — до 1 ноября
+- [ ] Шаги сохраняются в базу — Илья — до 15 ноября</pre>
+  <p>Пишите про свой проект, а не про шаги-бота: это только пример.</p>
+  </details>
+
   <ol class="steps" id="l7hw1">
     <li><h3>Задача</h3>
-      <p>Issues → <b>New issue</b>: «Документ: …» (например «Документ: сценарии»). Assignees — себя, метка <b>документация</b>. В описании:</p>
-      <pre class="cmd">Что сделать: …
-Зачем: …
+      <p>Issues → <b>New issue</b>: «Документ: …» (например «Документ: сценарии»). Assignees — себя, метка <b>документация</b>. В описании, например:</p>
+      <pre class="cmd">Что сделать: написать docs/scenarii.md — как человек пользуется проектом.
+Зачем: чтобы вся команда одинаково понимала, что мы делаем.
 Готово, когда:
-- [ ] …
-- [ ] …</pre>
+- [ ] 3 сценария
+- [ ] в каждом не меньше 3 шагов</pre>
       <p>Справа в задаче: <b>Projects</b> → выберите доску команды — иначе карточки на доске не будет. На доске перетащите карточку в <b>In Progress</b>.</p>
     </li>
     <li><h3>Ветка, коммит, pull request</h3>
       <pre class="cmd">git checkout main
 git pull
 git checkout -b docs-scenarii</pre>
-      <p>Ветка — своя из таблицы. Создайте папку <code>docs</code> и в ней свой файл, напишите содержание, сохраните. Папку <code>docs</code> создаёт каждый у себя в ветке — конфликта не будет: файлы разные. Пустую папку git не видит, поэтому файл в ней нужен сразу.</p>
+      <p>Ветка — своя из таблицы. Создайте папку <code>docs</code> и в ней свой файл (в VS Code — значки <b>New Folder</b> и <b>New File</b> над списком файлов), напишите содержание, сохраните. Папку <code>docs</code> создаёт каждый у себя в ветке — конфликта не будет: файлы разные. Пустую папку git не видит, поэтому файл в ней нужен сразу.</p>
       <pre class="cmd">git add .
 git commit -m "Документ: сценарии"
 git push -u origin docs-scenarii</pre>
-      <p>Откройте pull request, в описании — <code>Closes #номер</code> своей задачи.</p>
+      <p>Название ветки и сообщение коммита — свои. Откройте pull request, в описании — <code>Closes #номер</code> своей задачи.</p>
     </li>
     <li><h3>Review по кругу — через stash</h3>
-      <p>Сначала начните свою доработку: допишите строку в <b>свой</b> документ, сохраните, <b>не коммитьте</b>. Теперь спрячьте её и откройте ветку автора у себя:</p>
+      <p>Когда тот, кого вы проверяете, открыл pull request. Сначала начните свою доработку: допишите в <b>свой</b> документ ещё один пункт, сохраните, <b>не коммитьте</b>. Теперь спрячьте её и откройте ветку автора у себя:</p>
       <pre class="cmd">git stash
 git fetch
 git checkout ветка-автора</pre>
-      <p>Имя ветки — вверху страницы его pull request. Прочитайте файл в VS Code. Вернитесь к себе:</p>
+      <p>Имя ветки — вверху страницы его pull request (например <code>docs-scenarii</code>). Прочитайте его файл в VS Code. Ваш документ на это время пропадёт из папки: в ветке автора его нет. Это нормально. Вернитесь к себе:</p>
       <pre class="cmd">git checkout своя-ветка
 git stash pop</pre>
-      <p>Ваша строка вернулась.</p>
+      <p>Вместо <code>своя-ветка</code> — ваша, например <code>docs-dannye</code>. Документ на месте, и дописанный пункт вернулся.</p>
     </li>
     <li><h3>Request changes</h3>
       <p>В pull request автора: <b>Files changed</b> → «+» у строки → замечание. Хотя бы одно, по делу: чего не хватает по «Готово, когда». <b>Submit review → Request changes</b>.</p>
@@ -957,7 +1100,7 @@ git push -u origin komanda-imya</pre>
       <p>Участник 1 сливает первым. У Участников 2 и 3 GitHub покажет конфликт. Решаем <b>у себя</b>:</p>
       <pre class="cmd">git checkout komanda-imya
 git pull origin main</pre>
-      <p>В README.md оставить <b>все</b> строки команды и удалить метки <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Сохранить.</p>
+      <p>Откройте README.md. VS Code подсветит конфликт и покажет над ним кнопку <b>Accept Both Changes</b> — нажмите: останутся строки обоих. Проверьте, что в разделе все строки команды и не осталось меток <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Сохраните.</p>
       <pre class="cmd">git add README.md
 git commit -m "Решил конфликт в README"
 git push</pre>
@@ -977,13 +1120,13 @@ git pull</pre>
       <p>Исправьте или допишите что-то в чужом документе, сохраните, <b>не коммитьте</b>.</p>
       <pre class="cmd">git diff --output=../patch-imya.patch
 git restore .</pre>
-      <p>Вместо <code>imya</code> — своё имя. Создайте issue «Правка от Имя в docs/…»: Assignees — <b>владелец этого файла</b>, метка <b>документация</b>, справа <b>Projects</b> → доска команды. Файл патча (он рядом с папкой репозитория) отправьте ему в личку Telegram.</p>
+      <p>Вместо <code>imya</code> — своё имя. Создайте issue «Правка от Имя в docs/…»: Assignees — <b>владелец этого файла</b>, метка <b>документация</b>, справа <b>Projects</b> → доска команды. Файл патча лежит рядом с папкой репозитория (если репозиторий на рабочем столе — на рабочем столе). Отправьте его владельцу файла в личку Telegram.</p>
     </li>
     <li><h3>Применить патч · владелец файла</h3>
       <pre class="cmd">git checkout main
 git pull
 git checkout -b patch-imya</pre>
-      <p>Вместо <code>imya</code> — имя автора правки. Положите файл патча <b>рядом</b> с папкой репозитория, не внутрь.</p>
+      <p>Вместо <code>imya</code> — имя автора правки. Скачайте файл патча из Telegram (он попадёт в «Загрузки») и перенесите его <b>рядом</b> с папкой репозитория — например на рабочий стол, не внутрь папки.</p>
       <pre class="cmd">git apply --check ../patch-imya.patch
 git apply ../patch-imya.patch
 git diff</pre>
@@ -1025,7 +1168,7 @@ git log --oneline --graph -20</pre>
     <tr><th>Что видите</th><th>Что делать</th></tr>
     <tr><td><code>Need to specify how to reconcile divergent branches</code></td><td><code>git config --global pull.rebase false</code>, затем снова <code>git pull origin main</code>.</td></tr>
     <tr><td>Задачи нет на доске</td><td>В задаче справа <b>Projects</b> → выбрать доску команды.</td></tr>
-    <tr><td>Новый участник не видит доску</td><td>Доска личная: владелец ⋯ → Settings → Manage access → пригласить.</td></tr>
+    <tr><td>Новый участник не видит доску</td><td>Доска личная: тот, кто её создавал, ⋯ → Settings → Manage access → пригласить.</td></tr>
     <tr><td><code>git checkout ветка-автора</code>: такой ветки нет</td><td>Сначала <code>git fetch</code>. Имя ветки — вверху страницы pull request.</td></tr>
     <tr><td>Сделали <code>git stash pop</code> не в той ветке</td><td><code>git stash</code>, перейти в свою ветку, <code>git stash pop</code>.</td></tr>
     <tr><td>Approve есть, а Merge серый</td><td>Не все замечания решены: <b>Resolve conversation</b>. Или после Approve был новый коммит — ревьюер ставит Approve ещё раз.</td></tr>
@@ -1044,9 +1187,9 @@ git log --oneline --graph -20</pre>
 
 </main>
 
-<script src="live.js?v=20261018200455"></script>
-<script src="quiz.js?v=20261018200455"></script>
-<script src="engine.js?v=20261018200455"></script>
+<script src="live.js?v=20261019220903"></script>
+<script src="quiz.js?v=20261019220903"></script>
+<script src="engine.js?v=20261019220903"></script>
 <script>
 (function () {
   "use strict";
