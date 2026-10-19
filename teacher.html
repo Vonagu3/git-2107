@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261019230213">
+<link rel="stylesheet" href="quiz.css?v=20261019234913">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -130,7 +130,7 @@ table.probs td:first-child { width: 40%; }
   <div class="top hide-on-show">
     <div>
       <h1>Занятие 8 — руководителю</h1>
-      <p class="lead">Данные учеников хранятся в Supabase и видны только после входа. План занятия 8 (история, bisect, cherry-pick, rebase) — <code>Урок_8/План_урока.md</code>, учебный репозиторий — <code>Урок_8/создать_репозиторий.py</code>.</p>
+      <p class="lead">Данные учеников хранятся в Supabase и видны только после входа. План занятия 8 (история, blame, cherry-pick, rebase) — <code>Урок_8/План_урока.md</code>, учебный репозиторий — <code>Урок_8/создать_репозиторий.py</code>.</p>
     </div>
     <div class="right"><span id="who"></span><button class="btn" id="logout">Выйти</button></div>
   </div>
@@ -210,11 +210,8 @@ table.probs td:first-child { width: 40%; }
   <h2 id="problems">Если у ученика…</h2>
   <div class="card wrap"><table class="probs">
     <tr><th>Видит</th><th>Что сделать</th></tr>
-    <tr><td>Нет Python: <code>python3</code> и <code>python</code> не найдены</td><td>Bisect без Python, писать ему в личку: в <code>kopilka.py</code> функция <code>nedeli_do_celi</code>, последняя строка. <code>return (… + v_nedelyu - 1) // v_nedelyu</code> → <code>git bisect good</code>; <code>return … // v_nedelyu</code> без <code>+ v_nedelyu - 1</code> → <code>git bisect bad</code></td></tr>
-    <tr><td><code>git bisect good v1</code>: bad revision</td><td>Нет тега: <code>git fetch --tags</code>. Или клонировал не тот репозиторий</td></tr>
-    <tr><td>bisect нашёл не тот коммит</td><td>Ошибся в одном ответе good/bad. <code>git bisect reset</code> и заново</td></tr>
-    <tr><td><code>HEAD detached</code>, не может <code>checkout</code></td><td>Не сделал <code>git bisect reset</code></td></tr>
     <tr><td>На экране <code>:</code></td><td><code>git log</code> или <code>git blame</code> ждут: клавиша <code>q</code></td></tr>
+    <tr><td><code>git blame -L README.md …</code>: <code>no such path</code></td><td>Убрал числа, а <code>-L</code> оставил: git принял имя файла за номера строк. Либо <code>-L 20,20</code>, либо без <code>-L</code></td></tr>
     <tr><td><code>cherry-pick</code>: bad revision</td><td>Хеш не целиком или с пробелом: <code>git log --oneline -3 origin/ispravlenie</code></td></tr>
     <tr><td><code>checkout moya-vetka</code>: pathspec did not match</td><td>Старый git: <code>git checkout -b moya-vetka origin/moya-vetka</code></td></tr>
     <tr><td>После <code>rebase --continue</code> снова конфликт</td><td>Это следующий коммит ветки — так же: решить, <code>add</code>, <code>--continue</code></td></tr>
@@ -254,18 +251,18 @@ table.probs td:first-child { width: 40%; }
   <h2>Как помогать</h2>
   <ul>
     <li>Застрявший присылает в чат скрин терминала с последней командой и ответом git — по нему видно, на каком шаге.</li>
-    <li>Ответы детектива — в личку, чтобы не подсказать остальным; в игре bisect хеш — в общий чат, кто первый.</li>
-    <li>Отстаёте: <code>rebase -i</code> не показывать; в практике rebase с конфликтом сделать вместе на экране. Игру bisect не урезать.</li>
-    <li>Кто закончил раньше: <code>git bisect run</code>, затем <code>git blame</code> на <code>kopilka.py</code> — кто последним менял строку с ошибкой.</li>
+    <li>Ответы детектива — в личку, чтобы не подсказать остальным.</li>
+    <li>Отстаёте: <code>rebase -i</code> не показывать; в практике rebase с конфликтом сделать вместе на экране.</li>
+    <li>Кто закончил раньше: на GitHub открыть <code>kopilka.py</code> → Blame и пройти назад по строке 20 кнопкой «View blame prior to this change» до самого первого автора.</li>
   </ul>
 
   <h2>Что сознательно не рассказываем</h2>
-  <p><code>rebase</code> общих веток и main, <code>git push --force</code> без <code>-with-lease</code>, самостоятельный <code>rebase -i</code> (<code>fixup</code>, <code>edit</code>, <code>drop</code>), <code>git bisect skip</code>, <code>git log -G</code>, <code>git blame -w -C</code>, теги и релизы подробно, SSH-ключи.</p>
+  <p><code>rebase</code> общих веток и main, <code>git push --force</code> без <code>-with-lease</code>, самостоятельный <code>rebase -i</code> (<code>fixup</code>, <code>edit</code>, <code>drop</code>), <code>git bisect</code>, <code>git log -G</code>, <code>git blame -w -C</code>, теги и релизы подробно, SSH-ключи.</p>
   </div>
 </div>
 </main>
-<script src="quiz.js?v=20261019230213"></script>
-<script src="engine.js?v=20261019230213"></script>
-<script src="teacher.js?v=20261019230213"></script>
+<script src="quiz.js?v=20261019234913"></script>
+<script src="engine.js?v=20261019234913"></script>
+<script src="teacher.js?v=20261019234913"></script>
 </body>
 </html>
