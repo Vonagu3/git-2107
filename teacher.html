@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261019220903">
+<link rel="stylesheet" href="quiz.css?v=20261019224032">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -129,8 +129,8 @@ table.probs td:first-child { width: 40%; }
 <div id="app" hidden>
   <div class="top hide-on-show">
     <div>
-      <h1>Занятие 7 — руководителю</h1>
-      <p class="lead">Данные учеников хранятся в Supabase и видны только после входа. Блок stash и патч — <code>Урок_7/Stash_и_патч.md</code>.</p>
+      <h1>Занятие 8 — руководителю</h1>
+      <p class="lead">Данные учеников хранятся в Supabase и видны только после входа. План занятия 8 (история, bisect, cherry-pick, rebase) — <code>Урок_8/План_урока.md</code>, учебный репозиторий — <code>Урок_8/создать_репозиторий.py</code>.</p>
     </div>
     <div class="right"><span id="who"></span><button class="btn" id="logout">Выйти</button></div>
   </div>
@@ -142,6 +142,7 @@ table.probs td:first-child { width: 40%; }
     <a id="lPulls" target="_blank" rel="noopener">Pull requests</a>
     <a id="lIssues" target="_blank" rel="noopener">Issues</a>
     <a href="#lesson">Ход занятия ↓</a>
+    <a href="https://github.com/Vonagu3/istoriya-igra" target="_blank" rel="noopener">istoriya-igra</a>
     <a href="https://github.com/Vonagu3/praktika-shablon" target="_blank" rel="noopener">Шаблон практики</a>
   </div>
 
@@ -196,7 +197,7 @@ table.probs td:first-child { width: 40%; }
     <li>Код можно подобрать, прочитав код страницы, — это мотивация, а не экзамен. Настоящая проверка — <code>python проверить.py</code> и ветки на GitHub.</li>
   </ul>
 
-  <h2 id="practice">Команды и домашка к занятию 8</h2>
+  <h2 id="practice">Команды и домашка к занятию 8 (разбор в начале занятия)</h2>
   <div class="card">
     <p style="margin:0 0 8px">С занятия 7 — две команды по 3 человека, работают в репозитории владельца (из домашки занятия 6). Домашка — повторение всего git за 2 часа в созвоне, у учеников вкладка <b>Домашка</b> (<code>#hw</code>), полный текст и проверка — <code>Урок_7/Домашнее_задание.md</code>. Круг review: PR 1 проверяет 2, PR 2 — 3, PR 3 — 1; патч — в обратную сторону.</p>
     <table class="probs">
@@ -209,6 +210,16 @@ table.probs td:first-child { width: 40%; }
   <h2 id="problems">Если у ученика…</h2>
   <div class="card wrap"><table class="probs">
     <tr><th>Видит</th><th>Что сделать</th></tr>
+    <tr><td>Нет Python: <code>python3</code> и <code>python</code> не найдены</td><td>Bisect без Python, писать ему в личку: в <code>kopilka.py</code> функция <code>nedeli_do_celi</code>, последняя строка. <code>return (… + v_nedelyu - 1) // v_nedelyu</code> → <code>git bisect good</code>; <code>return … // v_nedelyu</code> без <code>+ v_nedelyu - 1</code> → <code>git bisect bad</code></td></tr>
+    <tr><td><code>git bisect good v1</code>: bad revision</td><td>Нет тега: <code>git fetch --tags</code>. Или клонировал не тот репозиторий</td></tr>
+    <tr><td>bisect нашёл не тот коммит</td><td>Ошибся в одном ответе good/bad. <code>git bisect reset</code> и заново</td></tr>
+    <tr><td><code>HEAD detached</code>, не может <code>checkout</code></td><td>Не сделал <code>git bisect reset</code></td></tr>
+    <tr><td>На экране <code>:</code></td><td><code>git log</code> или <code>git blame</code> ждут: клавиша <code>q</code></td></tr>
+    <tr><td><code>cherry-pick</code>: bad revision</td><td>Хеш не целиком или с пробелом: <code>git log --oneline -3 origin/ispravlenie</code></td></tr>
+    <tr><td><code>checkout moya-vetka</code>: pathspec did not match</td><td>Старый git: <code>git checkout -b moya-vetka origin/moya-vetka</code></td></tr>
+    <tr><td>После <code>rebase --continue</code> снова конфликт</td><td>Это следующий коммит ветки — так же: решить, <code>add</code>, <code>--continue</code></td></tr>
+    <tr><td>Запутался в rebase</td><td><code>git rebase --abort</code> — всё как было</td></tr>
+    <tr><td>Хочет push в istoriya-igra</td><td>Прав нет, так задумано. Уборка: <code>git reset --hard origin/main</code></td></tr>
     <tr><td><code>git stash</code> пишет <code>No local changes to save</code></td><td>Файл не сохранён (Ctrl+S) или правку уже закоммитили. В шаге с новым файлом — так и задумано</td></tr>
     <tr><td>При <code>git checkout main</code> ошибки не было</td><td>Пропущен коммит в шаге «Коммит в ветке». Stash всё равно сделать</td></tr>
     <tr><td><code>git stash pop</code> пишет про конфликт</td><td>Тот же файл успели поменять ещё раз: <code>git restore README.md</code> и снова <code>git stash pop</code>. Не выходит — показать экран</td></tr>
@@ -243,17 +254,18 @@ table.probs td:first-child { width: 40%; }
   <h2>Как помогать</h2>
   <ul>
     <li>Застрявший присылает в чат скрин терминала с последней командой и ответом git — по нему видно, на каком шаге.</li>
-    <li>Нет склонированного репозитория команды: практику stash можно сделать в любом своём репозитории, хоть в учебном.</li>
-    <li>Отстаёте: патч в парах убрать, показ патча оставить. Практику stash не урезать.</li>
+    <li>Ответы детектива — в личку, чтобы не подсказать остальным; в игре bisect хеш — в общий чат, кто первый.</li>
+    <li>Отстаёте: <code>rebase -i</code> не показывать; в практике rebase с конфликтом сделать вместе на экране. Игру bisect не урезать.</li>
+    <li>Кто закончил раньше: <code>git bisect run</code>, затем <code>git blame</code> на <code>kopilka.py</code> — кто последним менял строку с ошибкой.</li>
   </ul>
 
   <h2>Что сознательно не рассказываем</h2>
-  <p>Rebase, теги, SSH-ключи, <code>git stash -p</code> и <code>git stash -a</code>, <code>git am</code> и <code>git format-patch</code>.</p>
+  <p><code>rebase</code> общих веток и main, <code>git push --force</code> без <code>-with-lease</code>, самостоятельный <code>rebase -i</code> (<code>fixup</code>, <code>edit</code>, <code>drop</code>), <code>git bisect skip</code>, <code>git log -G</code>, <code>git blame -w -C</code>, теги и релизы подробно, SSH-ключи.</p>
   </div>
 </div>
 </main>
-<script src="quiz.js?v=20261019220903"></script>
-<script src="engine.js?v=20261019220903"></script>
-<script src="teacher.js?v=20261019220903"></script>
+<script src="quiz.js?v=20261019224032"></script>
+<script src="engine.js?v=20261019224032"></script>
+<script src="teacher.js?v=20261019224032"></script>
 </body>
 </html>

@@ -296,12 +296,12 @@
 
   // ---------- чек-лист (git_teacher_kv, ключ prep) ----------
   const PREP = [
-    "Папка ~/Desktop/2107/Git/Vonagu3/praktik-demo: git checkout main, git pull, git status чистый, git stash list пустой.",
-    "Папка ~/Desktop/2107/Git/KruzhokProg/praktik-demo переведена на main (стояла на задача-1-визитка): git checkout main, git pull.",
-    "Рядом нет старого ~/Desktop/2107/Git/Vonagu3/my.patch (если есть — rm).",
-    "Два окна VS Code подписаны: Vonagu3 и KruzhokProg — перед каждой правкой смотреть путь в заголовке.",
-    "У ребят склонированы репозитории команд из домашки (без них практика stash не начнётся).",
-    "Ссылка на страницу учеников, вкладка «Практика», готова для чата группы в Telegram.",
+    "На GitHub создан публичный пустой репозиторий Vonagu3/istoriya-igra, в него отправлено: git remote add origin https://github.com/Vonagu3/istoriya-igra.git · git push -u origin --all · git push origin --tags. На GitHub 4 ветки, тег v1, 20 коммитов в main.",
+    "(По желанию) Vonagu3/istoriya-demo на GitHub — чтобы показать отказ git push после rebase и --force-with-lease. Без него — словами.",
+    "Папка ~/Desktop/2107/Git/Vonagu3/istoriya-demo чистая и на main. Испорчена после репетиции — rm -rf и пересоздать: python3 ~/Desktop/2107/MAX/Урок_8/создать_репозиторий.py ~/Desktop/2107/Git/Vonagu3/istoriya-demo demo",
+    "За день в чат: «Проверьте python --version (на Mac python3 --version)». У кого нет — способ bisect без Python в «Если у ученика…».",
+    "У себя git config --global core.editor \"code --wait\" — для показа rebase -i в VS Code, а не в Vim.",
+    "Ответы детектива и игры (внизу хода занятия) — не показывать на экране до конца практики.",
     "Демонстрировать окно, а не весь экран; эту страницу — только в «Режиме показа».",
   ];
   let prepDone = [];
@@ -312,7 +312,7 @@
       if (cb.checked && k < 0) prepDone.push(i);
       if (!cb.checked && k >= 0) prepDone.splice(k, 1);
       try {
-        await rest("git_teacher_kv?on_conflict=key", { method: "POST", body: JSON.stringify({ key: "prep7", value: prepDone, updated_at: new Date().toISOString() }), headers: { Prefer: "resolution=merge-duplicates,return=minimal" } });
+        await rest("git_teacher_kv?on_conflict=key", { method: "POST", body: JSON.stringify({ key: "prep8", value: prepDone, updated_at: new Date().toISOString() }), headers: { Prefer: "resolution=merge-duplicates,return=minimal" } });
       } catch (e) { alert("Не сохранилось: " + e.message); }
     }));
   }
@@ -320,56 +320,80 @@
   // ---------- ход занятия: команды копируются кликом (терминал или чат группы в Telegram) ----------
   const copied = new Set();
   const C = (...cmds) => ({ cmd: cmds });
-  const DEMO = "~/Desktop/2107/Git/Vonagu3/praktik-demo";
-  const KRUZ = "~/Desktop/2107/Git/KruzhokProg/praktik-demo";
+  const DEMO = "~/Desktop/2107/Git/Vonagu3/istoriya-demo";
+  const IGRA = "https://github.com/Vonagu3/istoriya-igra";
   const FLOW = [
-    ["0–1", "зачем", "Зачем stash", [
-      { note: "Сказать: «Вы дописываете README в своей ветке, остановились на середине. Пишет напарник: „глянь мой PR“. Или нужно срочно обновить main. Коммитить полуготовое не хочется. Для этого есть карман — <code>git stash</code>»." }]],
-    ["1–10", "показ", "Показ stash · папка Vonagu3", [
-      C("cd " + DEMO, "git checkout main", "git pull", "git checkout -b stash-demo"),
-      { note: "Дописать в конец <code>README.md</code> строку <code>Черновик раздела</code>, сохранить и закоммитить:" },
-      C("git add README.md", 'git commit -m "Начал раздел в README"'),
-      { note: "Дописать ещё строку <code># недописано</code>, сохранить. <b>Не коммитить.</b>" },
-      C("git status", "git checkout main"),
-      { warn: "Ждём ошибку <code>Your local changes … would be overwritten by checkout. Please commit your changes or stash them</code>. Сказать: «Git защищает вашу работу: в main этот файл другой. Он сам подсказывает два выхода: закоммитить или спрятать»." },
-      C("git stash", "git status", "git checkout main", "git pull", "git checkout stash-demo", "git stash list", "git stash show -p", "git stash pop"),
-      { note: "После <code>git stash</code> — nothing to commit, строка пропала; <code>show -p</code> показывает, что в кармане, не доставая; после <code>pop</code> строка вернулась. Сказать: «<code>stash</code> убрал незакоммиченное в карман, <code>pop</code> достал обратно»." }]],
-    ["10–14", "ловушки", "Ловушка 1: новый файл · ловушка 2 словами", [
-      C("git restore README.md"),
-      { note: "Создать файл <code>zametka.txt</code> с любым текстом." },
-      C("git stash", "git stash -u", "git stash pop", "rm zametka.txt", "git status"),
-      { note: "Обычный <code>stash</code> пишет <code>No local changes to save</code>: новые файлы сами в карман не попадают, нужен <code>-u</code> — «и новые файлы тоже». Про <code>rm</code>: удаляет файл с диска, незакоммиченный не вернуть; <code>git restore</code> новый файл не уберёт." },
-      { warn: "<b>Ловушка 2, словами:</b> «Если файл в обеих ветках одинаковый, git пускает в другую ветку без ошибки, и недописанное переезжает с вами. Перед <code>git commit</code> смотрим <code>git status</code>, первая строка — <code>On branch …</code>». Если забыли <code>rm</code> и <code>zametka.txt</code> переехал в main — это живая иллюстрация: показать <code>git status</code>." },
-      C("git checkout main", "git branch -D stash-demo"),
-      { note: "Большая <code>-D</code>: коммит не влит в main, <code>-d</code> откажет с <code>not fully merged</code>. На GitHub удалять нечего — ветку не пушили." }]],
-    ["14–21", "показ", "Патч-файл · две папки", [
-      { note: "Сказать: «stash — карман на вашем компьютере. Патч — тот же карман, но файлом: можно отправить напарнику в Telegram, перенести со школьного компьютера домой»." },
-      { note: "<b>Vonagu3 («вы»).</b> Дописать в <b>самый конец</b> README.md строку <code>Эта строка переехала патчем.</code>, сохранить, не коммитить." },
-      C("cd " + DEMO, "git diff", "git diff --output=../my.patch", "cat ../my.patch", "git restore README.md"),
-      { warn: "<code>git restore</code> — строго <b>после</b> <code>--output</code>, иначе патч пустой. <code>--output</code> в терминале ничего не пишет — это нормально. Открыть <code>my.patch</code> в VS Code: «обычный текст, <code>+</code> добавили, <code>-</code> удалили»." },
-      { note: "<b>KruzhokProg («напарник»).</b>" },
-      C("cd " + KRUZ, "git apply --check ../../Vonagu3/my.patch", "git apply ../../Vonagu3/my.patch", "git diff"),
-      { note: "«Правка переехала без коммита, без push и без PR». Теперь — когда не ложится:" },
-      C("git restore README.md"),
-      { note: "README.md <b>из папки KruzhokProg</b>: дописать в самый конец <code>Другая строка у напарника.</code>, сохранить." },
-      C("git apply ../../Vonagu3/my.patch"),
-      { warn: "Ждём <code>error: patch failed: README.md:168</code> · <code>patch does not apply</code>. Сказать: «Пока я отправлял патч, напарник дописал в то же место. Патч помнит строки вокруг правки — поэтому сначала <code>--check</code>». Если правка в другом месте файла — патч ляжет, ошибка только на одних и тех же строках." },
-      C("git restore README.md", "rm ../../Vonagu3/my.patch"),
-      { ol: ["<code>--output=</code>, а не <code>&gt;</code>: в Windows PowerShell <code>&gt;</code> портит кодировку, <code>git apply</code> пишет <code>No valid patches in input</code>.",
-        "Новые файлы в патч не попадают: сначала <code>git add</code>, потом <code>git diff --cached --output=../my.patch</code>.",
-        "Патч кладём вне репозитория (<code>../</code>), чтобы не закоммитить.",
-        "В патче весь текст правок — с токеном не отправлять.",
-        "Патч не заменяет PR: он для «глянь недописанное» и «перенести домой»."] },
-      C("Отдать недописанные правки файлом:\ngit diff --output=../my.patch       — сохранить правки в файл\ngit apply --check ../my.patch       — проверить, ляжет ли\ngit apply ../my.patch               — применить")]],
-    ["21–31", "практика", "Практика stash: каждый сам", [
-      { note: "Весь материал показан — теперь практика. Ученики открывают свою страницу → вкладка <b>Практика</b> → часть 1. Работают в папке репозитория своей команды, push не делают." },
+    ["0–15", "разбор", "Разбор командной домашки", [
+      { note: "Владелец каждой команды показывает экран: доска (сколько из 9 в Done) → Pull requests → Closed (9 слитых, у каждого Approve) → Insights → Network (два merge-коммита «Решил конфликт»). Каждому один вопрос: «Где застряли дольше всего?» Одну остановку разобрать, не больше 3 минут. Не доделали — к занятию 9." },
+      { note: "Переход: «В вашем репозитории уже десятки коммитов. Сегодня учимся в них разбираться: кто что поменял, где что сломалось и как перенести коммит из ветки в ветку»." }]],
+    ["15–21", "показ", "История файла · папка istoriya-demo", [
+      C("cd " + DEMO, "code .", "git log --oneline --graph --all"),
+      { note: "«Это программа-копилка, её писали четверо, 20 коммитов. Сбоку ветки — понадобятся во второй половине». Выход из log — <code>q</code>." },
+      C("git log --oneline README.md", "git log -p README.md", "git show 059d412", "git show --stat 059d412"),
+      { note: "Показать <code>-</code> и <code>+</code>: «минус — было, плюс — стало: цель сменилась с наушников на велосипед». Хеш — из <code>git log --oneline</code>, хватит 7 символов." },
+      { note: "Вопрос классу: «Кто написал функцию <code>trati</code>?» Листать долго:" },
+      C('git log -S "def trati" --oneline'),
+      { note: "Один коммит «Посчитал траты». «<code>-S</code> ищет коммиты, где слово появилось или исчезло. Кавычки — если в слове пробел»." }]],
+    ["21–27", "показ", "git blame · терминал, GitHub, VS Code", [
+      { note: "Вопрос: «Кто и когда написал строку „Цель: накопить на велосипед“?» <code>blame</code> подписывает каждую строку файла." },
+      C("git blame README.md"),
+      { note: "Разобрать одну строку слева направо: хеш → автор → дата → номер строки → текст. <code>^</code> перед хешем — строка с самого первого коммита. Выход — <code>q</code>." },
+      C("git blame -L 5,5 README.md", "git show 059d412", "git blame -L 5,5 README.md 059d412~1"),
+      { note: "«blame говорит кто и когда, а зачем — в самом коммите». Последняя команда — что было в строке до Ани: наушники. «<code>~1</code> — коммит перед этим, так идём назад по следам». <code>~1</code>, а не <code>^</code>: в cmd на Windows <code>^</code> ломает команду." },
+      { note: "<b>GitHub</b>: открыть README в " + "<a href='" + IGRA + "' target='_blank' rel='noopener'>istoriya-igra</a>" + " → кнопка <b>Blame</b>; значок «View blame prior to this change» — шаг назад, как <code>~1</code>; рядом <b>History</b>. Только README — ответы игры не трогать. <b>VS Code</b>: автор строки под курсором в строке состояния или <code>Cmd+Shift+P</code> → «Git: Toggle Git Blame Editor Decoration»; всегда есть Explorer → панель <b>Timeline</b>." },
+      { warn: "Сказать: «Blame — не чтобы ругать, а чтобы знать, у кого спросить. Нашли странную строку → blame → пишете автору»." }]],
+    ["27–35", "показ", "git bisect: горячо-холодно", [
+      C("python3 proverka.py"),
+      { note: "<code>ОШИБКА: недели: с остатком — получилось 3 а надо 4</code>. «Где-то за 20 коммитов сломали. На <code>v1</code> работало — это тег, метка на коммите»." },
+      C("git bisect start", "git bisect bad", "git bisect good v1"),
+      { note: "Дальше цикл вслух: проверяем → говорим git ответ. Через 3–4 шага — <code>d46d5b5 is the first bad commit</code>, «Комментарии в коде»." },
+      C("python3 proverka.py", "git bisect good", "git bisect bad"),
+      C("git show d46d5b5", "git bisect reset"),
+      { note: "«В сообщении — комментарии, а заодно поменялась формула. Вот почему коммит делает одно дело». Без <code>reset</code> так и стоите на старом коммите. Почему быстро: 20 → 10 → 5 → 3 → 1; из 1000 коммитов хватит 10 проверок." },
+      { note: "Если есть время — автоматически:" },
+      C("git bisect start HEAD v1", "git bisect run python3 proverka.py", "git bisect reset")]],
+    ["35–42", "показ", "cherry-pick: один коммит из ветки", [
+      { note: "«Вика в ветке <code>ispravlenie</code> начала черновик и попутно исправила опечатку „капилка“. Ветка не готова, а исправление нужно в main сейчас»." },
+      C("git log --oneline -3 ispravlenie", "git checkout main", "git cherry-pick ХЕШ", "git log --oneline -3"),
+      { note: "ХЕШ — верхний, «Исправил опечатку в README». В README «копилка», <code>velosiped.md</code> нет — черновик не приехал." },
+      { ol: ["Это <b>копия</b>: в main новый хеш, в ветке Вики остался старый.",
+        "Родственник патча: патч — недописанные правки между людьми, <code>cherry-pick</code> — готовый коммит между ветками.",
+        "Конфликт — как обычно, потом <code>git add</code> и <code>git cherry-pick --continue</code>; передумали — <code>--abort</code>.",
+        "В их репозиториях main защищён: ветка от main → <code>cherry-pick</code> → PR."] },
+      C("git reset --hard HEAD~1"),
+      { note: "Вернуть main демо перед rebase." }]],
+    ["42–49", "показ", "rebase main: без конфликта", [
+      C("до:      main   A─B─C─D─E\n                   \\\nветка               X─Y\n\ngit rebase main\n\nпосле:   main   A─B─C─D─E\n                         \\\nветка                     X'─Y'"),
+      { note: "Рисунок — в чат. «До сих пор вы обновляли ветку через <code>git pull origin main</code> — получался merge-коммит. rebase снимает ваши коммиты, обновляет основу и кладёт их сверху. История прямая»." },
+      C("git log --oneline --graph main moya-vetka", "git checkout moya-vetka", "git rebase main", "git log --oneline --graph -6"),
+      { note: "«Идеи» сверху, хеши <b>новые</b>: «X' — не X, коммиты переписаны»." }]],
+    ["49–55", "показ", "rebase с конфликтом", [
+      C("git checkout konflikt", "git rebase main"),
+      { warn: "<code>CONFLICT</code> в README. «При rebase всё наоборот: сверху (HEAD, Current) — main, снизу (Incoming) — ваш коммит. Читайте текст, а не кнопки»." },
+      { note: "Оставить <code>Цель: накопить на велосипед и чехол.</code>, метки убрать, сохранить." },
+      C("git add README.md", "git rebase --continue"),
+      { note: "Откроется сообщение — закрыть вкладку (Vim: <kbd>Esc</kbd>, <code>:wq</code>, <kbd>Enter</kbd>). «Конфликт может быть на каждом вашем коммите по очереди: решили → add → continue. Запутались — <code>git rebase --abort</code>»." }]],
+    ["55–60", "показ", "push после rebase · правило · rebase -i", [
+      { note: "Если <code>istoriya-demo</code> есть на GitHub — показать, иначе словами: обычный push откажет <code>rejected (non-fast-forward)</code> — на GitHub старые X, Y, у меня новые." },
+      C("git push", "git push --force-with-lease"),
+      C("REBASE — ТОЛЬКО В СВОЕЙ ВЕТКЕ, В КОТОРОЙ НЕ РАБОТАЕТ НИКТО ДРУГОЙ.\nmain и общие ветки — никогда.\nПосле rebase: git push --force-with-lease (не просто --force)."),
+      { ol: ["В main не выйдет: правило main запрещает force push (занятие 6).",
+        "<code>--force-with-lease</code> откажет, если в ветке на GitHub появилось чужое.",
+        "После force push Approve в PR сбрасывается — это нормально."] },
+      { note: "<b>rebase -i — только смотрим.</b> Во второй и третьей строке <code>pick</code> → <code>squash</code>, сохранить, закрыть; сообщение «Идеи для копилки». «Если откроется сами — <code>git rebase --abort</code>»." },
+      C("git checkout moya-vetka", "git rebase -i main", "git log --oneline -3")]],
+    ["60–65", "перерыв", "Перерыв", [
+      { note: "После занятия демо вернуть: удалить папку и пересоздать скриптом (чек-лист, п. 3)." }]],
+    ["65–110", "практика", "Практика: каждый сам", [
+      { note: "Весь материал показан. Ученики открывают свою страницу → вкладка <b>Практика</b> → «Практика на занятии 8». Push не делают. Ответы детектива — в личку, хеш виновника в игре — в общий чат, кто первый." },
       C(SITE + "#lesson"),
-      { note: "Первого, кто написал «готово», спросить вслух: «Почему в шаге 4 обычный <code>git stash</code> не сработал?» Частые остановки — в таблице «Если у ученика…» ниже." },
-      { ready: "Все написали «готово»" },
-      C("Нужно переключить ветку, а работа не дописана:\ngit stash       — спрятать (git stash -u — вместе с новыми файлами)\ngit stash pop   — вернуть, в той же ветке, где прятали\ngit stash list  — что лежит в кармане\nrm файл         — удалить файл (в cmd на Windows: del файл)")]],
-    ["31–38", "по желанию", "Патч в парах", [
-      { note: "Только если есть запас: время уходит на пересылку. Вкладка <b>Практика</b> → часть 2. Владелец сохраняет патч и шлёт напарнику в личку Telegram, напарник применяет и присылает скрин <code>git diff</code>." },
-      { ready: "Все пары прислали скрин" }]],
+      C("ПРАКТИКА · 45 минут · каждый сам · push НЕ делаем\nПодробно, с галочками: " + SITE + "#lesson\n0. git clone " + IGRA + ".git (на рабочем столе, не в своём проекте)\nА. Детектив — 5 вопросов, ответы мне в личку\nБ. Игра bisect — хеш, автор и сообщение виновника В ЧАТ, кто первый\nВ. cherry-pick опечатки из ветки ispravlenie\nГ. rebase: moya-vetka, потом konflikt\nУборка: git checkout main · git reset --hard origin/main\nНа Windows вместо python3 — python."),
+      { note: "Тайминг: клон 3, детектив 10, игра 12, cherry-pick 8, rebase 12. Не успевают — rebase с конфликтом сделать вместе на экране." },
+      { warn: "<b>Ответы детектива:</b> 1) Вика, <code>ab4aff3</code> «Самая большая трата»; 2) Аня, <code>83f1651</code> «Новая цель в README»; 3) на наушники; 4) <code>kopilka.py</code> и <code>operacii.txt</code> (<code>19adab4</code>); 5) 5 коммитов.<br><b>Игра:</b> <code>8ec99ed</code>, Гоша, «Упростил подсчёт недель»: <code>(ostatok + v_nedelyu - 1) // v_nedelyu</code> → <code>ostatok // v_nedelyu</code>; 1000 ₽ по 300 — 4 недели, а программа говорит 3. От <code>v1</code> — 4 проверки.<br><b>Cherry-pick:</b> хеш в ветке <code>7274b2f</code>." },
+      { ready: "Все написали «готово»" }]],
+    ["110–120", "итог", "Ответы и итог", [
+      { note: "Объявить, кто первым нашёл виновника; показать <code>git show 8ec99ed</code> в istoriya-igra. Пройти ответы детектива (2 мин). Домашка: доделать командную к занятию 8; по желанию — в следующем PR обновить ветку через <code>git rebase main</code> + <code>git push --force-with-lease</code>." },
+      C("ЗАНЯТИЕ 8 · ЗАПОМНИТЬ\ngit log -p файл             что менялось в файле\ngit log -S \"слово\"          в каком коммите слово появилось\ngit blame файл              кто последним менял каждую строку\ngit blame -L 5,5 файл       только строка 5 (+ ХЕШ~1 — что было до этого коммита)\ngit bisect                  start · bad · good ХОРОШИЙ · …проверка… · reset\ngit cherry-pick ХЕШ         копия одного коммита в текущую ветку\ngit rebase main             моя ветка поверх свежего main\n   конфликт: решить · git add · git rebase --continue · запутался: --abort\n   потом: git push --force-with-lease — ТОЛЬКО в своей ветке")]],
   ];
   function renderFlow() {
     let n = 0;
@@ -495,12 +519,12 @@
   async function start() {
     const [ps, kv, qz] = await Promise.all([
       rest("git_pupils?select=*&order=team.asc,sort.asc,name.asc"),
-      rest("git_teacher_kv?select=*&key=in.(prep7,sent)"),
+      rest("git_teacher_kv?select=*&key=in.(prep8,sent)"),
       rest("git_quiz?select=session,q,revealed&id=eq.1"),
     ]);
     pupils = ps;
     const kvOf = (k) => { const r = kv.find((x) => x.key === k); return (r && r.value) || []; };
-    prepDone = kvOf("prep7");
+    prepDone = kvOf("prep8");
     sentMarks = kvOf("sent");
     if (qz[0]) quiz = qz[0];
     await loadEvents();
