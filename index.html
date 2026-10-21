@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261021161548">
+<link rel="stylesheet" href="quiz.css?v=20261021161842">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1289,9 +1289,10 @@ git log --oneline -3</pre>
 git pull</pre>
   <p>Ответы на 5 вопросов — руководителю <b>в личку</b>: ответ и команда, которой нашли. Выход из <code>git log</code> и <code>git blame</code> — клавиша <code>q</code>.</p>
   <ol class="steps" id="l8hw1">
-    <li><h3>Кто и в каком коммите последним менял строку про <b>того, чей pull request вы проверяете</b>, в разделе «Команда»?</h3>
+    <li><h3>Кто и в каком коммите последним менял в разделе «Команда» строку товарища, которого вы проверяете по кругу?</h3>
+      <p>Участник 2 — строку Участника 1, Участник 3 — Участника 2, Участник 1 — Участника 3.</p>
       <pre class="cmd">git blame README.md</pre>
-      <p>Найдите его строку под <code>## Команда</code>: слева хеш, автор и дата. Зачем был этот коммит — покажет <code>git show ХЕШ</code>. То же на GitHub: README.md → кнопка <b>Blame</b>.</p>
+      <p>Найдите его строку под <code>## Команда</code>: слева хеш, автор и дата. Зачем был этот коммит — покажет <code>git show ХЕШ</code>. То же на GitHub: README.md → кнопка <b>Blame</b>. Если там не он сам, а коммит «Решил конфликт», значит строку поправили при решении конфликта.</p>
     </li>
     <li><h3>Что вы поменяли в своём документе по замечанию ревьюера и как было до этого?</h3>
       <pre class="cmd">git log --oneline docs/ВАШ_ФАЙЛ.md
@@ -1398,9 +1399,9 @@ git log --oneline --graph -20</pre>
 
 </main>
 
-<script src="live.js?v=20261021161548"></script>
-<script src="quiz.js?v=20261021161548"></script>
-<script src="engine.js?v=20261021161548"></script>
+<script src="live.js?v=20261021161842"></script>
+<script src="quiz.js?v=20261021161842"></script>
+<script src="engine.js?v=20261021161842"></script>
 <script>
 (function () {
   "use strict";
