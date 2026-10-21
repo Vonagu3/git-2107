@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261019234913">
+<link rel="stylesheet" href="quiz.css?v=20261021161159">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -219,10 +219,121 @@ pre.cmd { font-variant-ligatures: none; background: var(--term-bg); color: var(-
   </div>
 </section>
 
-<!-- ================= ПРАКТИКА: занятие 7 (stash, патч), ниже — занятия 5–6 ================= -->
+<!-- ================= ПРАКТИКА: занятие 8 (история, blame, cherry-pick, rebase), ниже — занятия 7 и 5–6 ================= -->
 <section class="tab" id="tab-lesson">
   <div class="doc">
-  <h1>Практика на занятии 7: карман git stash и патч-файл</h1>
+  <h1>Практика на занятии 8: история, blame, cherry-pick, rebase</h1>
+  <p class="lead">Каждый сам, в учебном репозитории «Копилка» — маленькой программе на Python, которую писали четверо: Аня, Боря, Вика и Гоша. Работаем только у себя: <b>push не делаем</b>, у вас нет на это прав, так и задумано. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+
+  <h2>0. Скачать · 3 минуты</h2>
+  <ol class="steps" id="l8clone">
+    <li><h3>Клон «Копилки»</h3>
+      <p>В терминале перейдите на рабочий стол — <b>не</b> внутрь репозитория своей команды.</p>
+      <pre class="cmd">git clone https://github.com/Vonagu3/istoriya-igra.git
+cd istoriya-igra
+code .
+git log --oneline --graph --all</pre>
+      <p>Видно 20 коммитов в main и три ветки сбоку — они понадобятся в заданиях Б и В. Выход из <code>git log</code> — клавиша <code>q</code>.</p>
+    </li>
+  </ol>
+
+  <h2>А. Детектив · 12 минут</h2>
+  <p>Ответы на 5 вопросов пришлите руководителю <b>в личку</b>, не в общий чат.</p>
+  <ol class="steps" id="l8det">
+    <li><h3>Кто написал функцию <code>samaya_bolshaya_trata</code>?</h3>
+      <pre class="cmd">git log -S "def samaya_bolshaya_trata" --oneline</pre>
+      <p><code>-S</code> ищет коммиты, где это слово появилось или исчезло. Автора покажет <code>git show ХЕШ</code>.</p>
+    </li>
+    <li><h3>Кто последним поменял в <code>kopilka.py</code> строку <code>return (ostatok + v_nedelyu - 1) // v_nedelyu</code> и в каком коммите?</h3>
+      <pre class="cmd">git blame kopilka.py</pre>
+      <p>Каждая строка подписана: хеш коммита, автор, дата, номер строки. Значок <code>^</code> перед хешем — строка с самого первого коммита. Номер строки виден и в VS Code слева от текста. То же на GitHub: откройте <code>kopilka.py</code> → кнопка <b>Blame</b>.</p>
+    </li>
+    <li><h3>Как раньше называлась переменная <code>ostatok</code> и кто написал ту, старую строку?</h3>
+      <pre class="cmd">git blame -L НОМЕР,НОМЕР kopilka.py ХЕШ~1</pre>
+      <p><code>-L 20,20</code> — только строка 20: вместо <code>НОМЕР</code> — номер строки из вопроса 2. <code>ХЕШ</code> — из ответа на вопрос 2, <code>~1</code> — «коммит перед ним». Убираете <code>-L</code> — убирайте и числа. Другой способ: <code>git show ХЕШ</code> и смотреть строки с <code>-</code> и <code>+</code>.</p>
+    </li>
+    <li><h3>Какие файлы поменял коммит «Операции из файла»?</h3>
+      <pre class="cmd">git log --oneline
+git show --stat ХЕШ</pre>
+    </li>
+    <li><h3>Сколько коммитов сделал Боря?</h3>
+      <pre class="cmd">git log --oneline --author="Боря"</pre>
+    </li>
+  </ol>
+
+  <h2>Б. Cherry-pick: взять один коммит · 10 минут</h2>
+  <div class="note-box"><b>Ситуация.</b> Вика в ветке <code>ispravlenie</code> начала черновик и попутно исправила опечатку в README — «капилка». Ветка не готова, а исправление нужно в main прямо сейчас. Берём <b>один</b> коммит, а не всю ветку.</div>
+  <ol class="steps" id="l8pick">
+    <li><h3>Найти коммит</h3>
+      <pre class="cmd">git log --oneline -3 origin/ispravlenie</pre>
+      <p>Скопируйте хеш коммита «Исправил опечатку в README».</p>
+    </li>
+    <li><h3>Перенести в main</h3>
+      <pre class="cmd">git checkout main
+git cherry-pick ХЕШ
+git log --oneline -3</pre>
+      <p>В main новый коммит с тем же сообщением, но <b>другим хешем</b> — это копия. В README теперь «копилка», а файла <code>velosiped.md</code> нет: черновик остался в ветке Вики.</p>
+    </li>
+  </ol>
+
+  <h2>В. Rebase: моя ветка поверх свежего main · 20 минут</h2>
+  <div class="note-box"><b>Зачем.</b> Ветку создали давно, а main ушёл вперёд. <code>git pull origin main</code> добавил бы merge-коммит. <code>git rebase main</code> делает иначе: снимает ваши коммиты, обновляет основу и кладёт их сверху заново. История получается прямой, а коммиты — переписанными, с новыми хешами.</div>
+  <ol class="steps" id="l8rebase">
+    <li><h3>Без конфликта</h3>
+      <pre class="cmd">git checkout moya-vetka
+git log --oneline --graph -10 --all
+git rebase main
+git log --oneline --graph -6</pre>
+      <p>До — ветка отходит от старого main. После — три коммита «Идея: …» сверху, хеши у них новые.</p>
+    </li>
+    <li><h3>С конфликтом</h3>
+      <pre class="cmd">git checkout konflikt
+git rebase main</pre>
+      <p><code>CONFLICT</code> в <code>README.md</code>: эту же строку «Цель» поменяли и в main, и в ветке. Откройте README в VS Code. <b>При rebase всё наоборот:</b> сверху (HEAD, Current) — main, снизу (Incoming) — ваш коммит. Читайте текст, а не кнопки.</p>
+      <p>Оставьте одну строку <code>Цель: …</code> — какую хотите, хоть свою, — уберите метки <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>, сохраните.</p>
+      <pre class="cmd">git add README.md
+git rebase --continue
+git log --oneline --graph -6</pre>
+      <p>После <code>--continue</code> откроется сообщение коммита — просто закройте вкладку (Vim: <kbd>Esc</kbd>, <code>:wq</code>, <kbd>Enter</kbd>). Запутались — <code>git rebase --abort</code>, всё вернётся как было, и заново.</p>
+    </li>
+    <li><h3>Убрать за собой</h3>
+      <pre class="cmd">git checkout main
+git reset --hard origin/main
+git status</pre>
+      <p>Main снова как на GitHub. Папку <code>istoriya-igra</code> потом можно удалить. Напишите в чат группы «готово».</p>
+    </li>
+  </ol>
+
+  <div class="note-box"><b>Правило rebase.</b> Только в <b>своей</b> ветке, в которой не работает никто другой. В main и общих ветках — никогда. После rebase обычный <code>git push</code> откажет: на GitHub старые коммиты, у вас новые. Тогда <code>git push --force-with-lease</code> — и только в своей ветке. Approve в pull request после этого сбросится, ревьюер посмотрит ещё раз.</div>
+
+  <h2>Шпаргалка: история и перенос коммитов</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td><code>git log -p файл</code></td><td>Все изменения файла: <code>-</code> было, <code>+</code> стало</td></tr>
+    <tr><td><code>git log -S "слово"</code></td><td>В каких коммитах слово появилось или исчезло</td></tr>
+    <tr><td><code>git log --author="Имя"</code></td><td>Коммиты одного автора</td></tr>
+    <tr><td><code>git show ХЕШ</code></td><td>Один коммит: кто, когда, зачем, что поменял. <code>--stat</code> — только файлы</td></tr>
+    <tr><td><code>git blame файл</code></td><td>Кто и когда последним менял каждую строку. На GitHub — кнопка Blame</td></tr>
+    <tr><td><code>git blame -L 20,20 файл ХЕШ~1</code></td><td>Строка 20 — какой она была до этого коммита</td></tr>
+    <tr><td><code>git cherry-pick ХЕШ</code></td><td>Копия одного коммита в текущую ветку</td></tr>
+    <tr><td><code>git rebase main</code></td><td>Переставить свою ветку поверх свежего main</td></tr>
+    <tr><td><code>git rebase --continue</code> / <code>--abort</code></td><td>После решения конфликта — дальше / отменить весь rebase</td></tr>
+  </table></div>
+
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что видите</th><th>Что делать</th></tr>
+    <tr><td>На экране <code>:</code> и ничего не вводится</td><td>Это <code>git log</code> или <code>git blame</code> — клавиша <code>q</code>.</td></tr>
+    <tr><td><code>git blame</code>: <code>no such path</code></td><td>Убрали числа, а <code>-L</code> оставили: git принял имя файла за номера строк. Пишите <code>-L 20,20</code> или уберите <code>-L</code> совсем.</td></tr>
+    <tr><td><code>cherry-pick</code>: bad revision</td><td>Хеш скопирован не целиком или с пробелом. Возьмите из <code>git log --oneline -3 origin/ispravlenie</code>.</td></tr>
+    <tr><td><code>git checkout moya-vetka</code>: pathspec did not match</td><td><code>git checkout -b moya-vetka origin/moya-vetka</code>.</td></tr>
+    <tr><td>После <code>--continue</code> снова конфликт</td><td>Это следующий коммит ветки — решите так же, <code>git add</code>, <code>git rebase --continue</code>.</td></tr>
+    <tr><td>Запутались в rebase</td><td><code>git rebase --abort</code> — всё как было, и заново.</td></tr>
+    <tr><td><code>git push</code> не даёт</td><td>Так и задумано: в этот репозиторий push не делаем.</td></tr>
+  </table></div>
+  <p>Застряли дольше пяти минут — пишите в чат группы: что делали и какую ошибку видите.</p>
+
+  <h1 style="margin-top:40px">Для повторения · занятие 7: карман git stash и патч-файл</h1>
   <p class="lead">Часть 1 — каждый сам: прячем недописанную работу в карман и достаём обратно. Часть 2 — в паре, если останется время: передаём недописанные правки напарнику файлом. Всё в папке репозитория своей команды. <b>Push не делаем.</b> Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
 
   <div class="note-box"><b>Зачем.</b> Вы дописываете README в своей ветке, остановились на середине. Пишет напарник: «глянь мой PR». Коммитить полуготовое не хочется — прячем в карман: <code>git stash</code>.</div>
@@ -770,7 +881,7 @@ python проверить.py 5      # только задание 5</pre>
 <section class="tab" id="tab-cheat">
   <div class="doc">
   <h1>Шпаргалка</h1>
-  <p class="lead">Все команды вводятся в терминале VS Code, находясь в папке репозитория. Слова <code>файл</code>, <code>имя</code>, <code>ветка</code> заменяйте на свои. В тренажёре работают основные команды; <code>stash</code>, <code>reset</code>, <code>revert</code>, <code>reflog</code> и патчи — только в настоящем терминале.</p>
+  <p class="lead">Все команды вводятся в терминале VS Code, находясь в папке репозитория. Слова <code>файл</code>, <code>имя</code>, <code>ветка</code> заменяйте на свои. В тренажёре работают основные команды; <code>stash</code>, <code>reset</code>, <code>revert</code>, <code>reflog</code>, <code>blame</code>, <code>cherry-pick</code>, <code>rebase</code> и патчи — только в настоящем терминале.</p>
 
   <div class="cols2">
     <div class="card"><h3>Один раз на компьютере</h3>
@@ -857,6 +968,27 @@ git push -u origin moya-zadacha</pre>
   </table></div>
   <p>До push можно переписывать как угодно. После push переписываем только свою неслитую ветку; в общей ветке и в main — исправление сверху.</p>
 
+  <h2>История: кто, когда и зачем</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td>git log -p файл</td><td>Все изменения одного файла: <code>-</code> было, <code>+</code> стало.</td></tr>
+    <tr><td>git log -S "слово"</td><td>В каких коммитах слово появилось или исчезло. Добавьте <code>--oneline</code>, чтобы кратко.</td></tr>
+    <tr><td>git log --author="Имя"</td><td>Коммиты одного автора.</td></tr>
+    <tr><td>git show --stat a1b2c3d</td><td>Какие файлы поменял коммит, без самих изменений.</td></tr>
+    <tr><td>git blame файл</td><td>Кто и когда последним менял каждую строку. На GitHub: файл → кнопка <b>Blame</b>. Выход — <code>q</code>.</td></tr>
+    <tr><td>git blame -L 5,10 файл</td><td>Только строки 5–10. Добавьте <code>a1b2c3d~1</code> в конец — какими они были до этого коммита.</td></tr>
+  </table></div>
+
+  <h2>Перенести коммиты</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td>git cherry-pick a1b2c3d</td><td>Копия одного коммита из другой ветки в текущую. Хеш у копии новый.</td></tr>
+    <tr><td>git rebase main</td><td>Переставить свою ветку поверх свежего main: история без merge-коммитов, ваши коммиты переписаны. Только в <b>своей</b> ветке, никогда в main и общих.</td></tr>
+    <tr><td>git add файл<br>git rebase --continue</td><td>Конфликт при rebase решён — идти дальше. Сверху в конфликте main, снизу ваш коммит.</td></tr>
+    <tr><td>git rebase --abort<br>git cherry-pick --abort</td><td>Отменить всё и вернуться как было.</td></tr>
+    <tr><td>git push --force-with-lease</td><td>Отправить ветку после rebase. Approve в pull request сбросится.</td></tr>
+  </table></div>
+
   <h2>Карман: git stash</h2>
   <div class="tablewrap"><table class="cheat">
     <tr><th>Команда</th><th>Что делает</th></tr>
@@ -940,11 +1072,12 @@ git push -u origin moya-zadacha</pre>
 <!-- ================= ДОМАШКА ================= -->
 <section class="tab" id="tab-hw">
   <div class="doc">
-  <span id="proj"></span><span id="hw7"></span>
-  <h1 id="hw8">Домашнее задание к занятию 8: повторяем весь git</h1>
-  <p class="lead">Командой из трёх человек, 2 часа в созвоне, в репозитории проекта владельца. Кто Участник 1 (владелец), 2 и 3 — сказано в чате группы в Telegram. Работа устроена кругом, поэтому у каждого одинаковый набор: 3 задачи, 3 pull request, 3 review. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+  <span id="proj"></span><span id="hw7"></span><span id="hw9"></span>
+  <h1 id="hw8">Домашнее задание к занятию 9: повторяем весь git и читаем историю</h1>
+  <div class="note-box"><b>Что нового.</b> Это домашка к занятию 8 и новая <b>часть 4</b> — по темам занятия 8: история, <code>git blame</code>, <code>cherry-pick</code>. Части 0–3 уже сделали — переходите сразу к части 4. Rebase пока не нужен: разберём его на занятии 9.</div>
+  <p class="lead">Командой из трёх человек, около 2,5 часа в созвоне, в репозитории проекта владельца. Кто Участник 1 (владелец), 2 и 3 — сказано в чате группы в Telegram. Работа устроена кругом, поэтому у каждого одинаковый набор: 4 задачи, 4 pull request, 4 review. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
   <div class="note-box"><b>Круг review:</b> pull request Участника 1 проверяет Участник 2, pull request Участника 2 — Участник 3, pull request Участника 3 — Участник 1. В main напрямую не пушим: всё через pull request с Approve.</div>
-  <p><b>Готово, когда:</b> 9 слитых pull request с <code>Closes</code> — по 3 от каждого, у каждого Approve; 3 Request changes — по одному от каждого ревьюера; в main три документа в папке <code>docs/</code> и все трое в разделе «Команда» README; 9 задач на доске в Done; файла <code>.env</code> нет в репозитории; скрины <code>git log</code> от всех троих в чате.</p>
+  <p><b>Готово, когда:</b> 12 слитых pull request с <code>Closes</code> — по 4 от каждого, у каждого Approve; 3 Request changes — по одному от каждого ревьюера; в main три документа в папке <code>docs/</code> и все трое в разделе «Команда» README; 12 задач на доске в Done; файла <code>.env</code> нет ни в репозитории, ни в истории; ответы детектива — руководителю в личку; скрины <code>git log</code> от всех троих в чате.</p>
 
   <h2>0. Подготовка · 15 минут</h2>
   <ol class="steps" id="l7hw0">
@@ -1147,10 +1280,82 @@ git log --oneline -3</pre>
     </li>
   </ol>
 
-  <h2>4. Итог · 10 минут</h2>
+  <h2>4. История и cherry-pick · 40 минут · по темам занятия 8</h2>
+  <p>Теперь в вашем репозитории есть настоящая история: документы, review, конфликт, патч. Читаем её и переносим один коммит из ветки в ветку. Детектив каждый может сделать сам, без созвона.</p>
+
+  <h3>Детектив по своему репозиторию · 15 минут · каждый сам</h3>
+  <p>Сначала свежий main:</p>
+  <pre class="cmd">git checkout main
+git pull</pre>
+  <p>Ответы на 5 вопросов — руководителю <b>в личку</b>: ответ и команда, которой нашли. Выход из <code>git log</code> и <code>git blame</code> — клавиша <code>q</code>.</p>
+  <ol class="steps" id="l8hw1">
+    <li><h3>Кто и в каком коммите последним менял строку про <b>того, чей pull request вы проверяете</b>, в разделе «Команда»?</h3>
+      <pre class="cmd">git blame README.md</pre>
+      <p>Найдите его строку под <code>## Команда</code>: слева хеш, автор и дата. Зачем был этот коммит — покажет <code>git show ХЕШ</code>. То же на GitHub: README.md → кнопка <b>Blame</b>.</p>
+    </li>
+    <li><h3>Что вы поменяли в своём документе по замечанию ревьюера и как было до этого?</h3>
+      <pre class="cmd">git log --oneline docs/ВАШ_ФАЙЛ.md
+git show ХЕШ</pre>
+      <p>Вместо <code>ВАШ_ФАЙЛ</code> — свой: <code>scenarii</code>, <code>dannye</code> или <code>plan</code>. <code>ХЕШ</code> — коммита «Доработал по замечаниям». Строки с <code>-</code> — как было, с <code>+</code> — как стало.</p>
+    </li>
+    <li><h3>Кто сделал два коммита «Решил конфликт в README»?</h3>
+      <pre class="cmd">git log --oneline --merges</pre>
+      <p><code>--merges</code> — только коммиты-склейки с двумя родителями: и ваши «Решил конфликт», и «Merge pull request» от GitHub. Автора покажет <code>git show ХЕШ</code> — первые строки.</p>
+    </li>
+    <li><h3>Секрет не попал в историю?</h3>
+      <pre class="cmd">git log -S "TOKEN=" --oneline</pre>
+      <p>Должно быть пусто: значит, строки <code>TOKEN=</code> не было ни в одном коммите, даже в удалённом потом. Если что-то нашлось — сразу напишите руководителю, это важно.</p>
+    </li>
+    <li><h3>Сколько коммитов в репозитории у каждого из троих?</h3>
+      <pre class="cmd">git log --oneline --author="Имя"</pre>
+      <p>Имя — как в <code>git config user.name</code> у этого человека. Посчитайте строки для каждого.</p>
+    </li>
+  </ol>
+
+  <h3>Cherry-pick: взять один коммит из черновика · 25 минут · каждый свой</h3>
+  <div class="note-box"><b>Ситуация.</b> Вы начали в ветке черновик, а попутно нашли и исправили ошибку в своём документе. Черновик не готов, а исправление нужно в main сейчас. Берём <b>один</b> коммит. Main защищён, поэтому так: новая ветка от main → <code>cherry-pick</code> → pull request.</div>
+  <ol class="steps" id="l8hw2">
+    <li><h3>Задача</h3>
+      <p>Issue «Исправление в docs/… — Имя». Assignees — себя, метка <b>документация</b>, справа <b>Projects</b> → доска команды. В описании:</p>
+      <pre class="cmd">Что сделать: исправить ошибку в docs/ВАШ_ФАЙЛ.md без черновика.
+Зачем: исправление нужно в main сейчас, черновик ещё не готов.
+Готово, когда:
+- [ ] в main исправление есть
+- [ ] файла chernovik-imya.md в main нет</pre>
+    </li>
+    <li><h3>Ветка-черновик с двумя коммитами</h3>
+      <pre class="cmd">git checkout main
+git pull
+git checkout -b chernovik-imya</pre>
+      <p>Вместо <code>imya</code> — своё имя латиницей. Исправьте в <b>своём</b> документе ошибку или неточность, сохраните:</p>
+      <pre class="cmd">git add .
+git commit -m "Исправил ошибку в docs/ВАШ_ФАЙЛ.md"</pre>
+      <p>Теперь черновик: создайте файл <code>chernovik-imya.md</code> с любой недописанной идеей для проекта, сохраните:</p>
+      <pre class="cmd">git add .
+git commit -m "Черновик: идея"
+git log --oneline -3</pre>
+      <p>Скопируйте хеш коммита «Исправил ошибку…» — он второй сверху.</p>
+    </li>
+    <li><h3>Взять только исправление</h3>
+      <pre class="cmd">git checkout main
+git checkout -b fix-imya
+git cherry-pick ХЕШ
+git log --oneline -3</pre>
+      <p>В ветке <code>fix-imya</code> новый коммит с тем же сообщением, но <b>другим хешем</b> — это копия. Файла <code>chernovik-imya.md</code> в папке нет: черновик остался в своей ветке.</p>
+    </li>
+    <li><h3>Pull request и уборка</h3>
+      <pre class="cmd">git push -u origin fix-imya</pre>
+      <p>Pull request с <code>Closes #номер</code>, review по кругу: ревьюер проверяет, что в Files changed только исправление и нет черновика. Approve → Merge. Черновик на GitHub не отправляли — удалите ветку у себя:</p>
+      <pre class="cmd">git checkout main
+git pull
+git branch -D chernovik-imya</pre>
+    </li>
+  </ol>
+
+  <h2>5. Итог · 10 минут</h2>
   <ol class="steps" id="l7hw4">
     <li><h3>Доска</h3>
-      <p>Все 9 задач в Done. Какая-то осталась — значит, в её pull request не было <code>Closes</code>: закройте задачу кнопкой <b>Close issue</b>.</p>
+      <p>Все 12 задач в Done. Какая-то осталась — значит, в её pull request не было <code>Closes</code>: закройте задачу кнопкой <b>Close issue</b>.</p>
     </li>
     <li><h3>История · каждый</h3>
       <pre class="cmd">git checkout main
@@ -1180,6 +1385,12 @@ git log --oneline --graph -20</pre>
     <tr><td>После <code>--amend</code> git просит pull</td><td>Push уже был до <code>--amend</code>. В своей ветке: <code>git push --force-with-lease</code>, Approve потом поставят заново.</td></tr>
     <tr><td>Push в main прошёл</td><td>Правило ветки не работает: владелец, Settings → Rules → Rulesets → main → Active.</td></tr>
     <tr><td><code>rm</code> не найдена</td><td>Вы в cmd на Windows: <code>del</code> вместо <code>rm</code>. Или терминал в VS Code.</td></tr>
+    <tr><td>На экране <code>:</code> и ничего не вводится</td><td>Это <code>git log</code> или <code>git blame</code> — клавиша <code>q</code>.</td></tr>
+    <tr><td><code>git log --author</code> ничего не показал</td><td>Имя не совпало. Посмотрите, как подписаны коммиты: <code>git log --format="%an"</code>, и возьмите имя оттуда.</td></tr>
+    <tr><td><code>cherry-pick</code>: bad revision</td><td>Хеш скопирован не целиком или с пробелом. Возьмите заново: <code>git log --oneline -3 chernovik-imya</code>.</td></tr>
+    <tr><td><code>cherry-pick</code>: конфликт</td><td>Main успел поменять ту же строку. Решите как обычно, затем <code>git add .</code> и <code>git cherry-pick --continue</code>. Передумали — <code>git cherry-pick --abort</code>.</td></tr>
+    <tr><td>В <code>fix-imya</code> появился файл черновика</td><td>Взяли не тот хеш. <code>git reset --hard origin/main</code> в ветке <code>fix-imya</code> и снова <code>cherry-pick</code> с хешем «Исправил ошибку…».</td></tr>
+    <tr><td><code>git branch -D</code>: not found</td><td>Имя ветки другое. Список веток: <code>git branch</code>.</td></tr>
   </table></div>
   <p>Застряли дольше пяти минут — пишите в чат группы: что делали и какую ошибку видите.</p>
   </div>
@@ -1187,9 +1398,9 @@ git log --oneline --graph -20</pre>
 
 </main>
 
-<script src="live.js?v=20261019234913"></script>
-<script src="quiz.js?v=20261019234913"></script>
-<script src="engine.js?v=20261019234913"></script>
+<script src="live.js?v=20261021161159"></script>
+<script src="quiz.js?v=20261021161159"></script>
+<script src="engine.js?v=20261021161159"></script>
 <script>
 (function () {
   "use strict";
@@ -1264,8 +1475,14 @@ git log --oneline --graph -20</pre>
   checkSteps("l7hw2", "l7hw2");
   checkSteps("l7hw3", "l7hw3");
   checkSteps("l7hw4", "l7hw4");
+  checkSteps("l8hw1", "l8hw1");
+  checkSteps("l8hw2", "l8hw2");
   checkSteps("l7stash", "l7stash");
   checkSteps("l7patch", "l7patch");
+  checkSteps("l8clone", "l8clone");
+  checkSteps("l8det", "l8det");
+  checkSteps("l8pick", "l8pick");
+  checkSteps("l8rebase", "l8rebase");
 
   // ================= ТРЕНАЖЁР =================
   const L = S.LEVELS;
