@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261021161842">
+<link rel="stylesheet" href="quiz.css?v=20261022225138">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1283,6 +1283,12 @@ git log --oneline -3</pre>
   <h2>4. История и cherry-pick · 40 минут · по темам занятия 8</h2>
   <p>Работаем в <b>репозитории проекта команды</b> — том же, что в частях 0–3 (у владельца). Не в «Копилке» с занятия: там история чужая. Теперь в нём есть настоящая история: документы, review, конфликт, патч. Читаем её и переносим один коммит из ветки в ветку. Детектив каждый может сделать сам, без созвона.</p>
 
+  <div class="note-box"><b>Где взять репозиторий.</b> Это папка репозитория команды на вашем компьютере — та, в которой вы работали в частях 0–3. Новый участник скачал её в части 0, шаг «Скачать репозиторий». Прежний хозяин после передачи владельцу перенастроил её через <code>git remote set-url</code> (шаг «Репозиторий команды»). <b>Папки нет или не помните, где она:</b> страница репозитория владельца на GitHub → зелёная кнопка <b>&lt;&gt; Code</b> → HTTPS → скопировать, затем в терминале <code>cd Desktop</code> и <code>git clone ССЫЛКА</code>. История скачается вся сразу.</div>
+
+  <div class="note-box"><b>Что в нём сейчас.</b> С создания: <code>README.md</code>, <code>.gitignore</code> со строкой <code>.env</code>, правило main. Часть 1 — три документа в <code>docs/</code>: <code>scenarii.md</code> (Участник 1), <code>dannye.md</code> (Участник 2), <code>plan.md</code> (Участник 3), у каждого коммит «Доработал по замечаниям». Часть 2 — все трое в разделе «Команда» README и коммиты «Решил конфликт в README». Часть 3 — коммиты «Правка от Имя» по патчу. Всё слито через pull request, поэтому в main есть коммиты «Merge pull request #…». Это и читаем.</div>
+
+  <div class="note-box"><b>Без сайта GitHub.</b> Детектив — целиком в терминале, в этой папке. GitHub нужен только для <code>git pull</code> ниже: он подтягивает коммиты товарищей. Кнопка Blame на GitHub — запасной вариант того же самого мышкой. Cherry-pick дальше — уже с GitHub: issue, push, pull request.</div>
+
   <h3>Детектив по своему репозиторию · 15 минут · каждый сам</h3>
   <p>Сначала свежий main:</p>
   <pre class="cmd">git checkout main
@@ -1399,9 +1405,9 @@ git log --oneline --graph -20</pre>
 
 </main>
 
-<script src="live.js?v=20261021161842"></script>
-<script src="quiz.js?v=20261021161842"></script>
-<script src="engine.js?v=20261021161842"></script>
+<script src="live.js?v=20261022225138"></script>
+<script src="quiz.js?v=20261022225138"></script>
+<script src="engine.js?v=20261022225138"></script>
 <script>
 (function () {
   "use strict";
