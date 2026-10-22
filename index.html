@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261022225138">
+<link rel="stylesheet" href="quiz.css?v=20261022225500">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -216,6 +216,74 @@ pre.cmd { font-variant-ligatures: none; background: var(--term-bg); color: var(-
   <div class="doc" style="max-width:980px">
   <div class="card keybox" id="keybox"></div>
   <div class="card" id="liveq" style="margin-top:14px"></div>
+
+  <h1 style="margin-top:40px">Конспект занятия 8: история и cherry-pick</h1>
+  <p class="lead">Что показывали на занятии — по шагам, чтобы повторить самим в «Копилке» (<code>istoriya-igra</code>, как скачать — вкладка «Практика», шаг 0). Ответов детектива здесь нет: примеры другие. Выход из <code>git log</code> и <code>git blame</code> — клавиша <code>q</code>.</p>
+
+  <h2>1. Как читать граф</h2>
+  <pre class="cmd">git log --oneline --graph --all</pre>
+  <ul>
+    <li>Каждая строка — коммит: хеш (хватит первых 7 символов) и сообщение. Сверху — самые новые.</li>
+    <li>В скобках — ярлыки веток: <code>(main)</code>, <code>(moya-vetka)</code>. Ярлык стоит на последнем коммите ветки и сам переезжает вперёд при каждом новом коммите в ней.</li>
+    <li><code>HEAD -> main</code> — вы сейчас в ветке main. Это не про незакоммиченные изменения: их показывает <code>git status</code>.</li>
+    <li>Коммит, сделанный после данного, — его <b>потомок</b>, предыдущий — <b>родитель</b>. Развилка <code>|/</code> появляется там, где у коммита двое потомков: от него пошли две ветки. Пока в новой ветке нет своих коммитов, развилки не видно — ярлыки просто стоят на одном коммите.</li>
+  </ul>
+  <pre class="cmd">git log --oneline --graph main moya-vetka</pre>
+  <p>Только две ветки: видно, от какого коммита <code>moya-vetka</code> отошла от main и насколько main ушёл вперёд.</p>
+
+  <h2>2. Что было в файле</h2>
+  <pre class="cmd">git log --oneline README.md
+git log -p README.md</pre>
+  <p>Первая — только коммиты, где менялся README, вторая — и сами изменения: строки с <code>-</code> — как было, с <code>+</code> — как стало. Например, видно, как цель сменилась с наушников на велосипед.</p>
+  <pre class="cmd">git show 83f1651
+git show --stat b0611b4</pre>
+  <p><code>git show</code> — один коммит целиком: кто, когда, зачем и что поменял. <code>--stat</code> — только список файлов.</p>
+
+  <h2>3. В каком коммите появилось слово</h2>
+  <pre class="cmd">git log -S "def trati" --oneline</pre>
+  <p>→ один коммит «Посчитал траты». <code>-S</code> ищет коммиты, где слово появилось или исчезло. Кавычки нужны, если в слове пробел. Коммиты одного человека: <code>git log --oneline --author="Аня"</code>.</p>
+
+  <h2>4. Кто последним менял строку: git blame</h2>
+  <pre class="cmd">git blame README.md</pre>
+  <p>Каждая строка подписана слева направо: хеш коммита → автор → дата → номер строки → сама строка. Значок <code>^</code> перед хешем — строка с самого первого коммита.</p>
+  <pre class="cmd">git blame -L 5,5 README.md
+git show 83f1651
+git blame -L 5,5 README.md 83f1651~1</pre>
+  <ul>
+    <li><code>-L 5,5</code> — только строка 5 (<code>-L 5,10</code> — с 5 по 10).</li>
+    <li>Blame говорит <b>кто и когда</b>, а <b>зачем</b> — в самом коммите: <code>git show ХЕШ</code>.</li>
+    <li><code>ХЕШ~1</code> — коммит перед этим. Так видно, какой строка была раньше: «Цель: накопить на наушники». Можно идти назад по одной строке, как по следам.</li>
+  </ul>
+  <p><b>Без терминала.</b> GitHub: открыть файл → кнопка <b>Blame</b> над текстом, рядом <b>History</b> — все коммиты файла. VS Code: панель <b>Timeline</b> внизу слева в Explorer — история открытого файла.</p>
+  <div class="note-box"><b>Зачем blame.</b> Не чтобы ругать, а чтобы знать, у кого спросить. Нашли в проекте странную строку → blame → пишете автору в issue или в Telegram.</div>
+
+  <h2>5. Cherry-pick: взять один коммит из другой ветки</h2>
+  <div class="note-box"><b>Ситуация.</b> В ветке <code>ispravlenie</code> черновик и исправление опечатки в README. Ветка не готова, а исправление нужно в main сейчас.</div>
+  <pre class="cmd">git log --oneline -3 origin/ispravlenie
+git checkout main
+git cherry-pick ХЕШ
+git log --oneline -3</pre>
+  <ul>
+    <li>Это <b>копия</b>: у коммита в main новый хеш, в ветке остался старый. Черновик не приехал — только один коммит.</li>
+    <li>Похоже на патч с занятия 7: патч — недописанные правки между людьми, cherry-pick — готовый коммит между ветками.</li>
+    <li>Конфликт — решаете как обычно, затем <code>git add</code> и <code>git cherry-pick --continue</code>. Передумали — <code>git cherry-pick --abort</code>.</li>
+    <li>В репозитории команды main защищён, поэтому так: <code>git checkout -b fix-imya</code> от main → <code>cherry-pick</code> → push → pull request. Это часть 4 домашки.</li>
+  </ul>
+
+  <div class="note-box"><b>Merge и rebase</b> не успели — начнём с них занятие 9. Задание В на вкладке «Практика» можно попробовать заранее, но не обязательно.</div>
+
+  <h2>Запомнить</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Команда</th><th>Что делает</th></tr>
+    <tr><td><code>git log --oneline --graph --all</code></td><td>Граф всех веток</td></tr>
+    <tr><td><code>git log -p файл</code></td><td>Что менялось в файле</td></tr>
+    <tr><td><code>git log -S "слово"</code></td><td>В каком коммите слово появилось или исчезло</td></tr>
+    <tr><td><code>git log --author="Имя"</code></td><td>Коммиты одного автора</td></tr>
+    <tr><td><code>git show ХЕШ</code></td><td>Один коммит целиком; <code>--stat</code> — только файлы</td></tr>
+    <tr><td><code>git blame файл</code></td><td>Кто последним менял каждую строку</td></tr>
+    <tr><td><code>git blame -L 5,5 файл ХЕШ~1</code></td><td>Строка 5 — какой она была до этого коммита</td></tr>
+    <tr><td><code>git cherry-pick ХЕШ</code></td><td>Копия одного коммита в текущую ветку</td></tr>
+  </table></div>
   </div>
 </section>
 
@@ -1405,9 +1473,9 @@ git log --oneline --graph -20</pre>
 
 </main>
 
-<script src="live.js?v=20261022225138"></script>
-<script src="quiz.js?v=20261022225138"></script>
-<script src="engine.js?v=20261022225138"></script>
+<script src="live.js?v=20261022225500"></script>
+<script src="quiz.js?v=20261022225500"></script>
+<script src="engine.js?v=20261022225500"></script>
 <script>
 (function () {
   "use strict";
