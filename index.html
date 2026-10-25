@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261022225704">
+<link rel="stylesheet" href="quiz.css?v=20261025180759">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -270,7 +270,7 @@ git log --oneline -3</pre>
     <li>В репозитории команды main защищён, поэтому так: <code>git checkout -b fix-imya</code> от main → <code>cherry-pick</code> → push → pull request. Это часть 4 домашки.</li>
   </ul>
 
-  <div class="note-box"><b>Merge и rebase</b> не успели — начнём с них занятие 9. Задание В на вкладке «Практика» можно попробовать заранее, но не обязательно.</div>
+  <div class="note-box"><b>Merge и rebase</b> не успели и пока отложили. Задание В на вкладке «Практика» (раздел «Для повторения · занятие 8») можно попробовать самим, но не обязательно.</div>
 
   <h2>Запомнить</h2>
   <div class="tablewrap"><table>
@@ -287,10 +287,148 @@ git log --oneline -3</pre>
   </div>
 </section>
 
-<!-- ================= ПРАКТИКА: занятие 8 (история, blame, cherry-pick, rebase), ниже — занятия 7 и 5–6 ================= -->
+<!-- ================= ПРАКТИКА: занятие 9 (GitHub Pages), ниже — занятия 8, 7 и 5–6 ================= -->
 <section class="tab" id="tab-lesson">
   <div class="doc">
-  <h1>Практика на занятии 8: история, blame, cherry-pick, rebase</h1>
+  <h1>Практика на занятии 9: сайт проекта на GitHub Pages</h1>
+  <p class="lead">Командой, в репозитории проекта команды. У каждой команды будет сайт по адресу <code>логин-владельца.github.io/название-репозитория/</code> — его можно показать жюри конференции. Страницы — обычные <code>.md</code> из папки <code>docs/</code> в main, поэтому меняем их как любой файл: ветка → pull request → review. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+
+  <div class="note-box"><b>Кто есть кто.</b> Участник 1 — владелец репозитория, 2 и 3 — остальные, как в домашке. Круг review: PR Участника 1 проверяет 2, PR 2 — 3, PR 3 — 1.</div>
+
+  <div class="note-box"><b>Сайт открыт всем в интернете</b>, и вся история репозитория тоже: что попало в коммит, остаётся в истории, даже если потом стёрли. Без фамилий, школы, класса, телефонов, токенов — имя или ник. Пишем только то, что не стыдно показать жюри.</div>
+
+  <h2>Часть 1. Три страницы сайта · 45 минут</h2>
+  <p>Каждый делает <b>одну страницу</b> — один pull request. Файлы у всех разные, конфликтов здесь не будет. Файлы, которые уже лежат в <code>docs/</code> с прошлой домашки, не трогаем.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Кто</th><th>Файлы</th><th>Что на странице</th><th>Ветка</th></tr>
+    <tr><td>Участник 1</td><td><code>docs/index.md</code> + <code>docs/_config.yml</code></td><td>Главная: что за проект, для кого, какую проблему решает; ссылки на две другие страницы; заголовок «Команда»</td><td><code>sait-glavnaya</code></td></tr>
+    <tr><td>Участник 2</td><td><code>docs/umeet.md</code> + картинка в <code>docs/img/</code></td><td>Что умеет проект: 4+ пункта, у каждого 1–2 предложения; схема, рисунок или скриншот</td><td><code>sait-umeet</code></td></tr>
+    <tr><td>Участник 3</td><td><code>docs/dnevnik.md</code></td><td>Дневник проекта: дата — что сделали — кто, 5+ записей с первого занятия по проекту до сегодня</td><td><code>sait-dnevnik</code></td></tr>
+  </table></div>
+
+  <ol class="steps" id="l9site">
+    <li><h3>Задача и ветка</h3>
+      <p>Issue «Сайт: страница … — Имя» на себя, метка <code>документация</code>, справа Projects → доска команды. В описании: Что сделать / Зачем / Готово, когда (<code>- [ ] …</code>).</p>
+      <pre class="cmd">git checkout main
+git pull
+git checkout -b sait-glavnaya</pre>
+      <p>Участник 2 — <code>sait-umeet</code>, Участник 3 — <code>sait-dnevnik</code>.</p>
+    </li>
+    <li><h3>Страница</h3>
+      <p>Папки <code>docs</code> нет — создайте: <code>mkdir docs</code>. Для картинок — <code>mkdir docs/img</code>. Файл: <code>code docs/index.md</code> (у вас — своё имя). Пишем <b>текстом в VS Code</b>, не в Word и не в LibreOffice. Имена файлов — латиницей, маленькими буквами, расширение <code>.md</code>.</p>
+      <p>Первая строка — заголовок: <code># Название проекта</code> · <code># Что умеет</code> · <code># Дневник проекта</code>. Внизу страниц 2 и 3 — ссылка обратно: <code>[← На главную](index.md)</code>. Превью в VS Code: <kbd>Ctrl+Shift+V</kbd> (Mac: <kbd>Cmd+Shift+V</kbd>).</p>
+      <p><b>Участник 1</b> — образец <code>docs/index.md</code>:</p>
+      <pre class="cmd"># Название проекта
+
+Два-три предложения: что это, для кого, какую проблему решает.
+
+## Страницы
+
+- [Что умеет](umeet.md)
+- [Дневник проекта](dnevnik.md)
+
+## Команда
+</pre>
+      <p>Под «## Команда» пока пусто — впишемся в части 2. И <code>docs/_config.yml</code> — название и тема сайта:</p>
+      <pre class="cmd">title: Название проекта
+description: Одно предложение о проекте
+theme: jekyll-theme-cayman</pre>
+      <p><b>Участник 2</b> — картинку положите в <code>docs/img/</code> (имя латиницей, например <code>shema.png</code>, до 1 МБ) и вставьте в текст:</p>
+      <pre class="cmd">![Схема](img/shema.png)</pre>
+      <p><b>Участник 3</b> — дневник удобно сделать таблицей:</p>
+      <pre class="cmd">| Дата | Что сделали | Кто |
+|---|---|---|
+| 14.10 | создали репозиторий и доску | Имя |</pre>
+      <p>Строка <code>|---|---|---|</code> обязательна: она говорит, что сверху заголовок таблицы.</p>
+    </li>
+    <li><h3>Commit, push, pull request</h3>
+      <pre class="cmd">git add docs
+git status
+git commit -m "Сайт: главная"
+git push -u origin sait-glavnaya</pre>
+      <p><code>git add docs</code> добавляет всю папку <code>docs</code> — только файлы сайта. На GitHub: Compare &amp; pull request, в описании <code>Closes #номер</code>.</p>
+    </li>
+    <li><h3>Review по кругу</h3>
+      <p>Ревьюер: Files changed → замечание к строке → <b>Request changes</b> — хотя бы одно замечание. Автор: правка новым коммитом → push → Resolve conversation. Ревьюер: Approve. Автор: Merge.</p>
+    </li>
+    <li><h3>Владелец включает сайт</h3>
+      <p>Делает Участник 1, когда в main уже есть папка <code>docs/</code> (после первого слитого PR, или сразу, если она там есть с прошлой домашки).</p>
+      <p><b>Settings → Pages → Source: Deploy from a branch → Branch: <code>main</code>, папка <code>/docs</code> → Save.</b> Через минуту там же появится «Your site is live at …» — ссылку в чат команды.</p>
+      <p>Потом на главной странице репозитория: <b>About → шестерёнка → галочка «Use your GitHub Pages website» → Save</b>.</p>
+    </li>
+    <li><h3>Проверить на сайте</h3>
+      <p>Вкладка <b>Actions</b> → «pages build and deployment» → зелёная галочка (около минуты после каждого merge). Откройте сайт и обновите: <kbd>Ctrl+F5</kbd> (Mac: <kbd>Cmd+Shift+R</kbd>). Найдите <b>свою</b> страницу через ссылку на главной — скрин в чат группы.</p>
+      <p>Пока PR Участника 1 не слит, главной нет — будет 404. Ссылка на ещё не слитую страницу — тоже 404. Это нормально.</p>
+    </li>
+  </ol>
+
+  <h2>Часть 2. «Команда» на главной: конфликт · 22 минуты</h2>
+  <p>Все трое вписывают себя <b>в одно и то же место</b> — сразу под <code>## Команда</code> в <code>docs/index.md</code>. Сливаем строго по очереди: 1 → 2 → 3. У Участников 2 и 3 будет конфликт — решаете у себя.</p>
+  <ol class="steps" id="l9team">
+    <li><h3>Ветка и правка</h3>
+      <pre class="cmd">git checkout main
+git pull
+git checkout -b sait-komanda-imya</pre>
+      <p><code>imya</code> — своё имя латиницей. В <code>docs/index.md</code> сразу под строкой <code>## Команда</code> вставьте:</p>
+      <pre class="cmd">- Имя — за что отвечаю в проекте</pre>
+      <pre class="cmd">git add docs/index.md
+git commit -m "Сайт: Имя в разделе Команда"
+git push -u origin sait-komanda-imya</pre>
+      <p>Pull request, review по кругу — здесь хватит Approve.</p>
+    </li>
+    <li><h3>Сливаем 1 → 2 → 3, конфликт решаем у себя</h3>
+      <p>После слияния PR Участника 1 GitHub покажет у 2 и 3 «This branch has conflicts». Решаем в VS Code, а не на сайте:</p>
+      <pre class="cmd">git checkout sait-komanda-imya
+git pull origin main</pre>
+      <p>Над конфликтом в <code>docs/index.md</code> нажмите <b>Accept Both Changes</b> — должны остаться <b>все</b> строки, меток <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> — ни одной.</p>
+      <pre class="cmd">git add docs/index.md
+git commit -m "Решил конфликт в Команде"
+git push</pre>
+      <p>После push Approve сбросился — ревьюер ставит Approve ещё раз. Merge.</p>
+    </li>
+    <li><h3>Проверка</h3>
+      <p>Участник 1: на сайте (<kbd>Ctrl+F5</kbd>) в «Команда» все трое — скрин в чат группы.</p>
+    </li>
+  </ol>
+
+  <div class="note-box"><b>Успели раньше — по желанию.</b> Своя страница «не найдено»: <code>docs/404.md</code> с первой строкой <code># Такой страницы нет</code> и ссылкой на главную — проверьте, открыв на сайте несуществующий адрес. Другая тема в <code>_config.yml</code>: <code>jekyll-theme-minimal</code>, <code>jekyll-theme-slate</code>, <code>jekyll-theme-architect</code>, <code>jekyll-theme-hacker</code> — все темы на <a href="https://pages.github.com/themes/" target="_blank">pages.github.com/themes</a>. Картинка на главной. Всё — через PR.</div>
+
+  <h2>Шпаргалка: GitHub Pages</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что</th><th>Как</th></tr>
+    <tr><td>Включить сайт</td><td>Settings → Pages → Deploy from a branch → <code>main</code>, <code>/docs</code> → Save. Только владелец</td></tr>
+    <tr><td>Главная страница</td><td><code>docs/index.md</code></td></tr>
+    <tr><td>Другая страница</td><td><code>docs/umeet.md</code> → на сайте <code>…/umeet.html</code></td></tr>
+    <tr><td>Ссылка на страницу</td><td><code>[Что умеет](umeet.md)</code> — пишем <code>.md</code>, GitHub сам поменяет</td></tr>
+    <tr><td>Картинка</td><td><code>![Подпись](img/shema.png)</code>, файл в <code>docs/img/</code></td></tr>
+    <tr><td>Таблица</td><td>Строка заголовков, под ней <code>|---|---|---|</code>, дальше строки</td></tr>
+    <tr><td>Название и тема</td><td><code>docs/_config.yml</code>: <code>title:</code>, <code>description:</code>, <code>theme:</code></td></tr>
+    <tr><td>Обновить сайт</td><td>Merge в main → Actions пересобирает сайт сам, около минуты</td></tr>
+  </table></div>
+
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что видите</th><th>Что делать</th></tr>
+    <tr><td>Нет пункта Pages</td><td>Pages включает только владелец. Или репозиторий закрытый: Settings → General → внизу Change visibility → Public.</td></tr>
+    <tr><td>В списке папок нет <code>/docs</code></td><td>В main ещё нет папки <code>docs/</code>. Сначала слить первый PR с файлом в <code>docs/</code>.</td></tr>
+    <tr><td>Сайт: 404</td><td>Подождите минуту и смотрите Actions. Нет <code>docs/index.md</code> в main — главная ещё не слита. Выбрана папка <code>/ (root)</code> вместо <code>/docs</code>.</td></tr>
+    <tr><td>Страница 404, а файл есть</td><td>Имя файла: <code>umeet.md.md</code>, большая буква, кириллица. Переименовать: <code>git mv docs/старое docs/umeet.md</code>, PR.</td></tr>
+    <tr><td>Вместо страницы скачивается файл</td><td>Расширение не <code>.md</code>. <code>git mv docs/старое docs/имя.md</code>, PR.</td></tr>
+    <tr><td>Вся страница серая, как код</td><td>Первая и последняя строки файла — три обратные кавычки <code>```</code>: скопировали с рамкой. Удалить эти строки, PR.</td></tr>
+    <tr><td>Картинки нет, вместо неё подпись</td><td>Путь не совпадает: регистр (<code>Shema.PNG</code> ≠ <code>shema.png</code>), пробелы, кириллица. Или файл не добавлен — <code>git status</code>.</td></tr>
+    <tr><td>Таблица — строчками с <code>|</code></td><td>Нет пустой строки перед таблицей или нет строки <code>|---|---|---|</code> под заголовком.</td></tr>
+    <tr><td>Изменил, а на сайте старое</td><td>PR не слит, сборка ещё идёт (Actions) или кеш браузера — <kbd>Ctrl+F5</kbd>.</td></tr>
+    <tr><td>В Actions красный крестик</td><td>Открыть его → build → внизу ошибка. <code>found character that cannot start any token</code> — в <code>_config.yml</code> лишняя строка <code>```</code> или нет пробела после <code>:</code>. Исправить, PR.</td></tr>
+    <tr><td>Тема не поменялась</td><td><code>_config.yml</code> лежит в корне, а не в <code>docs/</code>. Или опечатка в <code>theme:</code>.</td></tr>
+    <tr><td><code>nothing added to commit</code></td><td>Файл не сохранён или в нём ничего не поменялось. <code>git status</code>, <code>git diff</code>.</td></tr>
+    <tr><td><code>Need to specify how to reconcile divergent branches</code></td><td><code>git config --global pull.rebase false</code>, снова <code>git pull origin main</code>.</td></tr>
+    <tr><td>Конфликт решил, а на GitHub всё ещё conflicts</td><td>Не сделали <code>git push</code> после коммита решения.</td></tr>
+    <tr><td>В «Команда» пропало чьё-то имя</td><td>Решая конфликт, удалили чужую строку. Новая ветка, вернуть строку, PR.</td></tr>
+    <tr><td>Merge серый</td><td>Нет Approve, не закрыты замечания (Resolve conversation) или после Approve был новый коммит — Approve ещё раз.</td></tr>
+  </table></div>
+  <p>Застряли дольше пяти минут — пишите в чат группы: что делали и какую ошибку видите.</p>
+
+  <h1 style="margin-top:40px">Для повторения · занятие 8: история, blame, cherry-pick, rebase</h1>
   <p class="lead">Каждый сам, в учебном репозитории «Копилка» — маленькой программе на Python, которую писали четверо: Аня, Боря, Вика и Гоша. Работаем только у себя: <b>push не делаем</b>, у вас нет на это прав, так и задумано. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
 
   <h2>0. Скачать · 3 минуты</h2>
@@ -1473,9 +1611,9 @@ git log --oneline --graph -20</pre>
 
 </main>
 
-<script src="live.js?v=20261022225704"></script>
-<script src="quiz.js?v=20261022225704"></script>
-<script src="engine.js?v=20261022225704"></script>
+<script src="live.js?v=20261025180759"></script>
+<script src="quiz.js?v=20261025180759"></script>
+<script src="engine.js?v=20261025180759"></script>
 <script>
 (function () {
   "use strict";
@@ -1554,6 +1692,8 @@ git log --oneline --graph -20</pre>
   checkSteps("l8hw2", "l8hw2");
   checkSteps("l7stash", "l7stash");
   checkSteps("l7patch", "l7patch");
+  checkSteps("l9site", "l9site");
+  checkSteps("l9team", "l9team");
   checkSteps("l8clone", "l8clone");
   checkSteps("l8det", "l8det");
   checkSteps("l8pick", "l8pick");
