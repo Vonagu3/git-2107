@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261025180759">
+<link rel="stylesheet" href="quiz.css?v=20261028181857">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -57,6 +57,7 @@ h3 { font-size: 16px; margin: 14px 0 6px; }
 .lead { color: var(--muted); max-width: 820px; }
 .btn { font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 7px 12px; border-radius: 8px; cursor: pointer; }
 .btn:hover { border-color: var(--ink); }
+a.btn { display: inline-block; text-decoration: none; margin: 0 6px 6px 0; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn:disabled { opacity: .45; cursor: default; }
 table { border-collapse: collapse; width: 100%; }
@@ -200,6 +201,7 @@ pre.cmd { font-variant-ligatures: none; background: var(--term-bg); color: var(-
     <nav id="nav">
       <button data-tab="live">Урок</button>
       <button data-tab="lesson">Практика</button>
+      <button data-tab="excel">Excel</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -1609,11 +1611,108 @@ git log --oneline --graph -20</pre>
   </div>
 </section>
 
+<!-- ================= EXCEL ================= -->
+<section class="tab" id="tab-excel">
+  <div class="doc">
+  <h1>Практика: формулы в Excel</h1>
+  <p class="lead">Каждый сам, около 40 минут. Скачайте файл, заполняйте только <b>жёлтые</b> ячейки, ответы пишите в столбец «Ответ». Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+
+  <p>
+    <a class="btn primary" href="files/excel-praktika.xlsx?v=1" download="Excel_практика.xlsx">⬇ Excel_практика.xlsx — задание</a>
+    <a class="btn" href="files/pitomcy-excel.xlsx?v=1" download="Питомцы_excel_vs_baza.xlsx">⬇ Питомцы — файл с занятия</a>
+  </p>
+
+  <div class="note-box"><b>Нет Excel?</b> Подойдут онлайн-таблицы — формулы пишутся так же:
+    <ul>
+      <li><b>Google Таблицы:</b> <a href="https://sheets.google.com" target="_blank">sheets.google.com</a> → «Пустая таблица» → Файл → Импортировать → Загрузка → выбрать файл → «Заменить таблицу».</li>
+      <li><b>Яндекс Таблицы:</b> войдите в Яндекс ID → <a href="https://docs.yandex.ru" target="_blank">docs.yandex.ru</a> → «Загрузить» → выбрать файл → он откроется как таблица.</li>
+    </ul>
+    Фильтр и сортировка там — в меню «Данные» (или кнопка-воронка на панели). Если формула не принимается — см. «Если что-то пошло не так» внизу.</div>
+
+  <h2>Часть 1. Лист «1 Магазин» · 15 минут</h2>
+  <p>Строки — товары с ценой, столбцы — сколько штук купили (от 1 до 10). Это как таблица умножения на занятии, только вместо чисел — цены.</p>
+  <ol class="steps" id="xl1">
+    <li><h3>Одна формула на всю таблицу</h3>
+      <p>В <code>C4</code> — формула «цена × штук»: цена в столбце <code>B</code>, штуки в строке <code>3</code>. Потом протяните её за правый нижний уголок вправо до <code>L</code>, затем вниз до строки 9.</p>
+      <p>Числа «поехали» или стали огромными — не хватает <code>$</code>. Закрепите столбец у цены и строку у штук. Проверка: в <code>L9</code> (альбом × 10) — 1200.</p>
+    </li>
+    <li><h3>Сумма строки и итоги</h3>
+      <p>Столбец <code>M</code> — сумма строки (<code>СУММ</code>), протянуть вниз. Строка 10 — сумма каждого столбца, протянуть вправо. Ответы в задания 2 и 4.</p>
+    </li>
+    <li><h3>Скидка</h3>
+      <p>В <code>B1</code> — скидка 10%. Столбец <code>N</code> — сумма строки со скидкой: <i>сумма × (1 − скидка)</i>. Одна формула в <code>N4</code>, протянуть вниз — скидка должна браться всегда из <code>B1</code>. Ответ в задание 3.</p>
+      <p>Поменяйте <code>B1</code> на 20% — всё пересчиталось само. Верните 10%.</p>
+    </li>
+    <li><h3>Сколько и самое большое</h3>
+      <p>Задание 6: сколько ячеек в <code>C4:L9</code> дороже 500 — <code>СЧЁТЕСЛИ</code>. Задание 7: самая дорогая покупка — <code>МАКС</code>.</p>
+    </li>
+  </ol>
+
+  <h2>Часть 2. Лист «2 Герои» · 25 минут</h2>
+  <p>30 героев игры: имя, класс, уровень, золото, гильдия, в сети ли, дата регистрации. Справа — 12 вопросов, на каждый — <b>одна формула</b> в жёлтой ячейке «Ответ».</p>
+  <ol class="steps" id="xl2">
+    <li><h3>Сколько, сумма, среднее</h3>
+      <p>Вопросы 1–5: <code>СЧЁТЗ</code>, <code>СУММ</code>, <code>СРЗНАЧ</code>, <code>МАКС</code>, <code>МИН</code>. Диапазон — от строки 2 до 31, например <code>C2:C31</code>.</p>
+    </li>
+    <li><h3>С условием</h3>
+      <p>Вопросы 6–9: <code>СЧЁТЕСЛИ</code> (сколько магов, сколько с уровнем больше 50), <code>СУММЕСЛИ</code> (золото всех магов), <code>СЧИТАТЬПУСТОТЫ</code> (без гильдии). Условие пишется в кавычках: <code>"маг"</code>, <code>"&gt;50"</code>.</p>
+    </li>
+    <li><h3>Новый столбец</h3>
+      <p>Столбец <code>H</code> — золото ÷ уровень: одна формула в <code>H2</code>, протянуть до 31. Вопрос 10 — самое большое значение в <code>H</code>.</p>
+    </li>
+    <li><h3>Фильтр и сортировка</h3>
+      <p>Вопрос 11: выделите любую ячейку таблицы → Данные → Фильтр → в столбце <code>klass</code> оставить только «лучник». Сколько строк? Потом снимите фильтр.</p>
+      <p>Вопрос 12: Данные → Сортировка → по <code>zoloto</code>, по убыванию. Кто первый?</p>
+    </li>
+    <li><h3>Сдать</h3>
+      <p>Скриншот листа «1 Магазин» и листа «2 Герои» (так, чтобы были видны ответы) — в чат группы в Telegram.</p>
+    </li>
+  </ol>
+
+  <div class="note-box"><b>Запомните ответы листа «2 Герои».</b> Скоро зададим те же вопросы базе данных на языке SQL — ответы должны совпасть.</div>
+
+  <h2>Шпаргалка</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Как пишется</th><th>Что значит</th></tr>
+    <tr><td>=B4*C3</td><td>формула всегда начинается с <code>=</code></td></tr>
+    <tr><td>$B$1</td><td>закреплено всё: при протягивании не меняется</td></tr>
+    <tr><td>$B4</td><td>закреплён столбец B, номер строки меняется</td></tr>
+    <tr><td>C$3</td><td>закреплена строка 3, столбец меняется</td></tr>
+    <tr><td>F4 (Mac: Cmd+T)</td><td>ставит <code>$</code> в ссылке, где стоит курсор; нажать ещё раз — другой вариант</td></tr>
+  </table></div>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Русский Excel</th><th>Английский Excel</th><th>Что делает</th></tr>
+    <tr><td>СУММ(A1:A9)</td><td>SUM</td><td>сумма</td></tr>
+    <tr><td>СРЗНАЧ(A1:A9)</td><td>AVERAGE</td><td>среднее</td></tr>
+    <tr><td>МАКС / МИН</td><td>MAX / MIN</td><td>самое большое / маленькое</td></tr>
+    <tr><td>СЧЁТ</td><td>COUNT</td><td>сколько чисел</td></tr>
+    <tr><td>СЧЁТЗ</td><td>COUNTA</td><td>сколько непустых ячеек</td></tr>
+    <tr><td>СЧЁТЕСЛИ(B2:B31; "маг")</td><td>COUNTIF</td><td>сколько ячеек подходят под условие</td></tr>
+    <tr><td>СУММЕСЛИ(B2:B31; "маг"; D2:D31)</td><td>SUMIF</td><td>сумма там, где условие выполнено</td></tr>
+    <tr><td>СЧИТАТЬПУСТОТЫ</td><td>COUNTBLANK</td><td>сколько пустых</td></tr>
+  </table></div>
+  <p>В русском Excel между частями формулы — точка с запятой <code>;</code>, в английском — запятая <code>,</code>.</p>
+
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что видно</th><th>Что делать</th></tr>
+    <tr><td><code>#ИМЯ?</code> / <code>#NAME?</code></td><td>Опечатка в названии функции или Excel на другом языке: попробуйте английское название (SUM вместо СУММ) или наоборот.</td></tr>
+    <tr><td>Excel ругается на формулу</td><td>Замените <code>,</code> на <code>;</code> между частями формулы (или наоборот).</td></tr>
+    <tr><td>Вместо результата видно саму формулу</td><td>Забыли <code>=</code> в начале, или ячейка в формате «Текст» — поставьте формат «Общий» и введите заново.</td></tr>
+    <tr><td>После протягивания нули или огромные числа</td><td>Не хватает <code>$</code>: кликните на ячейку в середине таблицы и посмотрите, на какие ячейки ссылается формула.</td></tr>
+    <tr><td><code>####</code></td><td>Число не влезает — расширьте столбец, потянув границу в заголовке.</td></tr>
+    <tr><td>Google / Яндекс Таблицы: не та функция</td><td>Попробуйте английское название (<code>COUNTIF</code> вместо <code>СЧЁТЕСЛИ</code>), или наоборот русское — зависит от языка таблицы.</td></tr>
+    <tr><td>Всё сломалось</td><td>Скачайте файл заново — начнёте с чистого листа.</td></tr>
+  </table></div>
+  <p>Застряли больше чем на 5 минут — пишите в чат группы: какое задание и что видите.</p>
+  </div>
+</section>
+
 </main>
 
-<script src="live.js?v=20261025180759"></script>
-<script src="quiz.js?v=20261025180759"></script>
-<script src="engine.js?v=20261025180759"></script>
+<script src="live.js?v=20261028181857"></script>
+<script src="quiz.js?v=20261028181857"></script>
+<script src="engine.js?v=20261028181857"></script>
 <script>
 (function () {
   "use strict";
@@ -1649,7 +1748,7 @@ git log --oneline --graph -20</pre>
   const hashTab = location.hash.replace("#", "");
   // #proj и другие якоря внутри вкладки: открыть эту вкладку и прокрутить к разделу
   const hashSec = hashTab && document.getElementById(hashTab)?.closest(".tab");
-  showTab(["live", "lesson", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
+  showTab(["live", "lesson", "excel", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
     : hashSec ? hashSec.id.replace("tab-", "") : store.get("tab", "train"));
   if (hashSec) document.getElementById(hashTab).scrollIntoView();
 
@@ -1694,6 +1793,8 @@ git log --oneline --graph -20</pre>
   checkSteps("l7patch", "l7patch");
   checkSteps("l9site", "l9site");
   checkSteps("l9team", "l9team");
+  checkSteps("xl1", "xl1");
+  checkSteps("xl2", "xl2");
   checkSteps("l8clone", "l8clone");
   checkSteps("l8det", "l8det");
   checkSteps("l8pick", "l8pick");
