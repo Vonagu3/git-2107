@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261030234346">
+<link rel="stylesheet" href="quiz.css?v=20261031000812">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -308,6 +308,8 @@ table.probs td:first-child { width: 40%; }
     <tr><td>Проект долго «Setting up»</td><td>Подождать до 5 минут, обновить страницу. Пока — смотрит показ</td></tr>
     <tr><td>Просит выбрать организацию</td><td>Создать: имя — ник, Personal, Free</td></tr>
     <tr><td>Не видно результата запроса</td><td>В окне несколько запросов — показан последний. Выделить нужный → Run</td></tr>
+    <tr><td>Table Editor: Save не нажимается / строка не добавляется</td><td>Пустое имя столбца или пустая <code>klichka</code> (снята Is Nullable — значит обязательна)</td></tr>
+    <tr><td>Нет типа <code>int</code> в списке</td><td>Он называется <code>int4</code></td></tr>
     <tr><td><code>relation "geroi" does not exist</code></td><td>Не запущен <code>geroi.sql</code> или опечатка: <code>geroy</code>, <code>heroes</code></td></tr>
     <tr><td><code>relation "pitomcy" does not exist</code></td><td><code>pitomcy</code> была только на показе, у учеников её нет</td></tr>
     <tr><td><code>column "маг" does not exist</code></td><td>Текст без кавычек: нужно <code>'маг'</code></td></tr>
@@ -327,7 +329,7 @@ table.probs td:first-child { width: 40%; }
     <li>Застрявший присылает в чат скрин: запрос и ошибка или результат целиком.</li>
     <li>Первое при любой странности с героями — запустить <code>geroi.sql</code> заново.</li>
     <li>Кто закончил — помогает соседу словами, не за него (как review).</li>
-    <li>Отстаёте: Table Editor в показе пропустить, <code>pitomcy</code> создать скриптом; задания 12–16 — в домашку.</li>
+    <li>Отстаёте: в практике 0 — только таблица, без строк; задания 9–12 — в домашку. Совсем не успеваете — <code>pitomcy</code> на показе создать скриптом ниже (но практику 0 оставить).</li>
   </ul>
   <div class="fl-cmds" style="max-width:640px"><code style="display:block;white-space:pre;padding:8px 10px">create table pitomcy (
   id bigint generated always as identity primary key,
@@ -341,8 +343,8 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
   </section>
 </div>
 </main>
-<script src="quiz.js?v=20261030234346"></script>
-<script src="engine.js?v=20261030234346"></script>
-<script src="teacher.js?v=20261030234346"></script>
+<script src="quiz.js?v=20261031000812"></script>
+<script src="engine.js?v=20261031000812"></script>
+<script src="teacher.js?v=20261031000812"></script>
 </body>
 </html>
