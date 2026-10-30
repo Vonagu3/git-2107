@@ -14,6 +14,7 @@
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+
   const REPO = S.PRAKTIKA_URL;
   $("lRepo").href = REPO;
   $("lCollab").href = REPO + "/settings/access";
@@ -285,7 +286,7 @@
     $("qPrev").onclick = () => setQuiz({ q: quiz.q - 1, revealed: false });
     $("qNext").onclick = () => setQuiz({ q: quiz.q + 1, revealed: false });
     if ($("qReveal")) $("qReveal").onclick = () => setQuiz({ revealed: true });
-    $("qShow").onclick = () => { document.body.classList.toggle("show"); renderLive(); };
+    $("qShow").onclick = () => { document.body.classList.toggle("show"); if (document.body.classList.contains("show")) showTab("pupils"); renderLive(); };
     $("qStop").onclick = () => { if (confirm("Завершить опрос? У учеников появится «Опрос ещё не начался».")) { document.body.classList.remove("show"); setQuiz({ session: null, q: 0, revealed: false }); } };
   }
   async function loadAnswers() {
@@ -294,8 +295,25 @@
     renderLive();
   }
 
-  // ---------- чек-лист (git_teacher_kv, ключ prep) ----------
-  const PREP = [
+  // ---------- вкладки: общая «Ученики и опрос» + по одной на каждое занятие ----------
+  const TABS = ["pupils", "l8", "l11"];
+  function showTab(t) {
+    if (!TABS.includes(t)) t = TABS[TABS.length - 1];
+    document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
+    document.querySelectorAll(".tab").forEach((s) => s.classList.toggle("on", s.id === "tab-" + t));
+    try { localStorage.setItem("git2107_teacher_tab", t); } catch (e) {}
+  }
+  document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => { showTab(b.dataset.tab); history.replaceState(null, "", "#" + b.dataset.tab); }));
+  {
+    const h = location.hash.replace("#", "");
+    const sec = h && document.getElementById(h) && document.getElementById(h).closest(".tab");
+    let saved = null;
+    try { saved = localStorage.getItem("git2107_teacher_tab"); } catch (e) {}
+    showTab(TABS.includes(h) ? h : sec ? sec.id.replace("tab-", "") : saved || TABS[TABS.length - 1]);
+  }
+
+  // ---------- чек-листы подготовки (git_teacher_kv, ключ prep<номер занятия>) ----------
+  const PREP8 = [
     "На GitHub создан публичный пустой репозиторий Vonagu3/istoriya-igra, в него отправлено: git remote add origin https://github.com/Vonagu3/istoriya-igra.git · git push -u origin --all. На GitHub 4 ветки, 20 коммитов в main.",
     "(По желанию) Vonagu3/istoriya-demo на GitHub — чтобы показать отказ git push после rebase и --force-with-lease. Без него — словами.",
     "Папка ~/Desktop/2107/Git/Vonagu3/istoriya-demo чистая и на main. Испорчена после репетиции — rm -rf и пересоздать: python3 ~/Desktop/2107/MAX/Урок_8/создать_репозиторий.py ~/Desktop/2107/Git/Vonagu3/istoriya-demo",
@@ -303,25 +321,34 @@
     "Ответы детектива (в блоке практики) — не показывать на экране до конца практики.",
     "Демонстрировать окно, а не весь экран; эту страницу — только в «Режиме показа».",
   ];
-  let prepDone = [];
-  function renderPrep() {
-    $("prep").innerHTML = PREP.map((t, i) => "<li><label><input type='checkbox' data-p='" + i + "'" + (prepDone.includes(i) ? " checked" : "") + "><span>" + esc(t) + "</span></label></li>").join("");
-    $("prep").querySelectorAll("input").forEach((cb) => (cb.onchange = async () => {
-      const i = +cb.dataset.p, k = prepDone.indexOf(i);
-      if (cb.checked && k < 0) prepDone.push(i);
-      if (!cb.checked && k >= 0) prepDone.splice(k, 1);
+  const PREP11 = [
+    "Демо-проект sql-demo в Supabase — от аккаунта KruzhokProg (вход через GitHub KruzhokProg), НЕ на Otbor_2107: там настоящие данные учеников. Пароль базы сохранён. Таблиц pitomcy и geroi в нём нет (после репетиции — drop table, см. блок «Итог»).",
+    "supabase.com открывается с того интернета, откуда ведёте занятие.",
+    "Ученикам в чат группы в Telegram за день: «На занятии начинаем базы данных. Нужен вход в GitHub в браузере (логин и пароль под рукой) — через него зарегистрируемся в Supabase. Ничего ставить не нужно. И вспомните вопрос с прошлого занятия: чего Excel не умеет?»",
+    "Открыты вкладки: эта страница, Урок_10/Питомцы_excel_vs_baza.xlsx (лист «Так бывает в Excel»), sql-demo → SQL Editor, Урок_10/geroi.sql.",
+    "Лист «Для учителя» в Excel и ответы практики — не показывать на экране. Демонстрировать окно, а не весь экран.",
+  ];
+  const PREPS = { 8: PREP8, 11: PREP11 };
+  const prepDone = {};
+  function renderPrep(l) {
+    const box = $("prep-" + l), done = prepDone[l] || (prepDone[l] = []);
+    box.innerHTML = PREPS[l].map((t, i) => "<li><label><input type='checkbox' data-p='" + i + "'" + (done.includes(i) ? " checked" : "") + "><span>" + esc(t) + "</span></label></li>").join("");
+    box.querySelectorAll("input").forEach((cb) => (cb.onchange = async () => {
+      const i = +cb.dataset.p, k = done.indexOf(i);
+      if (cb.checked && k < 0) done.push(i);
+      if (!cb.checked && k >= 0) done.splice(k, 1);
       try {
-        await rest("git_teacher_kv?on_conflict=key", { method: "POST", body: JSON.stringify({ key: "prep8", value: prepDone, updated_at: new Date().toISOString() }), headers: { Prefer: "resolution=merge-duplicates,return=minimal" } });
+        await rest("git_teacher_kv?on_conflict=key", { method: "POST", body: JSON.stringify({ key: "prep" + l, value: done, updated_at: new Date().toISOString() }), headers: { Prefer: "resolution=merge-duplicates,return=minimal" } });
       } catch (e) { alert("Не сохранилось: " + e.message); }
     }));
   }
 
-  // ---------- ход занятия: команды копируются кликом (терминал или чат группы в Telegram) ----------
+  // ---------- ход занятия: команды копируются кликом (терминал, SQL Editor или чат группы в Telegram) ----------
   const copied = new Set();
   const C = (...cmds) => ({ cmd: cmds });
   const DEMO = "~/Desktop/2107/Git/Vonagu3/istoriya-demo";
   const IGRA = "https://github.com/Vonagu3/istoriya-igra";
-  const FLOW = [
+  const FLOW8 = [
     ["0–15", "разбор", "Разбор командной домашки", [
       { note: "Владелец каждой команды показывает экран: доска (сколько из 9 в Done) → Pull requests → Closed (9 слитых, у каждого Approve) → Insights → Network (два merge-коммита «Решил конфликт»). Каждому один вопрос: «Где застряли дольше всего?» Одну остановку разобрать, не больше 3 минут. Не доделали — к занятию 9." },
       { note: "Переход: «В вашем репозитории уже десятки коммитов. Сегодня учимся в них разбираться: кто что поменял и зачем, и как перенести коммит из ветки в ветку»." }]],
@@ -384,18 +411,82 @@
       { note: "Пройти ответы детектива: на вопросы 2 и 3 показать <code>git blame kopilka.py</code> и <code>git show 5b3f231</code> в istoriya-igra. Домашка: доделать командную к занятию 8; по желанию — в следующем PR обновить ветку через <code>git rebase main</code> + <code>git push --force-with-lease</code>." },
       C("ЗАНЯТИЕ 8 · ЗАПОМНИТЬ\ngit log -p файл             что менялось в файле\ngit log -S \"слово\"          в каком коммите слово появилось\ngit blame файл              кто последним менял каждую строку\ngit blame -L 5,5 файл       только строка 5 (+ ХЕШ~1 — что было до этого коммита)\ngit cherry-pick ХЕШ         копия одного коммита в текущую ветку\ngit rebase main             моя ветка поверх свежего main\n   конфликт: решить · git add · git rebase --continue · запутался: --abort\n   потом: git push --force-with-lease — ТОЛЬКО в своей ветке")]],
   ];
-  function renderFlow() {
-    let n = 0;
-    $("flowNav").innerHTML = FLOW.map((b, i) => "<a href='#fl" + i + "'>" + b[0] + "</a>").join("") + "<a href='#problems'>Проблемы</a>";
-    $("flow").innerHTML = FLOW.map((b, i) => "<div class='fl-block' id='fl" + i + "'><div class='fl-time'>" + b[0] + "<small>" + esc(b[1]) + "</small></div><div class='fl-body'><b>" + esc(b[2]) + "</b>" +
+  const GEROI = SITE + "files/geroi.sql";
+  const FLOW11 = [
+    ["0–8", "разговор", "Чего Excel не решит — ответы ребят", [
+      { note: "Вопрос, на котором остановились на занятии 10. Каждый пишет в чат 1–2 проблемы, потом каждый озвучивает одну. Записывать в две колонки: «Excel не умеет» → «что нужно вместо». Не подсказывать: что не назовут — найдут сами на листе с питомцами." },
+      C("ВОПРОС С ПРОШЛОГО ЗАНЯТИЯ\nВаш бот хранит напоминания пользователей. Почему не в Excel-файле?\nНапишите 1–2 проблемы, которые Excel не решит."),
+      { warn: "<b>Шпаргалка, сверять с ответами:</b> нет типов («два» в числовой колонке); нет ключа (две строки «Барсик» — один кот или два?); один файл — один хозяин, бот, приложение и сайт не могут писать одновременно; из кода нужен запрос по сети, а не файл; нет прав «каждый видит только свои» (в базе — RLS); тормозит на миллионах строк (в базе — индексы); телефон хозяина в 10 строках — меняешь в 10 местах (связи, JOIN); затёр файл — данных нет. Плюс: Excel сам «угадывает» — протянули 1, 2, 4 → получили 5,33 (линейный тренд), чего в данных не было." }]],
+    ["8–15", "все", "Supabase: регистрация и проект sql-praktika", [
+      { note: "Проект создаётся 1–3 минуты — поэтому сейчас, до показа. Пройти путь на экране от KruzhokProg до формы New project и закрыть её." },
+      C("1. Откройте supabase.com → Start your project (или Sign in).\n2. Continue with GitHub → Authorize.\n3. Если спросит про организацию: имя — ваш ник, тип Personal, план Free.\n4. New project:\n   • Name: sql-praktika\n   • Database Password: кнопка Generate → СКОПИРУЙТЕ и сохраните в заметки\n   • Region: Европа (Central EU / Frankfurt)\n   • Create new project\n5. Проект создаётся 1–3 минуты. Не закрывайте вкладку, смотрим показ."),
+      { note: "Пока создаётся: «Supabase — база PostgreSQL в облаке плюс панель. Бот на Python, приложение на Kotlin и сайт будут читать и писать в одну базу». Бесплатный проект засыпает через неделю без дела → кнопка Restore, данные целы. Пароль сегодня не нужен — понадобится для Python, его можно сбросить." }]],
+    ["15–23", "показ", "Excel против базы · питомцы", [
+      { note: "<code>Питомцы_excel_vs_baza.xlsx</code>, лист <b>«Так бывает в Excel»</b>. Вопрос: «Сколько собак? Какой средний возраст?» Формулы внизу: собак 1, возраст 4,2. Ребята сами ищут, почему — и сверяют со своим списком из начала." },
+      { warn: "<b>8 проблем (лист «Для учителя»):</b> 1) возраст «два», «7 лет» — текст в числах, AVERAGE молча пропускает; 2) средний 4,2 — посчитано 5 строк из 7, правильно 4,5; 3) «Собака», «собака » с пробелом, «пёс» — одно и то же по-разному; 4) собак насчитано 1, а их 3; 5) Барсик дважды — один кот или два? → <code>id</code>; 6) пусто и «?» — оба «не знаем» → <code>NULL</code>; 7) телефон Ани дважды и в разном виде → таблица хозяев, связь (занятие 12); 8) файл у одного человека → базу пишут бот, приложение, сайт одновременно." },
+      { note: "Лист <b>«Так в базе (pitomcy)»</b>: <code>id</code>, латинские названия, строка типов, <code>NULL</code> — формулы дают 3 и 4,5. «Это та же pitomcy, которую сейчас создадим в Supabase». Телефона нет нарочно — «он про хозяина, а не про питомца», только упомянуть." },
+      C("EXCEL → БАЗА ДАННЫХ\nлист                      → таблица (table)\nстрока                    → строка, запись (row)\nстолбец с заголовком      → столбец, поле (column)\nв ячейку что угодно       → у столбца тип: text, int, boolean, date\nстроки путаются           → первичный ключ id, не повторяется\nоткрывает один человек    → пишут бот, приложение и сайт сразу\nищем глазами и фильтрами  → спрашиваем на языке SQL\nпусто, «?», «-»           → NULL — «неизвестно», не 0 и не ''"),
+      { note: "SQL читается почти как английский: <code>select imya from geroi where uroven &gt; 50</code>. Названия — латиницей, маленькими, через <code>_</code>, как ветки в git. Значения в кавычках — на любом языке." }]],
+    ["23–30", "показ", "Таблица мышкой · Table Editor · sql-demo", [
+      { ol: ["Table Editor → <b>Create a new table</b>. Name <code>pitomcy</code>. RLS оставить включённым: «замок от внешнего мира, разберём с ботом; мы в панели — администраторы».",
+        "<code>id</code> и <code>created_at</code> Supabase добавил сам — у <code>id</code> значок ключа.",
+        "Add column: <code>klichka</code> text (убрать Is Nullable), <code>vid</code> text, <code>vozrast</code> int4, <code>hozyain</code> text → Save.",
+        "Insert row ×3: Барсик, кот, 3, Аня · Рекс, собака, 5, Миша · Кеша, попугай, 2, хозяин пусто. <code>id</code> 1, 2, 3 — сами.",
+        "В <code>vozrast</code> написать <code>три</code> — не сохранит. «Вот он, тип. Excel бы проглотил»."] },
+      { note: "«Мышкой удобно, пока строк три. Когда тысяча, а вопрос — „все собаки старше 4 лет без хозяина“ — нужен SQL»." }]],
+    ["30–45", "показ", "SQL Editor: SELECT, WHERE, ORDER BY, INSERT, UPDATE, DELETE", [
+      { warn: "Сразу: в окне несколько запросов → выполнятся все, а виден результат <b>только последнего</b>. Нужен один — выделить его и Run (<code>Ctrl+Enter</code> / <code>Cmd+Enter</code>)." },
+      C("select * from pitomcy;", "select klichka, vid from pitomcy;"),
+      C("insert into pitomcy (klichka, vid, vozrast, hozyain) values\n  ('Мурка', 'кошка', 7, 'Аня'),\n  ('Шарик', 'собака', 1, NULL),\n  ('Граф', 'собака', 9, 'Петя');"),
+      { note: "Текст — в <b>одинарных</b> кавычках, числа без кавычек, <code>id</code> не пишем. Теперь 6 строк." },
+      C("select * from pitomcy where vid = 'собака';", "select * from pitomcy where vid = 'собака' and vozrast > 4;", "select * from pitomcy where vid in ('кот', 'кошка');", "select * from pitomcy where klichka like 'Ш%';"),
+      { note: "<code>= &lt;&gt; &gt; &lt; &gt;= &lt;=</code>; <code>and</code> — оба, <code>or</code> — хотя бы одно; <code>in (…)</code> — одно из списка; <code>%</code> — любые символы." },
+      C("select * from pitomcy where hozyain = NULL;", "select * from pitomcy where hozyain is null;"),
+      { warn: "<b>Ловушка 1.</b> <code>= NULL</code> — пусто: «неизвестно» не равно ничему. Только <code>is null</code> / <code>is not null</code>. Спросить: почему <code>where hozyain &lt;&gt; 'Аня'</code> не покажет Кешу?" },
+      C("select * from pitomcy order by vozrast desc limit 2;", "select * from pitomcy order by vid, vozrast desc;"),
+      C("select … from … where … order by … limit …"),
+      C("update pitomcy set hozyain = 'Илья' where klichka = 'Шарик';", "update pitomcy set vozrast = vozrast + 1 where id = 1;", "delete from pitomcy where id = 5;"),
+      { note: "«Менять лучше по <code>id</code> — кличка может повториться»." },
+      C("update pitomcy set hozyain = 'Никто';"),
+      { warn: "<b>Ловушка 2.</b> Run → Supabase переспросит → <b>Cancel</b>. «Без <code>where</code> изменятся ВСЕ строки, <code>delete</code> удалит всех. Отмены, как <code>git revert</code>, нет. Правило: сначала <code>select … where …</code>, смотрим строки, потом меняем на <code>update</code>/<code>delete</code> с тем же <code>where</code>»." },
+      { note: "Комментарий: <code>-- задание 3</code> — до конца строки не выполняется." }]],
+    ["45–48", "показ", "geroi.sql и как устроена практика", [
+      { note: "Новый запрос → вставить весь <code>geroi.sql</code> → Run → <code>vsego_geroev 30</code>. Пройти по <code>create table</code>: <code>generated always as identity primary key</code> — номер ставит база; <code>not null</code> — обязательно; <code>check (uroven between 1 and 100)</code> — уровень 500 не запишется; <code>default 0</code>; <code>drop table if exists</code> — <b>сломали героев → запустите скрипт заново</b>." },
+      C(GEROI),
+      { note: "Ссылку — в чат (открывается как текст: Ctrl+A, Ctrl+C). Или отправить файл <code>Урок_10/geroi.sql</code>. В каждом задании написано, сколько строк должно выйти, — это самопроверка." }]],
+    ["48–53", "перерыв", "Перерыв", [{ note: "Кто не успел создать проект — доделать в перерыв." }]],
+    ["53–93", "практика", "Практика 1: запросы к героям · каждый в своём sql-praktika", [
+      C("ПРАКТИКА · БАЗЫ ДАННЫХ · занятие 11\n\n0. Supabase → проект sql-praktika → SQL Editor → New query.\n   Вставить ВЕСЬ текст geroi.sql → Run. Внизу: vsego_geroev 30.\n   " + GEROI + "\n   Каждое задание — новый запрос или выделить нужную строку и Run.\n   Сломали таблицу — запустите geroi.sql заново.\n\nТаблица geroi: id, imya, klass, uroven, zoloto, gildiya, v_seti, data_registracii\nКлассы: воин, маг, лучник, лекарь.\nГильдии: Стальные волки, Звёздный круг, Ночные тени, Белые крылья (или пусто).\n\n 1. Все герои, все столбцы.                                → 30 строк\n 2. Только имя и уровень всех героев.                      → 30 строк, 2 столбца\n 3. Все маги.                                              → 8 строк\n 4. Герои с уровнем больше 50.                             → 16 строк\n 5. Маги с уровнем больше 50.                              → 5 строк\n 6. Лучники и лекари (через or и через in).                → 13 строк\n 7. Герои без гильдии.                                     → 8 строк\n    (а что выйдет с  where gildiya = NULL ? почему?)\n 8. Герои, чьё имя начинается на «А».                      → 3 строки\n 9. 5 самых богатых героев (имя и золото).                 → первый — Ультра, 9999\n10. Все герои: по классу, внутри — от высокого уровня.     → первые: Йети, Гром, Ястреб\n11. Зарегистрировались в 2026 году или позже\n    (дата пишется так: '2026-01-01').                      → 7 строк\n12. Кто из «Стальных волков» сейчас в сети? (v_seti = true) → 4 строки\n13. Уровень от 20 до 30 включительно, по уровню\n    (подсказка: between 20 and 30).                        → Зорро, Юла, Мира\n14. Сколько героев НЕ из «Ночных теней»?\n    Сначала угадайте, потом проверьте через <>.            → 16 строк. Почему не 24?\n15. В имени есть буква «р», любая (ilike вместо like).     → 15 строк\n16. Самый новый (по дате регистрации) герой.               → Пиксель\n\nГотово — пишите в чат «Практика 1 готова»."),
+      { note: "Частые ошибки: <code>column \"маг\" does not exist</code> — текст без кавычек; <code>syntax error at or near …</code> — смотреть слово и слово перед ним (запятая, двойные кавычки); 0 строк без ошибки — <code>'Маг'</code> вместо <code>'маг'</code> или лишний пробел. Не успевают — 13–16 в домашку." },
+      { warn: "<b>Ответы:</b> 5) Белла, Жасмин, Нокс, Руна, Ультра · 7) <code>is null</code>, <code>= NULL</code> → 0 · 8) Аргон, Астра, Ангел · 9) <code>order by zoloto desc limit 5</code>: Ультра 9999, Йети 7800, Гром 5100, Нокс 4600, Ястреб 4200 · 10) <code>order by klass, uroven desc</code> · 11) <code>data_registracii &gt;= '2026-01-01'</code> · 12) Аргон, Йети, Сокол, Цезарь · 14) 30 − 6 = 24, но 8 без гильдии не попали — про них неизвестно; все 24: <code>… or gildiya is null</code> · 15) <code>imya ilike '%р%'</code>; <code>like</code> различает Р и р · 16) <code>order by data_registracii desc limit 1</code>. Все — <code>Урок_10/Ответы.md</code>." },
+      { ready: "Все написали «Практика 1 готова»" }]],
+    ["93–105", "практика", "Практика 2: свой герой + контроль", [
+      C("ПРАКТИКА 2 · свой герой\n\n17. Добавьте СВОЕГО героя: имя — ваш ник, класс, уровень (1–100!), золото, гильдия.\n    id и дату не пишите.                                   → 31 герой\n    Найдите себя через where imya = '…'.\n    Попробуйте добавить героя с уровнем 500 — что ответит база?\n18. Узнайте id своего героя. +500 золота (zoloto = zoloto + 500) и v_seti = true.\n    ТОЛЬКО ему — по id. Сначала select с тем же where, потом update.\n19. Ваш герой перешёл в «Белые крылья» — измените.\n20. Удалите своего героя. Сначала select с тем же where!  → снова 30\n\nКОНТРОЛЬ — выполните и пришлите СКРИНШОТ результата в чат:\n    select klass, imya, uroven from geroi\n    where uroven > 60 and gildiya is not null\n    order by uroven desc limit 5;"),
+      { warn: "<b>Контроль:</b> Ультра 99, Йети 95, Гром 88, Нокс 82, Ястреб 80. Другое — таблица испорчена (<code>update</code> без <code>where</code>): запустить <code>geroi.sql</code> заново. Уровень 500 → <code>violates check constraint</code>: «база сама защищает данные — Excel бы записал». Удалил и вставил снова — id 32, 33: номера не переиспользуются." },
+      { ready: "Скриншоты контроля у всех в чате" }]],
+    ["105–112", "бонус", "Бонус для быстрых / помощь отстающим", [
+      C("БОНУС\nБ1. Сколько всего героев?               select count(*) from geroi;\nБ2. Сколько золота у всех вместе?       select sum(zoloto) from geroi;\nБ3. Какие классы бывают (без повторов)? select distinct klass from geroi;\nБ4. Золото на один уровень — у кого больше?\n    select imya, zoloto / uroven as na_uroven from geroi\n    order by na_uroven desc limit 3;\nБ5. Таблица для ВАШЕГО проекта: 3–5 столбцов с типами, create table, 5 строк."),
+      { note: "Ответы: Б1 30 · Б2 66409 · Б3 4 · Б4 Ультра 101, Йети 82, Гром 57. <code>count</code>, <code>sum</code> — тема занятия 12, сейчас только попробовать." }]],
+    ["112–120", "итог", "Итог и домашка", [
+      C("ЗАПОМНИТЬ · БАЗЫ ДАННЫХ · занятие 11\n• Таблица = строки (записи) × столбцы (поля). У столбца есть тип: text, int, boolean, date.\n• id — первичный ключ: уникальный номер строки, ставится сам.\n• Порядок в запросе: select … from … where … order by … limit …\n• Текст — в 'одинарных' кавычках, числа — без кавычек.\n• Пусто = NULL. Проверка: is null / is not null. «= NULL» не работает никогда.\n• UPDATE и DELETE — только с where. Сначала select с тем же where, потом меняем.\n• Несколько запросов в окне → видно только последний. Выделить нужный → Run.\n• Сломали таблицу героев — запустите geroi.sql заново."),
+      C("ДОМАШНЕЕ ЗАДАНИЕ К ЗАНЯТИЮ 12 · каждый сам · ~40 минут\nSupabase → sql-praktika → SQL Editor. Если таблица героев менялась —\nсначала запустите geroi.sql заново.\n\nЧАСТЬ 1. Запросы (для каждого — сам запрос и проверка):\n Д1. Воины из «Стальных волков», от богатого к бедному.        → 4, первый Йети\n Д2. Герои НЕ в сети с уровнем меньше 30.                       → 3 строки\n Д3. 3 самых слабых героя (по уровню).                          → Пиксель, Ёрш, Эхо\n Д4. Сколько героев зарегистрировалось в 2025 году?             → 17\n Д5. Маги и лекари без гильдии.                                 → 4 строки\n Д6. Герои, чьё имя заканчивается на «а».                       → 9 строк\n Д7. Герои с золотом от 1000 до 2000 включительно.              → 7 строк\n Все 7 запросов сохраните в один файл zaprosy.sql\n (подпишите: -- Д1, -- Д2 …) и пришлите в чат.\n\nЧАСТЬ 2. Таблица для ВАШЕГО проекта.\n Придумайте одну таблицу, которая нужна вашему проекту\n (например, напоминания, пользователи, ответы бота).\n • Создайте её через create table по образцу geroi.sql:\n   id как в образце, 3–6 своих столбцов, у каждого тип (text, int, boolean, date),\n   хотя бы один not null и хотя бы один default.\n • Добавьте 5 строк через insert.\n • Скриншот select * from ваша_таблица; — в чат.\n Названия таблицы и столбцов — латиницей, маленькими буквами, через _.\n\nГОТОВО, КОГДА: в чате ваш zaprosy.sql и скриншот своей таблицы.\nЗастряли больше чем на 5 минут — пишите в чат группы: какой запрос и какую ошибку видите."),
+      { note: "Если в практике не успели 13–16 — добавить их в часть 1. После занятия очистить демо (проект <code>sql-demo</code> не удалять):" },
+      C("drop table if exists pitomcy;\ndrop table if exists geroi;")]],
+  ];
+  const FLOWS = { 8: FLOW8, 11: FLOW11 };
+  let cmdN = 0;
+  function renderFlow(l) {
+    const FLOW = FLOWS[l];
+    $("flowNav-" + l).innerHTML = FLOW.map((b, i) => "<a href='#fl" + l + "-" + i + "'>" + b[0] + "</a>").join("") + "<a href='#problems-" + l + "'>Проблемы</a>";
+    $("flow-" + l).innerHTML = FLOW.map((b, i) => "<div class='fl-block' id='fl" + l + "-" + i + "'><div class='fl-time'>" + b[0] + "<small>" + esc(b[1]) + "</small></div><div class='fl-body'><b>" + esc(b[2]) + "</b>" +
       b[3].map((x) => {
-        if (x.cmd) return "<div class='fl-cmds'>" + x.cmd.map((c) => { const id = n++; return "<button type='button' class='fl-cmd" + (copied.has(id) ? " done" : "") + "' data-c='" + id + "'><code>" + esc(c) + "</code><span>" + (copied.has(id) ? "скопировано" : "копировать") + "</span></button>"; }).join("") + "</div>";
+        if (x.cmd) return "<div class='fl-cmds'>" + x.cmd.map((c) => { const id = cmdN++; return "<button type='button' class='fl-cmd" + (copied.has(id) ? " done" : "") + "' data-c='" + id + "'><code>" + esc(c) + "</code><span>" + (copied.has(id) ? "скопировано" : "копировать") + "</span></button>"; }).join("") + "</div>";
         if (x.ol) return "<ol>" + x.ol.map((t) => "<li>" + t + "</li>").join("") + "</ol>";
         if (x.warn) return "<div class='note'>" + x.warn + "</div>";
         if (x.ready) return "<span class='fl-ready'>" + esc(x.ready) + "</span>";
         return "<div class='muted'>" + x.note + "</div>";
       }).join("") + "</div></div>").join("");
-    $("flow").querySelectorAll(".fl-cmd").forEach((btn) => (btn.onclick = () => {
+    $("flow-" + l).querySelectorAll(".fl-cmd").forEach((btn) => (btn.onclick = () => {
       const code = btn.querySelector("code"), text = code.textContent;
       const done = () => { copied.add(+btn.dataset.c); btn.classList.add("done"); btn.querySelector("span").textContent = "скопировано"; };
       const sel = () => { const r = document.createRange(); r.selectNodeContents(code); const s2 = getSelection(); s2.removeAllRanges(); s2.addRange(r); btn.querySelector("span").textContent = "Cmd+C"; };
@@ -508,12 +599,12 @@
   async function start() {
     const [ps, kv, qz] = await Promise.all([
       rest("git_pupils?select=*&order=team.asc,sort.asc,name.asc"),
-      rest("git_teacher_kv?select=*&key=in.(prep8,sent)"),
+      rest("git_teacher_kv?select=*&key=in.(" + Object.keys(PREPS).map((l) => "prep" + l).join(",") + ",sent)"),
       rest("git_quiz?select=session,q,revealed&id=eq.1"),
     ]);
     pupils = ps;
     const kvOf = (k) => { const r = kv.find((x) => x.key === k); return (r && r.value) || []; };
-    prepDone = kvOf("prep8");
+    Object.keys(PREPS).forEach((l) => (prepDone[l] = kvOf("prep" + l)));
     sentMarks = kvOf("sent");
     if (qz[0]) quiz = qz[0];
     await loadEvents();
@@ -522,7 +613,7 @@
     $("login").hidden = true;
     $("app").hidden = false;
     await loadAllAnswers();
-    renderPupils(); renderPrep(); renderFlow(); renderLive(); renderResults();
+    renderPupils(); cmdN = 0; Object.keys(PREPS).forEach((l) => { renderPrep(l); renderFlow(l); }); renderLive(); renderResults();
     status(pupils.length ? "Учеников: " + pupils.length : "Список пуст — добавьте учеников ниже.");
     clearInterval(timer);
     timer = setInterval(tick, 3000);

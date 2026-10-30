@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261028181857">
+<link rel="stylesheet" href="quiz.css?v=20261030234346">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -107,6 +107,13 @@ table.res th[title] { cursor: help; }
 .fl-cmd.done { background: color-mix(in srgb, var(--ok) 16%, transparent); }
 .fl-cmd.done span { color: var(--ok); }
 .fl-ready { justify-self: start; font-size: 13px; font-weight: 600; color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); padding: 2px 10px; border-radius: 999px; }
+#tabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 14px 0 4px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+#tabs button { font: 600 14px var(--sans); border: 0; background: transparent; color: var(--muted); padding: 7px 11px; border-radius: 8px; cursor: pointer; }
+#tabs button:hover { background: var(--chip); color: var(--ink); }
+#tabs button.on { background: var(--ink); color: var(--panel); }
+.tab { display: none; }
+.tab.on { display: block; }
+body.show #tab-pupils { display: block; }
 table.probs td { vertical-align: top; font-size: 14px; }
 table.probs td:first-child { width: 40%; }
 @media (max-width: 600px) { .fl-block { grid-template-columns: 1fr; gap: 4px; } }
@@ -129,23 +136,21 @@ table.probs td:first-child { width: 40%; }
 <div id="app" hidden>
   <div class="top hide-on-show">
     <div>
-      <h1>Занятие 8 — руководителю</h1>
-      <p class="lead">Данные учеников хранятся в Supabase и видны только после входа. План занятия 8 (история, blame, cherry-pick, rebase) — <code>Урок_8/План_урока.md</code>, учебный репозиторий — <code>Урок_8/создать_репозиторий.py</code>.</p>
+      <h1>Руководителю</h1>
+      <p class="lead">Данные учеников хранятся в Supabase и видны только после входа. Общее — во вкладке «Ученики и опрос», план каждого занятия — в своей вкладке.</p>
     </div>
     <div class="right"><span id="who"></span><button class="btn" id="logout">Выйти</button></div>
   </div>
-  <div class="links hide-on-show">
-    <a href="./" target="_blank" rel="noopener">Тренажёр</a>
-    <a id="lRepo" target="_blank" rel="noopener">git-praktika</a>
-    <a id="lCollab" target="_blank" rel="noopener">Collaborators (пригласить)</a>
-    <a id="lBranches" target="_blank" rel="noopener">Ветки учеников</a>
-    <a id="lPulls" target="_blank" rel="noopener">Pull requests</a>
-    <a id="lIssues" target="_blank" rel="noopener">Issues</a>
-    <a href="#lesson">Ход занятия ↓</a>
-    <a href="https://github.com/Vonagu3/istoriya-igra" target="_blank" rel="noopener">istoriya-igra</a>
-    <a href="https://github.com/Vonagu3/praktika-shablon" target="_blank" rel="noopener">Шаблон практики</a>
-  </div>
+  <nav id="tabs" class="hide-on-show">
+    <button data-tab="pupils">Ученики и опрос</button>
+    <button data-tab="l8">Занятие 8 · история git</button>
+    <button data-tab="l11">Занятие 11 · базы данных</button>
+  </nav>
 
+  <section class="tab" id="tab-pupils">
+  <div class="links hide-on-show">
+    <a href="./" target="_blank" rel="noopener">Тренажёр (страница учеников)</a>
+  </div>
   <h2 class="hide-on-show">Опрос в прямом эфире</h2>
   <div class="card" id="live"></div>
 
@@ -174,19 +179,35 @@ table.probs td:first-child { width: 40%; }
     <div class="addrow"><input type="text" id="cName" placeholder="Имя Фамилия как в карточке"><input type="number" id="cN" placeholder="уровней" style="max-width:110px"><input type="text" id="cCode" class="code" placeholder="код" style="max-width:120px"><span id="cRes"></span></div>
   </details>
 
-  <h2>Подготовить заранее</h2>
-  <div class="card"><ul class="check" id="prep"></ul></div>
-
-  <h2 id="lesson">Ход занятия</h2>
-  <p class="lead">Нажмите на команду — она скопируется: для своего терминала или для чата группы в Telegram. Скопированные отмечаются зелёным. Ученики делают практику по своей странице, вкладка «Практика».</p>
-  <nav class="fl-nav" id="flowNav"></nav>
-  <div class="card" id="flow"></div>
-
   <h2>Опрос (если проводите снова)</h2>
   <ol class="demo">
     <li>«Начать опрос» → «Режим показа» → демонстрация окна этой страницы. Ученики — вкладка «Урок».</li>
     <li>Каждый вопрос: ждать «ответили N из M» → «Показать ответ» → разбор → «Дальше». В конце «Завершить». Результаты — в блоке «Результаты опросов».</li>
   </ol>
+  </div>
+  </section>
+
+  <section class="tab" id="tab-l8">
+  <h2>Занятие 8 — история git: log, blame, cherry-pick, rebase</h2>
+  <p class="lead">План занятия 8 (история, blame, cherry-pick, rebase) — <code>Урок_8/План_урока.md</code>, учебный репозиторий — <code>Урок_8/создать_репозиторий.py</code>.</p>
+  <div class="links">
+    <a id="lRepo" target="_blank" rel="noopener">git-praktika</a>
+    <a id="lCollab" target="_blank" rel="noopener">Collaborators (пригласить)</a>
+    <a id="lBranches" target="_blank" rel="noopener">Ветки учеников</a>
+    <a id="lPulls" target="_blank" rel="noopener">Pull requests</a>
+    <a id="lIssues" target="_blank" rel="noopener">Issues</a>
+    <a href="#lesson-8">Ход занятия ↓</a>
+    <a href="https://github.com/Vonagu3/istoriya-igra" target="_blank" rel="noopener">istoriya-igra</a>
+    <a href="https://github.com/Vonagu3/praktika-shablon" target="_blank" rel="noopener">Шаблон практики</a>
+  </div>
+
+  <h2>Подготовить заранее</h2>
+  <div class="card"><ul class="check" id="prep-8"></ul></div>
+
+  <h2 id="lesson-8">Ход занятия</h2>
+  <p class="lead">Нажмите на команду — она скопируется: для своего терминала или для чата группы в Telegram. Скопированные отмечаются зелёным. Ученики делают практику по своей странице, вкладка «Практика».</p>
+  <nav class="fl-nav" id="flowNav-8"></nav>
+  <div class="card" id="flow-8"></div>
 
   <h2>Как пользоваться тренажёром на занятии</h2>
   <ul>
@@ -197,7 +218,7 @@ table.probs td:first-child { width: 40%; }
     <li>Код можно подобрать, прочитав код страницы, — это мотивация, а не экзамен. Настоящая проверка — <code>python проверить.py</code> и ветки на GitHub.</li>
   </ul>
 
-  <h2 id="practice">Команды и домашка к занятию 8 (разбор в начале занятия)</h2>
+  <h2 id="practice-8">Команды и домашка к занятию 8 (разбор в начале занятия)</h2>
   <div class="card">
     <p style="margin:0 0 8px">С занятия 7 — две команды по 3 человека, работают в репозитории владельца (из домашки занятия 6). Домашка — повторение всего git за 2 часа в созвоне, у учеников вкладка <b>Домашка</b> (<code>#hw</code>), полный текст и проверка — <code>Урок_7/Домашнее_задание.md</code>. Круг review: PR 1 проверяет 2, PR 2 — 3, PR 3 — 1; патч — в обратную сторону.</p>
     <table class="probs">
@@ -207,7 +228,7 @@ table.probs td:first-child { width: 40%; }
     </table>
   </div>
 
-  <h2 id="problems">Если у ученика…</h2>
+  <h2 id="problems-8">Если у ученика…</h2>
   <div class="card wrap"><table class="probs">
     <tr><th>Видит</th><th>Что сделать</th></tr>
     <tr><td>На экране <code>:</code></td><td><code>git log</code> или <code>git blame</code> ждут: клавиша <code>q</code></td></tr>
@@ -258,11 +279,70 @@ table.probs td:first-child { width: 40%; }
 
   <h2>Что сознательно не рассказываем</h2>
   <p><code>rebase</code> общих веток и main, <code>git push --force</code> без <code>-with-lease</code>, самостоятельный <code>rebase -i</code> (<code>fixup</code>, <code>edit</code>, <code>drop</code>), <code>git bisect</code>, <code>git log -G</code>, <code>git blame -w -C</code>, теги и релизы подробно, SSH-ключи.</p>
+  </section>
+
+  <section class="tab" id="tab-l11">
+  <h2>Занятие 11 — базы данных: Excel → Supabase и первые SQL-запросы</h2>
+  <p class="lead">Начало раздела «Базы данных»: от вопроса «чего Excel не решит» к первой таблице и SQL в Supabase. Подробный сценарий — <code>Урок_10/Базы_данных_и_SQL.md</code>, ответы — <code>Урок_10/Ответы.md</code>, таблица практики — <code>Урок_10/geroi.sql</code>.</p>
+  <div class="links">
+    <a href="https://supabase.com/dashboard/projects" target="_blank" rel="noopener">Supabase (sql-demo)</a>
+    <a href="files/geroi.sql" target="_blank" rel="noopener">geroi.sql</a>
+    <a href="files/pitomcy-excel.xlsx">Питомцы Excel (без листа учителя)</a>
+    <a href="./#excel" target="_blank" rel="noopener">Вкладка Excel у учеников</a>
+    <a href="#lesson-11">Ход занятия ↓</a>
   </div>
+
+  <h2>Подготовить заранее</h2>
+  <div class="card"><ul class="check" id="prep-11"></ul></div>
+
+  <h2 id="lesson-11">Ход занятия</h2>
+  <p class="lead">Нажмите на команду — она скопируется: для своего терминала или для чата группы в Telegram. Скопированные отмечаются зелёным. SQL — в SQL Editor демо-проекта, тексты практики — в чат группы. Ответы (оранжевые блоки) на экран не выводить.</p>
+  <nav class="fl-nav" id="flowNav-11"></nav>
+  <div class="card" id="flow-11"></div>
+
+  <h2 id="problems-11">Если у ученика…</h2>
+  <div class="card wrap"><table class="probs">
+    <tr><th>Видит</th><th>Что сделать</th></tr>
+    <tr><td>supabase.com не открывается</td><td>Другой браузер или мобильный интернет. Не вышло — смотрит экран соседа, проект создаёт дома</td></tr>
+    <tr><td>Не помнит пароль GitHub</td><td>Sign up по почте, подтвердить письмо</td></tr>
+    <tr><td>Проект долго «Setting up»</td><td>Подождать до 5 минут, обновить страницу. Пока — смотрит показ</td></tr>
+    <tr><td>Просит выбрать организацию</td><td>Создать: имя — ник, Personal, Free</td></tr>
+    <tr><td>Не видно результата запроса</td><td>В окне несколько запросов — показан последний. Выделить нужный → Run</td></tr>
+    <tr><td><code>relation "geroi" does not exist</code></td><td>Не запущен <code>geroi.sql</code> или опечатка: <code>geroy</code>, <code>heroes</code></td></tr>
+    <tr><td><code>relation "pitomcy" does not exist</code></td><td><code>pitomcy</code> была только на показе, у учеников её нет</td></tr>
+    <tr><td><code>column "маг" does not exist</code></td><td>Текст без кавычек: нужно <code>'маг'</code></td></tr>
+    <tr><td><code>syntax error at or near …</code></td><td>Смотреть указанное слово и слово перед ним: пропущена или лишняя запятая, "двойные" кавычки вместо 'одинарных'</td></tr>
+    <tr><td>0 строк, ошибки нет</td><td>Значение не как в таблице: <code>'Маг'</code> вместо <code>'маг'</code>, лишний пробел. SQL сравнивает буквы точно</td></tr>
+    <tr><td><code>where gildiya = NULL</code> — 0 строк</td><td>Ловушка 1: <code>is null</code></td></tr>
+    <tr><td>Окно «destructive operation»</td><td>Supabase переспрашивает перед <code>update</code>/<code>delete</code>/<code>drop</code>. Проверить <code>where</code>. Для <code>geroi.sql</code> — подтвердить</td></tr>
+    <tr><td>Изменилось сразу много строк</td><td><code>update</code>/<code>delete</code> без <code>where</code>. Запустить <code>geroi.sql</code> заново</td></tr>
+    <tr><td><code>violates check constraint</code></td><td>Уровень вне 1–100 — так и задумано (задание 17)</td></tr>
+    <tr><td><code>null value in column … violates not-null constraint</code></td><td>Не указан обязательный столбец: имя, класс или уровень</td></tr>
+    <tr><td>Русские буквы в названии таблицы или столбца</td><td>Работает только в "двойных кавычках" — так не делаем. Латиницей</td></tr>
+    <tr><td>Проект «Paused»</td><td>Restore project, подождать пару минут</td></tr>
+  </table></div>
+
+  <h2>Как помогать</h2>
+  <ul>
+    <li>Застрявший присылает в чат скрин: запрос и ошибка или результат целиком.</li>
+    <li>Первое при любой странности с героями — запустить <code>geroi.sql</code> заново.</li>
+    <li>Кто закончил — помогает соседу словами, не за него (как review).</li>
+    <li>Отстаёте: Table Editor в показе пропустить, <code>pitomcy</code> создать скриптом; задания 12–16 — в домашку.</li>
+  </ul>
+  <div class="fl-cmds" style="max-width:640px"><code style="display:block;white-space:pre;padding:8px 10px">create table pitomcy (
+  id bigint generated always as identity primary key,
+  klichka text not null, vid text, vozrast int, hozyain text
+);
+insert into pitomcy (klichka, vid, vozrast, hozyain) values
+  ('Барсик', 'кот', 3, 'Аня'), ('Рекс', 'собака', 5, 'Миша'), ('Кеша', 'попугай', 2, NULL);</code></div>
+
+  <h2>Что сознательно не рассказываем</h2>
+  <p><code>count</code>, <code>group by</code> (только бонус), связи и <code>join</code>, нормализация (телефон хозяина — только упомянуть), RLS подробно, подключение из Python, индексы, транзакции, пароль базы и строка подключения.</p>
+  </section>
 </div>
 </main>
-<script src="quiz.js?v=20261028181857"></script>
-<script src="engine.js?v=20261028181857"></script>
-<script src="teacher.js?v=20261028181857"></script>
+<script src="quiz.js?v=20261030234346"></script>
+<script src="engine.js?v=20261030234346"></script>
+<script src="teacher.js?v=20261030234346"></script>
 </body>
 </html>
