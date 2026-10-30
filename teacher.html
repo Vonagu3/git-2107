@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261031000812">
+<link rel="stylesheet" href="quiz.css?v=20261031001558">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -289,6 +289,7 @@ table.probs td:first-child { width: 40%; }
     <a href="files/geroi.sql" target="_blank" rel="noopener">geroi.sql</a>
     <a href="files/pitomcy-excel.xlsx">Питомцы Excel (без листа учителя)</a>
     <a href="./#excel" target="_blank" rel="noopener">Вкладка Excel у учеников</a>
+    <a href="./#sql" target="_blank" rel="noopener">Вкладка «Базы данных» у учеников</a>
     <a href="#lesson-11">Ход занятия ↓</a>
   </div>
 
@@ -318,7 +319,7 @@ table.probs td:first-child { width: 40%; }
     <tr><td><code>where gildiya = NULL</code> — 0 строк</td><td>Ловушка 1: <code>is null</code></td></tr>
     <tr><td>Окно «destructive operation»</td><td>Supabase переспрашивает перед <code>update</code>/<code>delete</code>/<code>drop</code>. Проверить <code>where</code>. Для <code>geroi.sql</code> — подтвердить</td></tr>
     <tr><td>Изменилось сразу много строк</td><td><code>update</code>/<code>delete</code> без <code>where</code>. Запустить <code>geroi.sql</code> заново</td></tr>
-    <tr><td><code>violates check constraint</code></td><td>Уровень вне 1–100 — так и задумано (задание 17)</td></tr>
+    <tr><td><code>violates check constraint</code></td><td>Уровень вне 1–100 — так и задумано (практика 2, задание 13)</td></tr>
     <tr><td><code>null value in column … violates not-null constraint</code></td><td>Не указан обязательный столбец: имя, класс или уровень</td></tr>
     <tr><td>Русские буквы в названии таблицы или столбца</td><td>Работает только в "двойных кавычках" — так не делаем. Латиницей</td></tr>
     <tr><td>Проект «Paused»</td><td>Restore project, подождать пару минут</td></tr>
@@ -343,8 +344,8 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
   </section>
 </div>
 </main>
-<script src="quiz.js?v=20261031000812"></script>
-<script src="engine.js?v=20261031000812"></script>
-<script src="teacher.js?v=20261031000812"></script>
+<script src="quiz.js?v=20261031001558"></script>
+<script src="engine.js?v=20261031001558"></script>
+<script src="teacher.js?v=20261031001558"></script>
 </body>
 </html>

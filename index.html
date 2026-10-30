@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261031000812">
+<link rel="stylesheet" href="quiz.css?v=20261031001558">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -202,6 +202,7 @@ pre.cmd { font-variant-ligatures: none; background: var(--term-bg); color: var(-
       <button data-tab="live">Урок</button>
       <button data-tab="lesson">Практика</button>
       <button data-tab="excel">Excel</button>
+      <button data-tab="sql">Базы данных</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -1708,11 +1709,167 @@ git log --oneline --graph -20</pre>
   </div>
 </section>
 
+<!-- ================= БАЗЫ ДАННЫХ (занятие 11) ================= -->
+<section class="tab" id="tab-sql">
+  <div class="doc">
+  <h1>Практика: первые таблицы и запросы в Supabase</h1>
+  <p class="lead">Занятие 11. Каждый сам, в своём проекте <code>sql-praktika</code>. В каждом задании написано, сколько строк должно получиться, — это самопроверка. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+
+  <h2>Шаг 0. Свой проект в Supabase · если не успели на занятии</h2>
+  <ol class="steps" id="sql0">
+    <li><h3>Вход</h3>
+      <p>Откройте <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a> → <b>Start your project</b> (или Sign in) → <b>Continue with GitHub</b> → Authorize. Если спросит про организацию: имя — ваш ник, тип Personal, план Free.</p>
+    </li>
+    <li><h3>Проект</h3>
+      <p><b>New project</b>: Name — <code>sql-praktika</code>; Database Password — кнопка Generate, <b>скопируйте и сохраните в заметки</b>; Region — Европа (Central EU / Frankfurt) → <b>Create new project</b>. Создаётся 1–3 минуты.</p>
+    </li>
+  </ol>
+
+  <h2>Практика 0. Таблица мышкой · 7 минут</h2>
+  <p>Повторяем то, что видели на показе: таблица питомцев в <b>Table Editor</b>.</p>
+  <ol class="steps" id="sqlp0">
+    <li><h3>Создать таблицу</h3>
+      <p>Слева <b>Table Editor</b> → <b>Create a new table</b> → Name: <code>pitomcy</code>. Галочку RLS не трогайте. Столбцы <code>id</code> и <code>created_at</code> уже есть.</p>
+    </li>
+    <li><h3>Столбцы</h3>
+      <p><b>Add column</b> четыре раза:</p>
+      <div class="tablewrap"><table class="cheat">
+        <tr><th>Name</th><th>Type</th><th></th></tr>
+        <tr><td>klichka</td><td>text</td><td>снять галочку <b>Is Nullable</b> — кличка обязательна</td></tr>
+        <tr><td>vid</td><td>text</td><td></td></tr>
+        <tr><td>vozrast</td><td>int4</td><td><code>int4</code> — обычное целое число</td></tr>
+        <tr><td>hozyain</td><td>text</td><td></td></tr>
+      </table></div>
+      <p>→ <b>Save</b>.</p>
+    </li>
+    <li><h3>Три питомца</h3>
+      <p><b>Insert → Insert row</b> — три строки, можно своих питомцев. У одного хозяин — пусто. <code>id</code> не заполняйте — посмотрите, что база поставит сама.</p>
+    </li>
+    <li><h3>Проверка типа</h3>
+      <p>Попробуйте в <code>vozrast</code> написать <code>три</code>. Что сделает Supabase? А что сделал бы Excel?</p>
+    </li>
+    <li><h3>Сдать</h3>
+      <p>Скриншот таблицы <code>pitomcy</code> — в чат группы.</p>
+    </li>
+  </ol>
+
+  <h2>Готовим героев</h2>
+  <p>Для запросов всем нужна одинаковая таблица — тогда ответы сходятся. Её создаёт готовый скрипт.</p>
+  <p><a class="btn primary" href="files/geroi.sql" target="_blank" rel="noopener">geroi.sql — открыть</a> <a class="btn" href="files/geroi.sql" download="geroi.sql">⬇ скачать</a></p>
+  <ol class="steps" id="sqlgeroi">
+    <li><h3>Запустить скрипт</h3>
+      <p>Откройте <code>geroi.sql</code>, выделите <b>весь</b> текст (Ctrl+A, на Mac Cmd+A) и скопируйте. Supabase → слева <b>SQL Editor</b> → <b>New query</b> → вставить → <b>Run</b> (или Ctrl+Enter / Cmd+Enter). Supabase может переспросить про «destructive operation» — подтвердите.</p>
+      <p>Внизу должно быть: <code>vsego_geroev 30</code>.</p>
+    </li>
+    <li><h3>Посмотреть, как устроена таблица</h3>
+      <p>Прочитайте <code>create table</code> в скрипте: тип у каждого столбца, <code>not null</code>, <code>default</code>, <code>check</code>. Дома вы напишете такой же для своего проекта.</p>
+    </li>
+  </ol>
+  <div class="note-box"><b>Таблица <code>geroi</code>:</b> <code>id</code>, <code>imya</code>, <code>klass</code>, <code>uroven</code>, <code>zoloto</code>, <code>gildiya</code>, <code>v_seti</code>, <code>data_registracii</code>.<br>
+  Классы: воин, маг, лучник, лекарь. Гильдии: Стальные волки, Звёздный круг, Ночные тени, Белые крылья (или пусто).<br>
+  <b>Сломали таблицу</b> (например, <code>update</code> без <code>where</code>) — запустите <code>geroi.sql</code> заново, всё вернётся.</div>
+
+  <h2>Практика 1. Запросы к героям · 35 минут</h2>
+  <p>Каждое задание — новый запрос, или выделите нужную строку и Run: если в окне несколько запросов, виден результат <b>только последнего</b>. Подпишите запросы комментариями: <code>-- задание 3</code>.</p>
+  <ol class="steps" id="sqlp1">
+    <li><h3>Все герои, все столбцы</h3><p>→ 30 строк</p></li>
+    <li><h3>Только имя и уровень всех героев</h3><p>→ 30 строк, 2 столбца</p></li>
+    <li><h3>Все маги</h3><p>→ 8 строк</p></li>
+    <li><h3>Герои с уровнем больше 50</h3><p>→ 16 строк</p></li>
+    <li><h3>Маги с уровнем больше 50</h3><p>→ 5 строк</p></li>
+    <li><h3>Лучники и лекари</h3><p>Двумя способами: через <code>or</code> и через <code>in</code>. → 13 строк</p></li>
+    <li><h3>Герои без гильдии</h3><p>→ 8 строк. А что выйдет с <code>where gildiya = NULL</code>? Почему?</p></li>
+    <li><h3>Имя начинается на «А»</h3><p>→ 3 строки</p></li>
+    <li><h3>5 самых богатых героев</h3><p>Только имя и золото. → первый — Ультра, 9999</p></li>
+    <li><h3>Все герои по классу</h3><p>Внутри класса — от высокого уровня к низкому. → первые: Йети, Гром, Ястреб</p></li>
+    <li><h3>Зарегистрировались в 2026 году или позже</h3><p>Дата пишется так: <code>'2026-01-01'</code>. → 7 строк</p></li>
+    <li><h3>Кто из «Стальных волков» сейчас в сети?</h3><p><code>v_seti = true</code> → 4 строки</p></li>
+  </ol>
+  <div class="note-box">Помните лист «2 Герои» из Excel? Это те же 30 героев. Сравните: сколько магов, сколько с уровнем больше 50, сколько без гильдии — ответы должны совпасть с вашими формулами.</div>
+  <p>Готово — пишите в чат «Практика 1 готова».</p>
+
+  <h2>Практика 2. Свой герой · 10 минут</h2>
+  <p>Правило для <code>update</code> и <code>delete</code>: <b>сначала <code>select</code> с тем же <code>where</code></b> — посмотрели, те ли строки, — потом меняем.</p>
+  <ol class="steps" id="sqlp2" style="counter-reset: s 12">
+    <li><h3>Добавить своего героя</h3>
+      <p>Имя — ваш ник; класс, уровень (от 1 до 100!), золото и гильдия — любые. <code>id</code> и дату не пишите. → в таблице 31 герой. Найдите себя через <code>where imya = '…'</code>.</p>
+      <p>Попробуйте добавить героя с уровнем 500 — что ответит база?</p>
+    </li>
+    <li><h3>Золото и в сети</h3>
+      <p>Узнайте <code>id</code> своего героя. Дайте ему +500 золота (<code>zoloto = zoloto + 500</code>) и поставьте <code>v_seti = true</code>. Только ему — по <code>id</code>.</p>
+    </li>
+    <li><h3>Новая гильдия</h3>
+      <p>Ваш герой перешёл в гильдию «Белые крылья» — измените.</p>
+    </li>
+    <li><h3>Удалить</h3>
+      <p>Удалите своего героя. Сначала <code>select</code> с тем же <code>where</code>! → снова 30</p>
+    </li>
+    <li><h3>Контроль</h3>
+      <p>Выполните и пришлите <b>скриншот результата</b> в чат:</p>
+      <pre class="cmd">select klass, imya, uroven from geroi
+where uroven > 60 and gildiya is not null
+order by uroven desc limit 5;</pre>
+    </li>
+  </ol>
+
+  <h2>Бонус — для тех, кто быстрее</h2>
+  <pre class="cmd">-- Б1. Сколько всего героев?
+select count(*) from geroi;
+-- Б2. Сколько золота у всех вместе?
+select sum(zoloto) from geroi;
+-- Б3. Какие классы бывают (без повторов)?
+select distinct klass from geroi;
+-- Б4. Золото на один уровень — у кого больше всех?
+select imya, zoloto / uroven as na_uroven from geroi
+order by na_uroven desc limit 3;</pre>
+  <p>Б5. Придумайте таблицу для <b>вашего проекта</b> (3–5 столбцов с типами), создайте её через Table Editor или <code>create table</code> и добавьте 5 строк.</p>
+
+  <h2>Шпаргалка</h2>
+  <div class="tablewrap"><table class="cheat">
+    <tr><th>Как пишется</th><th>Что значит</th></tr>
+    <tr><td>select * from geroi;</td><td>все столбцы, все строки; <code>;</code> — конец запроса</td></tr>
+    <tr><td>select imya, uroven from geroi;</td><td>только нужные столбцы</td></tr>
+    <tr><td>where klass = 'маг'</td><td>отбор строк; текст — в <b>'одинарных'</b> кавычках, числа — без</td></tr>
+    <tr><td>= &lt;&gt; &gt; &lt; &gt;= &lt;=</td><td>равно, не равно, больше, меньше…</td></tr>
+    <tr><td>and / or</td><td>оба условия / хотя бы одно</td></tr>
+    <tr><td>klass in ('маг', 'лекарь')</td><td>одно из списка</td></tr>
+    <tr><td>uroven between 20 and 30</td><td>от 20 до 30 включительно</td></tr>
+    <tr><td>imya like 'А%'</td><td>начинается на «А»; <code>%</code> — любые символы; <code>ilike</code> — без разницы, большая или маленькая буква</td></tr>
+    <tr><td>gildiya is null / is not null</td><td>пусто / не пусто. <code>= NULL</code> не работает никогда</td></tr>
+    <tr><td>order by uroven desc</td><td>сортировка; <code>desc</code> — от большего к меньшему</td></tr>
+    <tr><td>limit 5</td><td>только первые 5 строк</td></tr>
+    <tr><td>insert into geroi (imya, klass, uroven) values ('Ник', 'маг', 42);</td><td>добавить строку; <code>id</code> не пишем</td></tr>
+    <tr><td>update geroi set zoloto = zoloto + 500 where id = 31;</td><td>изменить — <b>только с where</b></td></tr>
+    <tr><td>delete from geroi where id = 31;</td><td>удалить — <b>только с where</b></td></tr>
+    <tr><td>-- текст</td><td>комментарий, не выполняется</td></tr>
+  </table></div>
+  <p>Порядок в запросе всегда такой: <code>select … from … where … order by … limit …</code>. Названия таблиц и столбцов — латиницей, маленькими буквами, через <code>_</code>.</p>
+
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что видно</th><th>Что делать</th></tr>
+    <tr><td>Не видно результата нужного запроса</td><td>В окне несколько запросов — показан последний. Выделите нужный и Run.</td></tr>
+    <tr><td><code>relation "geroi" does not exist</code></td><td>Не запущен <code>geroi.sql</code> или опечатка в названии таблицы.</td></tr>
+    <tr><td><code>column "маг" does not exist</code></td><td>Текст без кавычек: нужно <code>'маг'</code>.</td></tr>
+    <tr><td><code>syntax error at or near …</code></td><td>Смотрите на указанное слово и слово перед ним: пропущена или лишняя запятая, "двойные" кавычки вместо 'одинарных'.</td></tr>
+    <tr><td>0 строк, а ошибки нет</td><td>Значение написано не так, как в таблице: <code>'Маг'</code> вместо <code>'маг'</code>, лишний пробел. SQL сравнивает буквы точно.</td></tr>
+    <tr><td><code>violates check constraint</code></td><td>Уровень вне 1–100 — база сама защищает данные.</td></tr>
+    <tr><td><code>violates not-null constraint</code></td><td>Не указан обязательный столбец: имя, класс или уровень.</td></tr>
+    <tr><td>Окно «destructive operation»</td><td>Supabase переспрашивает перед <code>update</code>, <code>delete</code>, <code>drop</code>. Проверьте, есть ли <code>where</code>. Для <code>geroi.sql</code> — подтвердить.</td></tr>
+    <tr><td>Изменилось сразу много строк</td><td>Был <code>update</code> или <code>delete</code> без <code>where</code>. Запустите <code>geroi.sql</code> заново.</td></tr>
+    <tr><td>Table Editor: Save не нажимается, строка не добавляется</td><td>У столбца нет имени или пустая <code>klichka</code> — она обязательная.</td></tr>
+    <tr><td>Нет типа <code>int</code></td><td>Он называется <code>int4</code>.</td></tr>
+    <tr><td>Проект «Paused»</td><td>Кнопка Restore project, подождать пару минут. Данные не пропали.</td></tr>
+  </table></div>
+  <p>Застряли больше чем на 5 минут — пишите в чат группы: какое задание, сам запрос и что видите.</p>
+  </div>
+</section>
+
 </main>
 
-<script src="live.js?v=20261031000812"></script>
-<script src="quiz.js?v=20261031000812"></script>
-<script src="engine.js?v=20261031000812"></script>
+<script src="live.js?v=20261031001558"></script>
+<script src="quiz.js?v=20261031001558"></script>
+<script src="engine.js?v=20261031001558"></script>
 <script>
 (function () {
   "use strict";
@@ -1748,7 +1905,7 @@ git log --oneline --graph -20</pre>
   const hashTab = location.hash.replace("#", "");
   // #proj и другие якоря внутри вкладки: открыть эту вкладку и прокрутить к разделу
   const hashSec = hashTab && document.getElementById(hashTab)?.closest(".tab");
-  showTab(["live", "lesson", "excel", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
+  showTab(["live", "lesson", "excel", "sql", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
     : hashSec ? hashSec.id.replace("tab-", "") : store.get("tab", "train"));
   if (hashSec) document.getElementById(hashTab).scrollIntoView();
 
@@ -1795,6 +1952,11 @@ git log --oneline --graph -20</pre>
   checkSteps("l9team", "l9team");
   checkSteps("xl1", "xl1");
   checkSteps("xl2", "xl2");
+  checkSteps("sql0", "sql0");
+  checkSteps("sqlp0", "sqlp0");
+  checkSteps("sqlgeroi", "sqlgeroi");
+  checkSteps("sqlp1", "sqlp1");
+  checkSteps("sqlp2", "sqlp2");
   checkSteps("l8clone", "l8clone");
   checkSteps("l8det", "l8det");
   checkSteps("l8pick", "l8pick");
