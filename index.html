@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261031001558">
+<link rel="stylesheet" href="quiz.css?v=20261031112906">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1770,7 +1770,7 @@ git log --oneline --graph -20</pre>
   <b>Сломали таблицу</b> (например, <code>update</code> без <code>where</code>) — запустите <code>geroi.sql</code> заново, всё вернётся.</div>
 
   <h2>Практика 1. Запросы к героям · 35 минут</h2>
-  <p>Каждое задание — новый запрос, или выделите нужную строку и Run: если в окне несколько запросов, виден результат <b>только последнего</b>. Подпишите запросы комментариями: <code>-- задание 3</code>.</p>
+  <p>Каждое задание — новый запрос, или выделите нужную строку и Run: если в окне несколько запросов, виден результат <b>только последнего</b>. Подпишите запросы комментариями: <code>-- задание 3</code>. Не помните, как пишется, — <a href="#sql-pitomcy">шпаргалка на примере питомцев</a> внизу страницы.</p>
   <ol class="steps" id="sqlp1">
     <li><h3>Все герои, все столбцы</h3><p>→ 30 строк</p></li>
     <li><h3>Только имя и уровень всех героев</h3><p>→ 30 строк, 2 столбца</p></li>
@@ -1824,7 +1824,167 @@ select imya, zoloto / uroven as na_uroven from geroi
 order by na_uroven desc limit 3;</pre>
   <p>Б5. Придумайте таблицу для <b>вашего проекта</b> (3–5 столбцов с типами), создайте её через Table Editor или <code>create table</code> и добавьте 5 строк.</p>
 
-  <h2>Шпаргалка</h2>
+  <h2 id="sql-pitomcy">Шпаргалка на примере питомцев</h2>
+  <p>Те же запросы, что на показе, — к таблице <code>pitomcy</code>. После <code>-- →</code> написано, что получится. В практике делаете то же самое, только вместо <code>pitomcy</code> пишете <code>geroi</code>, а вместо <code>klichka</code>, <code>vid</code>, <code>vozrast</code> — <code>imya</code>, <code>klass</code>, <code>uroven</code> и другие столбцы героев.</p>
+  <p>Таблица <code>pitomcy</code> после показа (результаты ниже — для неё):</p>
+  <div class="tablewrap"><table>
+    <tr><th>id</th><th>klichka</th><th>vid</th><th>vozrast</th><th>hozyain</th></tr>
+    <tr><td>1</td><td>Барсик</td><td>кот</td><td>3</td><td>Аня</td></tr>
+    <tr><td>2</td><td>Рекс</td><td>собака</td><td>5</td><td>Миша</td></tr>
+    <tr><td>3</td><td>Кеша</td><td>попугай</td><td>2</td><td class="muted">NULL</td></tr>
+    <tr><td>4</td><td>Мурка</td><td>кошка</td><td>7</td><td>Аня</td></tr>
+    <tr><td>5</td><td>Шарик</td><td>собака</td><td>1</td><td class="muted">NULL</td></tr>
+    <tr><td>6</td><td>Граф</td><td>собака</td><td>9</td><td>Петя</td></tr>
+  </table></div>
+
+  <div class="cols2">
+    <div class="card"><h3>Прочитать — select</h3>
+<pre class="cmd">-- все столбцы, все строки
+select * from pitomcy;
+-- → 6 строк
+
+-- только нужные столбцы, в нашем порядке
+select klichka, vid from pitomcy;
+-- → 6 строк, 2 столбца</pre>
+      <p class="muted" style="margin:6px 0 0"><code>*</code> — все столбцы, <code>;</code> — конец запроса.</p></div>
+    <div class="card"><h3>Добавить — insert</h3>
+<pre class="cmd">insert into pitomcy (klichka, vid, vozrast, hozyain) values
+  ('Мурка', 'кошка', 7, 'Аня'),
+  ('Шарик', 'собака', 1, NULL),
+  ('Граф', 'собака', 9, 'Петя');
+-- → id 4, 5, 6 база поставила сама</pre>
+      <p class="muted" style="margin:6px 0 0">Текст — в <b>'одинарных'</b> кавычках, числа — без. <code>id</code> не пишем. Строки — через запятую, в конце <code>;</code>.</p></div>
+  </div>
+
+  <div class="card"><h3>Отобрать строки — where</h3>
+<pre class="cmd">select * from pitomcy where vid = 'собака';
+-- → Рекс, Шарик, Граф
+
+select * from pitomcy where vozrast &gt; 4;
+-- → Рекс, Мурка, Граф
+
+select * from pitomcy where vid = 'собака' and vozrast &gt; 4;
+-- → Рекс, Граф             (and — оба условия)
+
+select * from pitomcy where vid = 'кот' or vid = 'кошка';
+-- → Барсик, Мурка          (or — хотя бы одно)
+
+select * from pitomcy where vid in ('кот', 'кошка');
+-- → Барсик, Мурка          (то же самое короче)
+
+select * from pitomcy where vozrast between 2 and 5;
+-- → Барсик, Рекс, Кеша     (2 и 5 тоже входят)
+
+select * from pitomcy where vid &lt;&gt; 'собака';
+-- → Барсик, Кеша, Мурка    (&lt;&gt; — не равно)</pre>
+    <p class="muted" style="margin:6px 0 0">Сравнения: <code>=</code> <code>&lt;&gt;</code> <code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code>. Значение пишется точно как в таблице: <code>'Собака'</code> с большой буквы не найдёт ничего.</p></div>
+
+  <div class="cols2">
+    <div class="card"><h3>По началу или куску текста — like</h3>
+<pre class="cmd">select * from pitomcy where klichka like 'Ш%';
+-- → Шарик        (начинается на «Ш»)
+
+select * from pitomcy where klichka like '%ик';
+-- → Барсик, Шарик (кончается на «ик»)
+
+select * from pitomcy where klichka like '%р%';
+-- → Барсик, Мурка, Шарик, Граф
+--   Рекса нет: у него большая «Р»
+
+select * from pitomcy where klichka ilike '%р%';
+-- → 5 строк, теперь и Рекс</pre>
+      <p class="muted" style="margin:6px 0 0"><code>%</code> — любые символы (и ни одного). <code>ilike</code> — не смотрит на большие и маленькие буквы.</p></div>
+    <div class="card"><h3>Пусто — null</h3>
+<pre class="cmd">select * from pitomcy where hozyain = NULL;
+-- → 0 строк! Так НЕ работает
+
+select * from pitomcy where hozyain is null;
+-- → Кеша, Шарик
+
+select * from pitomcy where hozyain is not null;
+-- → Барсик, Рекс, Мурка, Граф
+
+select * from pitomcy where hozyain &lt;&gt; 'Аня';
+-- → Рекс, Граф
+--   Кеши и Шарика нет: у них пусто</pre>
+      <p class="muted" style="margin:6px 0 0"><code>NULL</code> — «неизвестно». Оно не равно ничему, поэтому только <code>is null</code> / <code>is not null</code>.</p></div>
+  </div>
+
+  <div class="card"><h3>Сортировка и количество — order by, limit</h3>
+<pre class="cmd">select * from pitomcy order by vozrast;
+-- → Шарик 1, Кеша 2, Барсик 3, Рекс 5, Мурка 7, Граф 9
+
+select * from pitomcy order by vozrast desc;
+-- → Граф 9, Мурка 7, Рекс 5, Барсик 3, Кеша 2, Шарик 1
+
+select klichka, vozrast from pitomcy order by vozrast desc limit 2;
+-- → Граф 9, Мурка 7        (два самых старших)
+
+select * from pitomcy order by vid, vozrast desc;
+-- → кот Барсик, кошка Мурка, попугай Кеша,
+--   собака Граф 9, собака Рекс 5, собака Шарик 1
+--   (сначала по виду, внутри вида — от старших)
+
+select klichka from pitomcy where vid = 'собака' order by vozrast limit 1;
+-- → Шарик                  (самая младшая собака: всё вместе)</pre>
+    <p class="muted" style="margin:6px 0 0"><code>desc</code> — от большего к меньшему, без него — от меньшего. Порядок слов всегда такой: <code>select … from … where … order by … limit …</code>.</p></div>
+
+  <div class="cols2">
+    <div class="card"><h3>Изменить — update</h3>
+<pre class="cmd">-- 1. сначала смотрим, ту ли строку нашли
+select * from pitomcy where klichka = 'Шарик';
+-- 2. меняем, where — тот же
+update pitomcy set hozyain = 'Илья' where klichka = 'Шарик';
+
+-- по id надёжнее: кличка может повториться
+update pitomcy set vozrast = vozrast + 1 where id = 1;
+-- → Барсику стало 4
+
+-- два столбца сразу — через запятую
+update pitomcy set vozrast = 6, hozyain = 'Оля' where id = 2;</pre></div>
+    <div class="card"><h3>Удалить — delete</h3>
+<pre class="cmd">select * from pitomcy where id = 5;
+-- → Шарик. Тот? Тогда:
+delete from pitomcy where id = 5;
+-- → осталось 5 строк</pre>
+      <div class="note-box"><b>Без <code>where</code> — все строки!</b><br>
+      <code>update pitomcy set hozyain = 'Никто';</code> — все хозяева станут «Никто».<br>
+      <code>delete from pitomcy;</code> — удалятся все питомцы.<br>
+      Отмены нет. Всегда: сначала <code>select … where …</code>, потом тот же <code>where</code> в <code>update</code> / <code>delete</code>.</div></div>
+  </div>
+
+  <div class="card"><h3>Бонус: посчитать — count, sum, avg</h3>
+<pre class="cmd">select count(*) from pitomcy;
+-- → 6                      (сколько всего строк)
+
+select count(*) from pitomcy where vid = 'собака';
+-- → 3
+
+select avg(vozrast) from pitomcy;
+-- → 4.5000000000000000     (средний возраст 4,5 — помните Excel?)
+
+select sum(vozrast) as vsego_let from pitomcy;
+-- → vsego_let 27           (as — своё название столбца)</pre></div>
+
+  <p class="muted">Хотите повторить примеры у себя один в один? Выполните в SQL Editor — таблица <code>pitomcy</code> из практики 0 заменится этой:</p>
+<pre class="cmd">drop table if exists pitomcy;
+create table pitomcy (
+  id      bigint generated always as identity primary key,
+  klichka text not null,
+  vid     text,
+  vozrast int,
+  hozyain text
+);
+insert into pitomcy (klichka, vid, vozrast, hozyain) values
+  ('Барсик', 'кот', 3, 'Аня'),
+  ('Рекс', 'собака', 5, 'Миша'),
+  ('Кеша', 'попугай', 2, NULL),
+  ('Мурка', 'кошка', 7, 'Аня'),
+  ('Шарик', 'собака', 1, NULL),
+  ('Граф', 'собака', 9, 'Петя');
+select * from pitomcy;</pre>
+
+  <h2>Шпаргалка коротко</h2>
   <div class="tablewrap"><table class="cheat">
     <tr><th>Как пишется</th><th>Что значит</th></tr>
     <tr><td>select * from geroi;</td><td>все столбцы, все строки; <code>;</code> — конец запроса</td></tr>
@@ -1867,9 +2027,9 @@ order by na_uroven desc limit 3;</pre>
 
 </main>
 
-<script src="live.js?v=20261031001558"></script>
-<script src="quiz.js?v=20261031001558"></script>
-<script src="engine.js?v=20261031001558"></script>
+<script src="live.js?v=20261031112906"></script>
+<script src="quiz.js?v=20261031112906"></script>
+<script src="engine.js?v=20261031112906"></script>
 <script>
 (function () {
   "use strict";
