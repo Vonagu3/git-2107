@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261031214951">
+<link rel="stylesheet" href="quiz.css?v=20261031221701">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -214,6 +214,7 @@ pre.cmd .sn { color: #c9a7ff; } pre.cmd .sc { color: var(--term-muted); } pre.cm
       <button data-tab="lesson">Практика</button>
       <button data-tab="excel">Excel</button>
       <button data-tab="sql">Базы данных</button>
+      <button data-tab="sql2">Подсчёты</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -2042,11 +2043,217 @@ select * from pitomcy;</pre>
   </div>
 </section>
 
+<section class="tab" id="tab-sql2">
+  <div class="doc">
+  <h1>Практика: база считает сама</h1>
+  <p class="lead">Занятие 12. Каждый сам, в своём проекте <code>sql-praktika</code>, на таблице героев. В каждом задании написано, что должно получиться, — это самопроверка. Как пишутся запросы — <a href="#sql2-cheat">шпаргалка на питомцах</a> внизу страницы. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+
+  <h2>Практика 0. Жизнь одной строки · все вместе</h2>
+  <p>Повторяем свой герой с прошлого занятия — по шагам, вместе. Шаг сделали — пишете в чат «готово», ждём всех, идём дальше. После каждого шага считаем героев: <b>30 → 31 → 31 → 30</b>.</p>
+  <ol class="steps" id="sql2p0">
+    <li><h3>Герои как новые</h3>
+      <p>SQL Editor → New query → вставить весь <a href="files/geroi.sql" target="_blank" rel="noopener">geroi.sql</a> → Run. Внизу: <code>vsego_geroev 30</code>. Потом новый запрос:</p>
+<pre class="cmd">select count(*) from geroi;
+-- → 30</pre></li>
+    <li><h3>Добавить своего героя — insert</h3>
+      <p>Вместо <code>'Ник'</code> — ваш ник, остальное — любое. Уровень от 1 до 100. <code>id</code> и дату не пишем.</p>
+<pre class="cmd">insert into geroi (imya, klass, uroven, zoloto, gildiya)
+values ('Ник', 'маг', 42, 100, NULL);
+
+select count(*) from geroi;
+-- → 31</pre></li>
+    <li><h3>Найти себя и узнать свой id</h3>
+<pre class="cmd">select * from geroi where imya = 'Ник';
+-- → одна строка, в ней ваш id (обычно 31)</pre>
+      <p>Дальше везде вместо <code>31</code> — ваш <code>id</code>.</p></li>
+    <li><h3>Изменить — update по id</h3>
+<pre class="cmd">-- сначала смотрим: та ли строка?
+select * from geroi where id = 31;
+-- меняем, where — тот же
+update geroi set zoloto = zoloto + 500, v_seti = true where id = 31;
+-- проверяем
+select * from geroi where id = 31;
+-- → золото стало на 500 больше, v_seti = true
+
+update geroi set gildiya = 'Белые крылья' where id = 31;
+select count(*) from geroi;
+-- → всё ещё 31: update строк не добавляет</pre></li>
+    <li><h3>Удалить — delete по id</h3>
+<pre class="cmd">select * from geroi where id = 31;
+delete from geroi where id = 31;
+
+select count(*) from geroi;
+-- → снова 30</pre></li>
+  </ol>
+  <div class="note-box"><b>Правило:</b> <code>update</code> и <code>delete</code> — только с <code>where</code>, лучше по <code>id</code>. Сначала <code>select</code> с тем же <code>where</code> — посмотрели, та ли строка, — потом меняем. Если стало не 30, а меньше, или все герои изменились — запустите <code>geroi.sql</code> заново.</div>
+
+  <h2>Практика 1. Считаем героев · 35 минут</h2>
+  <p>Каждое задание — новый запрос, или выделите нужный и Run. Если таблица менялась — сначала <code>geroi.sql</code> заново.</p>
+  <h3>Считаем всю таблицу — count, sum, avg, min, max</h3>
+  <ol class="steps" id="sql2p1">
+    <li><h3>Сколько всего героев?</h3><p>→ 30</p></li>
+    <li><h3>Сколько магов?</h3><p>→ 8</p></li>
+    <li><h3>Сколько героев состоят в гильдии?</h3><p>Подсказка: <code>count(gildiya)</code>. → 22. А <code>count(*)</code> — 30. Почему разница?</p></li>
+    <li><h3>Всё золото и средний уровень — одним запросом</h3><p>Средний округлите до одного знака: <code>round(avg(uroven), 1)</code>. → 66409 и 52.3</p></li>
+    <li><h3>Самый высокий и самый низкий уровень</h3><p>→ 99 и 7</p></li>
+    <li><h3>Когда зарегистрировался самый первый герой?</h3><p><code>min</code> работает и с датами. → 2024-08-08</p></li>
+    <li><h3>Сколько героев с уровнем больше 50?</h3><p>→ 16</p></li>
+  </ol>
+  <h3>По группам — group by</h3>
+  <ol class="steps" id="sql2p2" style="counter-reset: s 7">
+    <li><h3>Сколько героев в каждом классе</h3><p>Больших групп — первыми. → воин 9, маг 8, лучник 7, лекарь 6</p></li>
+    <li><h3>Средний уровень в каждом классе</h3><p>От высокого к низкому, до одного знака. → воин 60.6, маг 59.1, лекарь 44.0, лучник 41.0</p></li>
+    <li><h3>Сколько героев в каждой гильдии</h3><p>→ 5 строк, первая — пустая гильдия: 8. Откуда пятая гильдия, если их четыре?</p></li>
+    <li><h3>Золото каждой гильдии, без пустой</h3><p>Самая богатая — первой. → Стальные волки 22200</p></li>
+    <li><h3>Сколько героев в сети и сколько нет</h3><p>Группа по <code>v_seti</code>. → true 17, false 13</p></li>
+    <li><h3>Сколько героев с уровнем больше 50 в каждом классе</h3><p>Сначала <code>where</code>, потом <code>group by</code>. → воин 6, маг 5, лучник 3, лекарь 2</p></li>
+  </ol>
+  <h3>Отбор групп — having</h3>
+  <ol class="steps" id="sql2p3" style="counter-reset: s 13">
+    <li><h3>Классы, где больше 7 героев</h3><p>→ воин 9, маг 8</p></li>
+    <li><h3>Гильдии, где средний уровень больше 50</h3><p>→ 3 строки, первая — Стальные волки 73.2</p></li>
+  </ol>
+
+  <h2>Практика 2. Своя таблица · 15 минут</h2>
+  <p>Таблица вашего проекта из домашки. Нет таблицы — сначала создайте: <code>create table</code> по образцу <code>geroi.sql</code>, 3–6 столбцов, 5 строк через <code>insert</code>.</p>
+  <ol class="steps" id="sql2own">
+    <li><h3>Сколько строк</h3><p><code>select count(*) from ваша_таблица;</code></p></li>
+    <li><h3>Группа</h3><p>Выберите текстовый или <code>boolean</code>-столбец, где значения повторяются, и посчитайте строки в каждой группе. Не повторяется ничего — добавьте строки, чтобы повторялось.</p></li>
+    <li><h3>Изменить и удалить по id</h3><p>Одну строку измените, одну удалите. Каждый раз — сначала <code>select</code> с тем же <code>where</code>.</p></li>
+    <li><h3>Сдать</h3><p>Скриншот результата группы (шаг 2) — в чат.</p></li>
+  </ol>
+
+  <h2>Бонус — для тех, кто быстрее</h2>
+<pre class="cmd">-- Б1. Сколько героев зарегистрировалось в каждом году?
+--     Год из даты: extract(year from data_registracii)
+-- → 2024: 6, 2025: 17, 2026: 7   (17 — как в домашке Д4)
+
+-- Б2. Сколько разных гильдий? count(distinct gildiya)
+-- → 4. Почему не 5, как в задании 10?
+
+-- Б3. Самый сильный и самый слабый в каждом классе
+-- → воин 95 и 23, лекарь 71 и 15, лучник 78 и 7, маг 99 и 19
+
+-- Б4. Пары «класс + гильдия», где 3 героя и больше
+--     (group by klass, gildiya)
+-- → 5 строк, первая: маг, Звёздный круг, 5</pre>
+
+  <h2>Домашнее задание к занятию 13</h2>
+  <p>Каждый сам, ~40 минут. Если таблица героев менялась — сначала <code>geroi.sql</code> заново.</p>
+  <ol class="steps" id="sql2hw">
+    <li><h3>Часть 1. Запросы к героям</h3>
+<pre class="cmd">-- Д1. Сколько лекарей сейчас в сети?                    → 3
+-- Д2. Сколько золота у всех магов вместе?               → 24689
+-- Д3. Средний уровень героев без гильдии (до 1 знака).  → 29.4
+-- Д4. Сколько героев в сети в каждой гильдии?           → 5 строк, пустая — 5
+-- Д5. Золото каждого класса, от богатого к бедному.     → первый маг 24689
+-- Д6. Самый высокий уровень в каждой гильдии, без пустой.
+--                                                       → первая Звёздный круг 99
+-- Д7. Классы, у которых всё золото больше 10000.        → маг, воин
+-- Д8. Гильдии (без пустой), где в сети 3 героя и больше.
+--                                                       → 3 строки, первая Стальные волки 4</pre>
+      <p>Все 8 запросов — в один файл <code>podschet.sql</code> (подпишите <code>-- Д1</code>, <code>-- Д2</code> …) и в чат.</p></li>
+    <li><h3>Часть 2. Своя таблица</h3>
+      <p>Доделайте практику 2, если не успели. Плюс два своих вопроса к своей таблице с <code>count</code>, <code>sum</code> или <code>avg</code> — запрос и скриншот результата в чат.</p></li>
+    <li><h3>Часть 3. Командой — к следующему занятию</h3>
+      <p>В README командного репозитория раздел <b>«Данные»</b>: какие таблицы нужны вашему проекту (2–3), какие в них столбцы. Найдите, что в них <b>повторяется</b> — например, имя и телефон пользователя в каждом напоминании. На занятии 13 разберём, что с этим делать.</p></li>
+  </ol>
+
+  <h2 id="sql2-cheat">Шпаргалка на примере питомцев</h2>
+  <p>Та же таблица <code>pitomcy</code>, что на прошлом занятии: Барсик (кот, 3, Аня), Рекс (собака, 5, Миша), Кеша (попугай, 2, пусто), Мурка (кошка, 7, Аня), Шарик (собака, 1, пусто), Граф (собака, 9, Петя). Повторить у себя — скрипт на <a href="#sql-pitomcy">вкладке «Базы данных»</a>.</p>
+
+  <div class="cols2">
+    <div class="card c-sel"><h3>Посчитать — count</h3>
+<pre class="cmd">select count(*) from pitomcy;
+-- → 6       (все строки)
+
+select count(*) from pitomcy where vid = 'собака';
+-- → 3       (сначала where, потом счёт)
+
+select count(hozyain) from pitomcy;
+-- → 4       (пустые не считает!)
+
+select count(distinct vid) from pitomcy;
+-- → 4       (разных видов)</pre></div>
+    <div class="card c-ins"><h3>Сумма, среднее, меньше, больше</h3>
+<pre class="cmd">select sum(vozrast) from pitomcy;
+-- → 27
+
+select avg(vozrast) from pitomcy;
+-- → 4.5000000000000000
+
+select round(avg(vozrast), 1) from pitomcy;
+-- → 4.5     (1 знак после точки)
+
+select min(vozrast), max(vozrast) from pitomcy;
+-- → 1 и 9</pre></div>
+  </div>
+
+  <div class="card c-whr"><h3>По группам — group by</h3>
+<pre class="cmd">select vid, count(*) from pitomcy group by vid;
+-- → собака 3, кот 1, кошка 1, попугай 1   (порядок — какой выйдет)
+
+select vid, count(*) as skolko from pitomcy
+group by vid
+order by skolko desc;
+-- → собака 3 — первой        (as — своё имя столбца)
+
+select vid, round(avg(vozrast), 1) as sredniy from pitomcy group by vid;
+-- → собака 5.0, кот 3.0, кошка 7.0, попугай 2.0
+
+select hozyain, count(*) from pitomcy group by hozyain;
+-- → Аня 2, Миша 1, Петя 1 и пустая строка 2
+--   (у кого хозяина нет — тоже группа)
+
+select vid, count(*) from pitomcy where vozrast &gt; 2 group by vid;
+-- → кот 1, кошка 1, собака 2
+--   (where убрал малышей ДО подсчёта: Кешу и Шарика)</pre>
+    <p class="muted" style="margin:6px 0 0">В <code>select</code> — только то, что в <code>group by</code>, и подсчёты. <code>select vid, klichka, count(*) … group by vid</code> — ошибка: у собак три клички, какую показать?</p></div>
+
+  <div class="cols2">
+    <div class="card c-ord"><h3>Отбор групп — having</h3>
+<pre class="cmd">select vid, count(*) from pitomcy
+group by vid
+having count(*) &gt; 1;
+-- → собака 3
+
+select hozyain, count(*) from pitomcy
+group by hozyain
+having count(*) &gt; 1;
+-- → Аня 2 и пустая 2</pre>
+      <p class="muted" style="margin:6px 0 0"><code>where</code> отбирает <b>строки</b> до подсчёта, <code>having</code> — <b>группы</b> после. <code>where count(*) &gt; 1</code> — ошибка.</p></div>
+    <div class="card c-upd"><h3>Порядок слов</h3>
+<pre class="cmd">select vid, count(*) as skolko
+from pitomcy
+where vozrast &gt; 2
+group by vid
+having count(*) &gt; 1
+order by skolko desc
+limit 3;
+-- → собака 2</pre>
+      <p class="muted" style="margin:6px 0 0">Всегда так: <code>select</code>, <code>from</code>, <code>where</code>, <code>group by</code>, <code>having</code>, <code>order by</code>, <code>limit</code>. Лишние части можно пропускать, переставлять — нельзя.</p></div>
+  </div>
+
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что видно</th><th>Что делать</th></tr>
+    <tr><td><code>column "…" must appear in the GROUP BY clause</code></td><td>В <code>select</code> столбец, которого нет в <code>group by</code>. Уберите его или добавьте в <code>group by</code>.</td></tr>
+    <tr><td><code>aggregate functions are not allowed in WHERE</code></td><td><code>count</code>, <code>sum</code>, <code>avg</code> в <code>where</code> нельзя — для групп есть <code>having</code>.</td></tr>
+    <tr><td><code>syntax error at or near "group"</code> или <code>"where"</code></td><td>Перепутан порядок: <code>where</code> — до <code>group by</code>, <code>having</code> — после.</td></tr>
+    <tr><td>Среднее с кучей нулей: <code>52.3000000000000000</code></td><td><code>round(avg(uroven), 1)</code>.</td></tr>
+    <tr><td>В группах лишняя строка с пустым названием</td><td>Это строки с <code>NULL</code> — тоже группа. Не нужна — <code>where gildiya is not null</code>.</td></tr>
+    <tr><td>Числа не сходятся с ответом</td><td>Таблица изменена (свой герой не удалён, <code>update</code> без <code>where</code>). Запустите <code>geroi.sql</code> заново.</td></tr>
+  </table></div>
+  <p>Застряли больше чем на 5 минут — пишите в чат группы: какое задание, сам запрос и что видите.</p>
+  </div>
+</section>
+
+
 </main>
 
-<script src="live.js?v=20261031214951"></script>
-<script src="quiz.js?v=20261031214951"></script>
-<script src="engine.js?v=20261031214951"></script>
+<script src="live.js?v=20261031221701"></script>
+<script src="quiz.js?v=20261031221701"></script>
+<script src="engine.js?v=20261031221701"></script>
 <script>
 (function () {
   "use strict";
@@ -2074,8 +2281,8 @@ select * from pitomcy;</pre>
   // ---------- подсветка SQL во вкладке «Базы данных» ----------
   const SQL_KW = new Set(("select from where and or not in between like ilike is null order by desc asc limit insert into values " +
     "update set delete drop table if exists create primary key generated always as identity bigint text int boolean date " +
-    "default check true false distinct alter enable row level security current_date").split(" "));
-  const SQL_FN = new Set(["count", "sum", "avg", "min", "max"]);
+    "default check true false distinct alter enable row level security current_date group having year").split(" "));
+  const SQL_FN = new Set(["count", "sum", "avg", "min", "max", "round", "extract"]);
   function sqlHtml(src) {
     return src.replace(/(--[^\n]*)|('[^'\n]*')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]+)\b|([^-'\dA-Za-z_]+|.)/g, (m, c, str, n, w) => {
       if (c) return '<span class="' + (c.startsWith("-- →") || c.startsWith("--   ") ? "sr" : "sc") + '">' + esc(c) + "</span>";
@@ -2085,7 +2292,7 @@ select * from pitomcy;</pre>
       return esc(m);
     });
   }
-  document.querySelectorAll("#tab-sql pre.cmd, #tab-sql .cheat td:first-child").forEach((e) => (e.innerHTML = sqlHtml(e.textContent)));
+  document.querySelectorAll("#tab-sql pre.cmd, #tab-sql2 pre.cmd, #tab-sql .cheat td:first-child").forEach((e) => (e.innerHTML = sqlHtml(e.textContent)));
 
   // ---------- вкладки ----------
   function showTab(t) {
@@ -2098,7 +2305,7 @@ select * from pitomcy;</pre>
   const hashTab = location.hash.replace("#", "");
   // #proj и другие якоря внутри вкладки: открыть эту вкладку и прокрутить к разделу
   const hashSec = hashTab && document.getElementById(hashTab)?.closest(".tab");
-  showTab(["live", "lesson", "excel", "sql", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
+  showTab(["live", "lesson", "excel", "sql", "sql2", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
     : hashSec ? hashSec.id.replace("tab-", "") : store.get("tab", "train"));
   if (hashSec) document.getElementById(hashTab).scrollIntoView();
 
@@ -2150,6 +2357,12 @@ select * from pitomcy;</pre>
   checkSteps("sqlgeroi", "sqlgeroi");
   checkSteps("sqlp1", "sqlp1");
   checkSteps("sqlp2", "sqlp2");
+  checkSteps("sql2p0", "sql2p0");
+  checkSteps("sql2p1", "sql2p1");
+  checkSteps("sql2p2", "sql2p2");
+  checkSteps("sql2p3", "sql2p3");
+  checkSteps("sql2own", "sql2own");
+  checkSteps("sql2hw", "sql2hw");
   checkSteps("l8clone", "l8clone");
   checkSteps("l8det", "l8det");
   checkSteps("l8pick", "l8pick");

@@ -296,7 +296,7 @@
   }
 
   // ---------- вкладки: общая «Ученики и опрос» + по одной на каждое занятие ----------
-  const TABS = ["pupils", "l8", "l11"];
+  const TABS = ["pupils", "l8", "l11", "l12"];
   function showTab(t) {
     if (!TABS.includes(t)) t = TABS[TABS.length - 1];
     document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
@@ -328,7 +328,14 @@
     "Открыты вкладки: эта страница, Урок_10/Питомцы_excel_vs_baza.xlsx (лист «Так бывает в Excel»), sql-demo → SQL Editor, Урок_10/geroi.sql.",
     "Лист «Для учителя» в Excel и ответы практики — не показывать на экране. Демонстрировать окно, а не весь экран.",
   ];
-  const PREPS = { 8: PREP8, 11: PREP11 };
+  const PREP12 = [
+    "Домашка к 12 проверена по чату: у кого есть zaprosy.sql и скриншот своей таблицы, у кого нет. Кто без таблицы — в практике 2 сначала создаёт её.",
+    "Ученикам в чат за день: «Завтра считаем героев. Откройте Supabase → sql-praktika: если проект Paused — нажмите Restore заранее. Домашку — в чат до занятия».",
+    "sql-demo открывается, таблиц pitomcy и geroi в нём нет (питомцев создаём скриптом в блоке 25–40, героев — в практике 0).",
+    "Открыты вкладки: эта страница, sql-demo → SQL Editor, вкладка «Подсчёты» у учеников (#sql2).",
+    "Ответы (оранжевые блоки) не показывать на экране. Демонстрировать окно, а не весь экран.",
+  ];
+  const PREPS = { 8: PREP8, 11: PREP11, 12: PREP12 };
   const prepDone = {};
   function renderPrep(l) {
     const box = $("prep-" + l), done = prepDone[l] || (prepDone[l] = []);
@@ -481,7 +488,69 @@
       { note: "Если в практике не успели 9–12 — дописать их в часть 1 (Д12…). После занятия очистить демо (проект <code>sql-demo</code> не удалять):" },
       C("drop table if exists pitomcy;\ndrop table if exists geroi;")]],
   ];
-  const FLOWS = { 8: FLOW8, 11: FLOW11 };
+  const PITOMCY = "drop table if exists pitomcy;\ncreate table pitomcy (\n  id bigint generated always as identity primary key,\n  klichka text not null, vid text, vozrast int, hozyain text\n);\ninsert into pitomcy (klichka, vid, vozrast, hozyain) values\n  ('Барсик', 'кот', 3, 'Аня'), ('Рекс', 'собака', 5, 'Миша'), ('Кеша', 'попугай', 2, NULL),\n  ('Мурка', 'кошка', 7, 'Аня'), ('Шарик', 'собака', 1, NULL), ('Граф', 'собака', 9, 'Петя');\nselect * from pitomcy;";
+  const FLOW12 = [
+    ["0–10", "разбор", "Домашка к занятию 12", [
+      { note: "Пока все подключаются — у кого проект «Paused», жмут Restore. По чату: кто прислал <code>zaprosy.sql</code> и скриншот своей таблицы. Разбираем не всё, а три вещи:" },
+      { ol: ["<b>Д4</b> «сколько в 2025» — как считали? Глазами по строкам → «а если строк 10 000? Сегодня база посчитает сама».",
+        "<b>Д9</b> — почему 16, а не 24? Ещё раз <code>NULL</code>: 8 без гильдии не равны и не «не равны» «Ночным теням» — про них неизвестно.",
+        "<b>Своя таблица</b> — 1–2 человека показывают свой <code>create table</code>: какие типы, где <code>not null</code>, <code>default</code>. Ошибки — сразу вслух, без оценок."] },
+      { warn: "<b>Ответы Д1–Д11:</b> Д1 Йети первый, 4 строки · Д2 3 · Д3 Пиксель, Ёрш, Эхо · Д4 17 · Д5 4 · Д6 9 · Д7 7 · Д8 Зорро, Юла, Мира · Д9 16 (+8 с <code>or gildiya is null</code> = 24) · Д10 15 · Д11 Пиксель. Запросы — <code>Урок_10/Ответы.md</code> (13–16)." }]],
+    ["10–25", "все вместе", "Практика 0: жизнь одной строки (повтор практики 2)", [
+      { note: "Прошлый раз не поняли — значит, сейчас <b>в ногу</b>: вы говорите шаг и делаете его на экране в <code>sql-demo</code>, все делают у себя, пишут в чат «готово», только потом следующий. После каждого шага <code>count(*)</code>: 30 → 31 → 31 → 30 — так появляется первое слово сегодняшней темы. У учеников то же самое — вкладка <b>Подсчёты</b>:" },
+      C(SITE + "#sql2"),
+      C("ПРАКТИКА 0 · все вместе, по шагам · в своём sql-praktika\nШаг сделали — пишете в чат «готово». Ждём всех.\n\n1. Запустить geroi.sql заново → vsego_geroev 30\n   select count(*) from geroi;                         → 30\n2. Добавить своего героя (вместо Ник — ваш ник):\n   insert into geroi (imya, klass, uroven, zoloto, gildiya)\n   values ('Ник', 'маг', 42, 100, NULL);\n   select count(*) from geroi;                         → 31\n3. Найти себя, запомнить id:\n   select * from geroi where imya = 'Ник';            → id (обычно 31)\n4. Изменить ТОЛЬКО себя — по id:\n   select * from geroi where id = 31;\n   update geroi set zoloto = zoloto + 500, v_seti = true where id = 31;\n   select * from geroi where id = 31;\n   update geroi set gildiya = 'Белые крылья' where id = 31;\n   select count(*) from geroi;                         → всё ещё 31\n5. Удалить себя:\n   select * from geroi where id = 31;\n   delete from geroi where id = 31;\n   select count(*) from geroi;                         → снова 30"),
+      C(GEROI),
+      { note: "Проговорить на каждом шаге: <code>insert</code> — новая строка, <code>id</code> база ставит сама; <code>update</code> и <code>delete</code> — что именно менять, решает <code>where</code>; сначала <code>select</code> с тем же <code>where</code>, потом меняем. Спросить: «Почему по <code>id</code>, а не по имени?» — имя может повториться (два ученика выбрали одинаковый ник)." },
+      { warn: "Частое: <code>id</code> не 31 (удалял и вставлял снова — 32, 33; номера не переиспользуются); <code>update</code> изменил 0 строк — не тот <code>id</code>; изменились все — нет <code>where</code> → <code>geroi.sql</code> заново. Уровень 500 → <code>violates check constraint</code>." },
+      { ready: "У всех снова 30 героев" }]],
+    ["25–40", "показ", "Агрегаты: count, sum, avg, min, max · питомцы", [
+      { note: "В <code>sql-demo</code> после занятия 11 таблицы удалены. Создать питомцев (те же 6, что в шпаргалке у учеников):" },
+      C(PITOMCY),
+      { note: "Вопрос из Excel: «Сколько собак? Какой средний возраст?» — там формулы врали. Теперь база:" },
+      C("select count(*) from pitomcy;", "select count(*) from pitomcy where vid = 'собака';"),
+      { note: "6 и 3. <code>count(*)</code> — сколько строк. С <code>where</code> — сначала отобрали, потом посчитали." },
+      C("select count(hozyain) from pitomcy;"),
+      { warn: "<b>Ловушка 3 — снова NULL.</b> Выйдет 4, а не 6: <code>count(столбец)</code> пропускает пустые. Спросить: «Почему?» — у Кеши и Шарика хозяина нет. Нужно «сколько всего» — <code>count(*)</code>." },
+      C("select sum(vozrast), avg(vozrast), min(vozrast), max(vozrast) from pitomcy;"),
+      { note: "27, <code>4.5000000000000000</code>, 1, 9. «Помните Excel? Там средний вышел 4,2 — а правильно 4,5». Хвост из нулей:" },
+      C("select round(avg(vozrast), 1) as sredniy from pitomcy;", "select count(distinct vid) as vidov from pitomcy;"),
+      { note: "<code>round(…, 1)</code> — один знак после точки. <code>as</code> — своё имя столбца в результате. <code>distinct</code> — без повторов: 4 вида." }]],
+    ["40–50", "показ", "group by и having", [
+      { note: "«А сколько питомцев каждого вида? Считать <code>where vid = …</code> четыре раза? А если видов 50?»" },
+      C("select vid, count(*) from pitomcy group by vid;"),
+      { note: "Нарисовать на доске: база раскладывает строки по кучкам — по одной на каждый вид — и считает в каждой. Одна строка результата = одна кучка." },
+      C("select vid, count(*) as skolko from pitomcy\ngroup by vid\norder by skolko desc;", "select vid, round(avg(vozrast), 1) as sredniy from pitomcy group by vid;"),
+      C("select hozyain, count(*) from pitomcy group by hozyain;"),
+      { note: "Аня 2, Миша 1, Петя 1 и пустая строка 2 — «у кого хозяина нет» тоже кучка." },
+      C("select vid, klichka, count(*) from pitomcy group by vid;"),
+      { warn: "<b>Ловушка 4.</b> Ошибка <code>must appear in the GROUP BY clause</code>. «У собак три клички — какую из них показать в одной строке?» Правило: в <code>select</code> — только то, что в <code>group by</code>, и подсчёты." },
+      C("select vid from pitomcy where count(*) > 1 group by vid;", "select vid, count(*) from pitomcy\ngroup by vid\nhaving count(*) > 1;"),
+      { warn: "<b>Ловушка 5.</b> <code>where count(*) &gt; 1</code> — ошибка: <code>where</code> работает со <b>строками до</b> подсчёта, кучек ещё нет. Группы отбирает <code>having</code> — <b>после</b>. Результат: собака 3." },
+      C("select vid, count(*) from pitomcy where vozrast > 2 group by vid;"),
+      { note: "кот 1, кошка 1, собака 2: <code>where</code> выкинул малышей (Кешу и Шарика) <b>до</b> раскладки. Порядок слов — на доску:" },
+      C("select … from … where … group by … having … order by … limit …")]],
+    ["50–55", "разговор", "Мостик к занятию 13: телефон хозяина", [
+      { note: "Спросить: «Нам нужен телефон Ани. Куда его записать?» Добавить столбец <code>telefon</code> в <code>pitomcy</code>? Тогда у Ани он будет в двух строках. Аня сменила номер — править в двух местах, забыли одно — у Ани два номера. А если у хозяина 10 питомцев?" },
+      { note: "Не решать. «Подумайте, что с этим делать, — это тема следующего занятия. И посмотрите на свой проект: что у вас будет повторяться так же?» — это часть 3 домашки." }]],
+    ["55–60", "перерыв", "Перерыв", [{ note: "Кто не дошёл до 30 героев — запустить <code>geroi.sql</code> заново." }]],
+    ["60–95", "практика", "Практика 1: считаем героев · каждый сам", [
+      C("ПРАКТИКА 1 · БАЗА СЧИТАЕТ САМА · занятие 12\nВсё по шагам — вкладка «Подсчёты». Сначала у всех должно быть 30 героев.\n\nСЧИТАЕМ ВСЮ ТАБЛИЦУ\n 1. Сколько всего героев?                                   → 30\n 2. Сколько магов?                                          → 8\n 3. Сколько героев в гильдии? count(gildiya)                → 22. А count(*) — 30. Почему?\n 4. Всё золото и средний уровень одним запросом\n    (средний: round(avg(uroven), 1))                        → 66409 и 52.3\n 5. Самый высокий и самый низкий уровень                    → 99 и 7\n 6. Когда зарегистрировался самый первый герой?             → 2024-08-08\n 7. Сколько героев с уровнем больше 50?                     → 16\n\nПО ГРУППАМ — group by\n 8. Сколько героев в каждом классе, больших первыми         → воин 9, маг 8, лучник 7, лекарь 6\n 9. Средний уровень в каждом классе, от высокого            → воин 60.6, маг 59.1, лекарь 44.0, лучник 41.0\n10. Сколько героев в каждой гильдии                         → 5 строк, пустая — 8. Откуда пятая?\n11. Золото каждой гильдии, без пустой, богатая первой       → Стальные волки 22200\n12. Сколько героев в сети и сколько нет                     → true 17, false 13\n13. Уровень больше 50 — сколько в каждом классе             → воин 6, маг 5, лучник 3, лекарь 2\n\nОТБОР ГРУПП — having\n14. Классы, где больше 7 героев                             → воин 9, маг 8\n15. Гильдии, где средний уровень больше 50                  → 3 строки, первая Стальные волки 73.2\n\nГотово — пишите в чат «Практика 1 готова»."),
+      { warn: "<b>Ответы:</b> 1) <code>count(*)</code> · 2) <code>where klass = 'маг'</code> · 3) <code>count(gildiya)</code> не считает 8 пустых · 4) <code>sum(zoloto), round(avg(uroven), 1)</code> · 5) <code>max(uroven), min(uroven)</code> · 6) <code>min(data_registracii)</code> · 7) <code>where uroven &gt; 50</code> · 8) <code>group by klass order by count(*) desc</code> · 9) <code>round(avg(uroven), 1) as sredniy … group by klass order by sredniy desc</code> · 10) <code>group by gildiya</code>: пустая 8, Ночные тени 6, Стальные волки 6, Белые крылья 5, Звёздный круг 5 · 11) <code>where gildiya is not null group by gildiya order by sum(zoloto) desc</code>: 22200, Звёздный круг 18689, Ночные тени 14210, Белые крылья 6270 · 12) <code>group by v_seti</code> · 13) <code>where uroven &gt; 50 group by klass</code> · 14) <code>having count(*) &gt; 7</code> · 15) <code>having avg(uroven) &gt; 50</code>: 73.2, Звёздный круг 65.6, Ночные тени 58.3 (Белые крылья 43.4 и пустая 29.4 — нет). Запросы — <code>Урок_12/Ответы.md</code>." },
+      { note: "Бонус на вкладке (Б1–Б4): по годам через <code>extract(year from data_registracii)</code> — 2024: 6, 2025: 17 (сходится с Д4!), 2026: 7; <code>count(distinct gildiya)</code> = 4 — <code>NULL</code> не считается; max/min по классам; <code>group by klass, gildiya having count(*) &gt;= 3</code> — 5 строк, первая маг · Звёздный круг 5." },
+      { ready: "Все написали «Практика 1 готова» (или дошли до 11)" }]],
+    ["95–110", "практика", "Практика 2: своя таблица", [
+      C("ПРАКТИКА 2 · СВОЯ ТАБЛИЦА · 15 минут\nТаблица вашего проекта из домашки. Нет её — сначала create table + 5 строк.\n1. select count(*) from ваша_таблица;\n2. Выберите столбец, где значения повторяются, — посчитайте строки в каждой группе (group by).\n   Ничего не повторяется — добавьте строки, чтобы повторялось.\n3. Одну строку измените, одну удалите — по id. Каждый раз сначала select с тем же where.\n4. Скриншот результата group by — в чат."),
+      { note: "Ходить по скриншотам: осмысленна ли группа для их проекта («сколько напоминаний у каждого пользователя», «сколько ответов на каждый вопрос»). Хорошие примеры — показать всем: это то, что будет считать их бот." },
+      { ready: "Скриншоты group by своей таблицы в чате" }]],
+    ["110–120", "итог", "Итог и домашка", [
+      C("ЗАПОМНИТЬ · БАЗЫ ДАННЫХ · занятие 12\n• count(*) — сколько строк; count(столбец) — пустые (NULL) не считает.\n• sum, avg, min, max — сумма, среднее, меньшее, большее. round(avg(…), 1) — 1 знак.\n• as — своё имя столбца в результате. distinct — без повторов.\n• group by — разложить по кучкам и посчитать в каждой. NULL — тоже кучка.\n• В select при group by — только столбцы из group by и подсчёты.\n• where — отбирает СТРОКИ до подсчёта, having — ГРУППЫ после.\n• Порядок: select … from … where … group by … having … order by … limit …\n• update и delete — только по id и только после select с тем же where."),
+      C("ДОМАШНЕЕ ЗАДАНИЕ К ЗАНЯТИЮ 13 · ~40 минут\nВсё на вкладке «Подсчёты»: " + SITE + "#sql2\nЕсли таблица героев менялась — сначала geroi.sql заново.\n\nЧАСТЬ 1. Каждый сам — запросы к героям:\n Д1. Сколько лекарей сейчас в сети?                    → 3\n Д2. Сколько золота у всех магов вместе?               → 24689\n Д3. Средний уровень героев без гильдии (до 1 знака).  → 29.4\n Д4. Сколько героев в сети в каждой гильдии?           → 5 строк, пустая — 5\n Д5. Золото каждого класса, от богатого к бедному.     → первый маг 24689\n Д6. Самый высокий уровень в каждой гильдии, без пустой. → первая Звёздный круг 99\n Д7. Классы, у которых всё золото больше 10000.        → маг, воин\n Д8. Гильдии (без пустой), где в сети 3 героя и больше. → 3 строки, первая Стальные волки 4\n Все 8 запросов — в файл podschet.sql (подпишите -- Д1, -- Д2 …) и в чат.\n\nЧАСТЬ 2. Каждый сам — своя таблица:\n Доделайте практику 2. Плюс два своих вопроса к своей таблице с count, sum или avg —\n запрос и скриншот результата в чат.\n\nЧАСТЬ 3. Командой:\n В README командного репозитория раздел «Данные»: какие таблицы нужны проекту (2–3),\n какие в них столбцы. Что в них ПОВТОРЯЕТСЯ (например, имя и телефон пользователя\n в каждом напоминании)? На занятии 13 разберём, что с этим делать.\n\nЗастряли больше 5 минут — в чат: какой запрос и какую ошибку видите."),
+      { warn: "<b>Ответы Д1–Д8</b> (проверены): Д1 <code>count(*) where klass = 'лекарь' and v_seti = true</code> → 3 · Д2 <code>sum(zoloto) where klass = 'маг'</code> → 24689 · Д3 <code>round(avg(uroven), 1) where gildiya is null</code> → 29.4 · Д4 <code>where v_seti = true group by gildiya</code>: пустая 5, Стальные волки 4, Белые крылья 3, Ночные тени 3, Звёздный круг 2 · Д5 маг 24689, воин 24260, лучник 9620, лекарь 7840 · Д6 Звёздный круг 99, Стальные волки 95, Ночные тени 82, Белые крылья 71 · Д7 <code>having sum(zoloto) &gt; 10000</code> · Д8 <code>where v_seti = true and gildiya is not null group by gildiya having count(*) &gt;= 3</code>: Стальные волки 4, Белые крылья 3, Ночные тени 3." },
+      { note: "После занятия очистить демо (проект <code>sql-demo</code> не удалять):" },
+      C("drop table if exists pitomcy;\ndrop table if exists geroi;")]],
+  ];
+  const FLOWS = { 8: FLOW8, 11: FLOW11, 12: FLOW12 };
   let cmdN = 0;
   function renderFlow(l) {
     const FLOW = FLOWS[l];

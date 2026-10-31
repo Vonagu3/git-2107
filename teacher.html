@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261031214951">
+<link rel="stylesheet" href="quiz.css?v=20261031221701">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -145,6 +145,7 @@ table.probs td:first-child { width: 40%; }
     <button data-tab="pupils">Ученики и опрос</button>
     <button data-tab="l8">Занятие 8 · история git</button>
     <button data-tab="l11">Занятие 11 · базы данных</button>
+    <button data-tab="l12">Занятие 12 · подсчёты в SQL</button>
   </nav>
 
   <section class="tab" id="tab-pupils">
@@ -342,10 +343,56 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
   <h2>Что сознательно не рассказываем</h2>
   <p><code>count</code>, <code>group by</code> (только бонус), связи и <code>join</code>, нормализация (телефон хозяина — только упомянуть), RLS подробно, подключение из Python, индексы, транзакции, пароль базы и строка подключения.</p>
   </section>
+
+  <section class="tab" id="tab-l12">
+  <h2>Занятие 12 — база считает сама: count, sum, avg, group by, having</h2>
+  <p class="lead">На занятии 11 практика 1 прошла, практику 2 (свой герой: <code>insert</code> → <code>update</code> → <code>delete</code>) не поняли — объясняли словами. Поэтому сначала повторяем её все вместе по шагам, потом агрегаты и группировка. Конспект — <code>Урок_12/План_урока.md</code>, ответы — <code>Урок_12/Ответы.md</code> (все проверены на PostgreSQL), таблица — та же <code>geroi.sql</code>.</p>
+  <div class="links">
+    <a href="https://supabase.com/dashboard/projects" target="_blank" rel="noopener">Supabase (sql-demo)</a>
+    <a href="files/geroi.sql" target="_blank" rel="noopener">geroi.sql</a>
+    <a href="./#sql2" target="_blank" rel="noopener">Вкладка «Подсчёты» у учеников</a>
+    <a href="./#sql-pitomcy" target="_blank" rel="noopener">Шпаргалка питомцев (занятие 11)</a>
+    <a href="#lesson-12">Ход занятия ↓</a>
+  </div>
+
+  <h2>Подготовить заранее</h2>
+  <div class="card"><ul class="check" id="prep-12"></ul></div>
+
+  <h2 id="lesson-12">Ход занятия</h2>
+  <p class="lead">Нажмите на команду — она скопируется. SQL — в SQL Editor демо-проекта, тексты практики — в чат группы. Ответы (оранжевые блоки) на экран не выводить.</p>
+  <nav class="fl-nav" id="flowNav-12"></nav>
+  <div class="card" id="flow-12"></div>
+
+  <h2 id="problems-12">Если у ученика…</h2>
+  <div class="card wrap"><table class="probs">
+    <tr><th>Видит</th><th>Что сделать</th></tr>
+    <tr><td>Проект «Paused»</td><td>Restore project, 2–3 минуты. Пока — смотрит экран соседа</td></tr>
+    <tr><td>Числа не сходятся с ответом</td><td>Таблица изменена: не удалён свой герой, был <code>update</code> без <code>where</code>. Запустить <code>geroi.sql</code> заново</td></tr>
+    <tr><td><code>column "…" must appear in the GROUP BY clause</code></td><td>Ловушка 3: в <code>select</code> столбец не из <code>group by</code>. «У собак три клички — какую показать?»</td></tr>
+    <tr><td><code>aggregate functions are not allowed in WHERE</code></td><td>Ловушка 4: подсчёт в <code>where</code> → нужен <code>having</code></td></tr>
+    <tr><td><code>syntax error at or near "group"</code> / <code>"where"</code></td><td>Порядок слов: <code>where</code> до <code>group by</code>, <code>having</code> после</td></tr>
+    <tr><td>Лишняя строка с пустой гильдией</td><td>Так и есть: <code>NULL</code> — тоже группа. Не нужна — <code>where gildiya is not null</code></td></tr>
+    <tr><td><code>count(gildiya)</code> = 22, а <code>count(*)</code> = 30</td><td>Так и задумано: <code>count(столбец)</code> не считает <code>NULL</code></td></tr>
+    <tr><td>Среднее <code>52.3000000000000000</code></td><td><code>round(avg(uroven), 1)</code></td></tr>
+    <tr><td>Практика 0: <code>update</code> изменил 0 строк</td><td>Не тот <code>id</code> — сначала <code>select * from geroi where imya = '…'</code>. Удалял и вставлял снова — <code>id</code> 32, 33</td></tr>
+    <tr><td>Практика 0: <code>violates check constraint</code></td><td>Уровень вне 1–100</td></tr>
+    <tr><td>Нет своей таблицы из домашки</td><td>В практике 2 сначала создать: <code>create table</code> по образцу <code>geroi.sql</code> + 5 строк. Не успевает — практику 2 делает на героях, своя таблица — дома</td></tr>
+  </table></div>
+
+  <h2>Как помогать</h2>
+  <ul>
+    <li>Практика 0 — строго в ногу: шаг → «готово» в чат от всех → следующий. Кто впереди — помогает соседу словами.</li>
+    <li>Застрявший присылает в чат скрин: запрос и ошибка или результат целиком.</li>
+    <li>Отстаёте: задания 12–15 практики 1 — в домашку; практику 2 — дома.</li>
+  </ul>
+
+  <h2>Что сознательно не рассказываем</h2>
+  <p>Связи между таблицами, внешний ключ, <code>join</code> — занятие 13 (сегодня только вопрос про телефон хозяина). Подзапросы, <code>case</code>, оконные функции, <code>count(*) filter</code>, деление с дробями (<code>::numeric</code>), индексы, RLS.</p>
+  </section>
 </div>
 </main>
-<script src="quiz.js?v=20261031214951"></script>
-<script src="engine.js?v=20261031214951"></script>
-<script src="teacher.js?v=20261031214951"></script>
+<script src="quiz.js?v=20261031221701"></script>
+<script src="engine.js?v=20261031221701"></script>
+<script src="teacher.js?v=20261031221701"></script>
 </body>
 </html>
