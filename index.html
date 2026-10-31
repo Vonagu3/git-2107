@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261031112906">
+<link rel="stylesheet" href="quiz.css?v=20261031113048">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1927,7 +1927,7 @@ select * from pitomcy order by vid, vozrast desc;
 
 select klichka from pitomcy where vid = 'собака' order by vozrast limit 1;
 -- → Шарик                  (самая младшая собака: всё вместе)</pre>
-    <p class="muted" style="margin:6px 0 0"><code>desc</code> — от большего к меньшему, без него — от меньшего. Порядок слов всегда такой: <code>select … from … where … order by … limit …</code>.</p></div>
+    <p class="muted" style="margin:6px 0 0"><code>desc</code> — от большего к меньшему, без него — от меньшего. Порядок слов всегда такой, как в последнем запросе: <code>select</code>, <code>from</code>, <code>where</code>, <code>order by</code>, <code>limit</code>.</p></div>
 
   <div class="cols2">
     <div class="card"><h3>Изменить — update</h3>
@@ -1950,7 +1950,7 @@ delete from pitomcy where id = 5;
       <div class="note-box"><b>Без <code>where</code> — все строки!</b><br>
       <code>update pitomcy set hozyain = 'Никто';</code> — все хозяева станут «Никто».<br>
       <code>delete from pitomcy;</code> — удалятся все питомцы.<br>
-      Отмены нет. Всегда: сначала <code>select … where …</code>, потом тот же <code>where</code> в <code>update</code> / <code>delete</code>.</div></div>
+      Отмены нет. Всегда сначала <code>select * from pitomcy where id = 5;</code>, проверили — тогда <code>delete from pitomcy where id = 5;</code> с тем же <code>where</code>.</div></div>
   </div>
 
   <div class="card"><h3>Бонус: посчитать — count, sum, avg</h3>
@@ -1987,23 +1987,25 @@ select * from pitomcy;</pre>
   <h2>Шпаргалка коротко</h2>
   <div class="tablewrap"><table class="cheat">
     <tr><th>Как пишется</th><th>Что значит</th></tr>
-    <tr><td>select * from geroi;</td><td>все столбцы, все строки; <code>;</code> — конец запроса</td></tr>
-    <tr><td>select imya, uroven from geroi;</td><td>только нужные столбцы</td></tr>
-    <tr><td>where klass = 'маг'</td><td>отбор строк; текст — в <b>'одинарных'</b> кавычках, числа — без</td></tr>
-    <tr><td>= &lt;&gt; &gt; &lt; &gt;= &lt;=</td><td>равно, не равно, больше, меньше…</td></tr>
-    <tr><td>and / or</td><td>оба условия / хотя бы одно</td></tr>
-    <tr><td>klass in ('маг', 'лекарь')</td><td>одно из списка</td></tr>
-    <tr><td>uroven between 20 and 30</td><td>от 20 до 30 включительно</td></tr>
-    <tr><td>imya like 'А%'</td><td>начинается на «А»; <code>%</code> — любые символы; <code>ilike</code> — без разницы, большая или маленькая буква</td></tr>
-    <tr><td>gildiya is null / is not null</td><td>пусто / не пусто. <code>= NULL</code> не работает никогда</td></tr>
-    <tr><td>order by uroven desc</td><td>сортировка; <code>desc</code> — от большего к меньшему</td></tr>
-    <tr><td>limit 5</td><td>только первые 5 строк</td></tr>
-    <tr><td>insert into geroi (imya, klass, uroven) values ('Ник', 'маг', 42);</td><td>добавить строку; <code>id</code> не пишем</td></tr>
-    <tr><td>update geroi set zoloto = zoloto + 500 where id = 31;</td><td>изменить — <b>только с where</b></td></tr>
-    <tr><td>delete from geroi where id = 31;</td><td>удалить — <b>только с where</b></td></tr>
+    <tr><td>select * from pitomcy;</td><td>все столбцы, все строки; <code>;</code> — конец запроса</td></tr>
+    <tr><td>select klichka, vozrast from pitomcy;</td><td>только нужные столбцы</td></tr>
+    <tr><td>select * from pitomcy where vid = 'собака';</td><td>отбор строк; текст — в <b>'одинарных'</b> кавычках</td></tr>
+    <tr><td>select * from pitomcy where vozrast &gt; 4;</td><td>числа — без кавычек; ещё бывают <code>=</code> <code>&lt;&gt;</code> (не равно) <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code></td></tr>
+    <tr><td>select * from pitomcy where vid = 'собака' and vozrast &gt; 4;</td><td><code>and</code> — оба условия</td></tr>
+    <tr><td>select * from pitomcy where vid = 'кот' or vid = 'кошка';</td><td><code>or</code> — хотя бы одно</td></tr>
+    <tr><td>select * from pitomcy where vid in ('кот', 'кошка');</td><td>одно из списка</td></tr>
+    <tr><td>select * from pitomcy where vozrast between 2 and 5;</td><td>от 2 до 5 включительно</td></tr>
+    <tr><td>select * from pitomcy where klichka like 'Ш%';</td><td>начинается на «Ш»; <code>%</code> — любые символы; <code>ilike</code> — без разницы, большая или маленькая буква</td></tr>
+    <tr><td>select * from pitomcy where hozyain is null;</td><td>пусто; <code>is not null</code> — не пусто. <code>= NULL</code> не работает никогда</td></tr>
+    <tr><td>select * from pitomcy order by vozrast desc;</td><td>сортировка; <code>desc</code> — от большего к меньшему, без него — от меньшего</td></tr>
+    <tr><td>select * from pitomcy order by vozrast desc limit 2;</td><td>только первые 2 строки</td></tr>
+    <tr><td>insert into pitomcy (klichka, vid, vozrast) values ('Тоша', 'хомяк', 1);</td><td>добавить строку; <code>id</code> не пишем</td></tr>
+    <tr><td>update pitomcy set vozrast = vozrast + 1 where id = 1;</td><td>изменить — <b>только с where</b></td></tr>
+    <tr><td>delete from pitomcy where id = 5;</td><td>удалить — <b>только с where</b></td></tr>
+    <tr><td>select count(*) from pitomcy;</td><td>сколько строк</td></tr>
     <tr><td>-- текст</td><td>комментарий, не выполняется</td></tr>
   </table></div>
-  <p>Порядок в запросе всегда такой: <code>select … from … where … order by … limit …</code>. Названия таблиц и столбцов — латиницей, маленькими буквами, через <code>_</code>.</p>
+  <p>Порядок в запросе всегда такой: <code>select klichka from pitomcy where vid = 'собака' order by vozrast limit 1;</code> — <code>select</code>, <code>from</code>, <code>where</code>, <code>order by</code>, <code>limit</code>. Названия таблиц и столбцов — латиницей, маленькими буквами, через <code>_</code>.</p>
 
   <h2>Если что-то пошло не так</h2>
   <div class="tablewrap"><table>
@@ -2027,9 +2029,9 @@ select * from pitomcy;</pre>
 
 </main>
 
-<script src="live.js?v=20261031112906"></script>
-<script src="quiz.js?v=20261031112906"></script>
-<script src="engine.js?v=20261031112906"></script>
+<script src="live.js?v=20261031113048"></script>
+<script src="quiz.js?v=20261031113048"></script>
+<script src="engine.js?v=20261031113048"></script>
 <script>
 (function () {
   "use strict";
