@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261031113246">
+<link rel="stylesheet" href="quiz.css?v=20261031214951">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1804,16 +1804,20 @@ git log --oneline --graph -20</pre>
   <ol class="steps" id="sqlp2" style="counter-reset: s 12">
     <li><h3>Добавить своего героя</h3>
       <p>Имя — ваш ник; класс, уровень (от 1 до 100!), золото и гильдия — любые. <code>id</code> и дату не пишите. → в таблице 31 герой. Найдите себя через <code>where imya = '…'</code>.</p>
+      <p class="muted">Подсказка: команда <code>insert into geroi (…) values (…);</code> — пример в шпаргалке, карточка <a href="#sql-ins">«Добавить — insert»</a>.</p>
       <p>Попробуйте добавить героя с уровнем 500 — что ответит база?</p>
     </li>
     <li><h3>Золото и в сети</h3>
       <p>Узнайте <code>id</code> своего героя. Дайте ему +500 золота (<code>zoloto = zoloto + 500</code>) и поставьте <code>v_seti = true</code>. Только ему — по <code>id</code>.</p>
+      <p class="muted">Подсказка: <code>update geroi set … where id = …;</code> — два столбца через запятую, пример в карточке <a href="#sql-upd">«Изменить — update»</a>.</p>
     </li>
     <li><h3>Новая гильдия</h3>
       <p>Ваш герой перешёл в гильдию «Белые крылья» — измените.</p>
+      <p class="muted">Подсказка: тоже <code>update geroi set … where id = …;</code></p>
     </li>
     <li><h3>Удалить</h3>
       <p>Удалите своего героя. Сначала <code>select</code> с тем же <code>where</code>! → снова 30</p>
+      <p class="muted">Подсказка: <code>delete from geroi where id = …;</code> — пример в карточке <a href="#sql-del">«Удалить — delete»</a>.</p>
     </li>
     <li><h3>Контроль</h3>
       <p>Выполните и пришлите <b>скриншот результата</b> в чат:</p>
@@ -1858,7 +1862,7 @@ select * from pitomcy;
 select klichka, vid from pitomcy;
 -- → 6 строк, 2 столбца</pre>
       <p class="muted" style="margin:6px 0 0"><code>*</code> — все столбцы, <code>;</code> — конец запроса.</p></div>
-    <div class="card c-ins"><h3>Добавить — insert</h3>
+    <div class="card c-ins" id="sql-ins"><h3>Добавить — insert</h3>
 <pre class="cmd">insert into pitomcy (klichka, vid, vozrast, hozyain) values
   ('Мурка', 'кошка', 7, 'Аня'),
   ('Шарик', 'собака', 1, NULL),
@@ -1941,7 +1945,7 @@ select klichka from pitomcy where vid = 'собака' order by vozrast limit 1;
     <p class="muted" style="margin:6px 0 0"><code>desc</code> — от большего к меньшему, без него — от меньшего. Порядок слов всегда такой, как в последнем запросе: <code>select</code>, <code>from</code>, <code>where</code>, <code>order by</code>, <code>limit</code>.</p></div>
 
   <div class="cols2">
-    <div class="card c-upd"><h3>Изменить — update</h3>
+    <div class="card c-upd" id="sql-upd"><h3>Изменить — update</h3>
 <pre class="cmd">-- 1. сначала смотрим, ту ли строку нашли
 select * from pitomcy where klichka = 'Шарик';
 -- 2. меняем, where — тот же
@@ -1953,7 +1957,7 @@ update pitomcy set vozrast = vozrast + 1 where id = 1;
 
 -- два столбца сразу — через запятую
 update pitomcy set vozrast = 6, hozyain = 'Оля' where id = 2;</pre></div>
-    <div class="card c-del"><h3>Удалить — delete</h3>
+    <div class="card c-del" id="sql-del"><h3>Удалить — delete</h3>
 <pre class="cmd">select * from pitomcy where id = 5;
 -- → Шарик. Тот? Тогда:
 delete from pitomcy where id = 5;
@@ -2040,9 +2044,9 @@ select * from pitomcy;</pre>
 
 </main>
 
-<script src="live.js?v=20261031113246"></script>
-<script src="quiz.js?v=20261031113246"></script>
-<script src="engine.js?v=20261031113246"></script>
+<script src="live.js?v=20261031214951"></script>
+<script src="quiz.js?v=20261031214951"></script>
+<script src="engine.js?v=20261031214951"></script>
 <script>
 (function () {
   "use strict";
