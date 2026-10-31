@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261031113048">
+<link rel="stylesheet" href="quiz.css?v=20261031113246">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -174,6 +174,17 @@ pre.cmd { font-variant-ligatures: none; background: var(--term-bg); color: var(-
 .note-box { border-left: 4px solid var(--accent); background: var(--chip); padding: 8px 12px; border-radius: 0 8px 8px 0; margin: 10px 0; }
 .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .cheat td:first-child { white-space: nowrap; font-family: var(--mono); font-size: 13px; }
+/* подсветка SQL во вкладке «Базы данных» */
+.sk { color: var(--lane2); font-weight: 700; } .sf { color: var(--lane3); font-weight: 700; }
+.ss { color: var(--lane1); } .sn { color: var(--lane4); } .sc { color: var(--muted); font-style: italic; } .sr { color: var(--ok); font-weight: 600; }
+pre.cmd .sk { color: #7cb8ff; } pre.cmd .sf { color: #5fd7d7; } pre.cmd .ss { color: #f4c46b; }
+pre.cmd .sn { color: #c9a7ff; } pre.cmd .sc { color: var(--term-muted); } pre.cmd .sr { color: #7fd18f; }
+.card.c-sel { border-top: 4px solid var(--lane2); } .card.c-sel h3 { color: var(--lane2); }
+.card.c-ins { border-top: 4px solid var(--lane3); } .card.c-ins h3 { color: var(--lane3); }
+.card.c-whr { border-top: 4px solid var(--lane4); } .card.c-whr h3 { color: var(--lane4); }
+.card.c-ord { border-top: 4px solid var(--accent); } .card.c-ord h3 { color: var(--accent); }
+.card.c-upd { border-top: 4px solid var(--warn); } .card.c-upd h3 { color: var(--warn); }
+.card.c-del { border-top: 4px solid var(--lane5); } .card.c-del h3 { color: var(--lane5); }
 .report { margin-top: 14px; border: 2px dashed var(--line); border-radius: 12px; padding: 14px; }
 .report .code { font: 700 22px var(--mono); letter-spacing: .08em; }
 
@@ -1838,7 +1849,7 @@ order by na_uroven desc limit 3;</pre>
   </table></div>
 
   <div class="cols2">
-    <div class="card"><h3>Прочитать — select</h3>
+    <div class="card c-sel"><h3>Прочитать — select</h3>
 <pre class="cmd">-- все столбцы, все строки
 select * from pitomcy;
 -- → 6 строк
@@ -1847,7 +1858,7 @@ select * from pitomcy;
 select klichka, vid from pitomcy;
 -- → 6 строк, 2 столбца</pre>
       <p class="muted" style="margin:6px 0 0"><code>*</code> — все столбцы, <code>;</code> — конец запроса.</p></div>
-    <div class="card"><h3>Добавить — insert</h3>
+    <div class="card c-ins"><h3>Добавить — insert</h3>
 <pre class="cmd">insert into pitomcy (klichka, vid, vozrast, hozyain) values
   ('Мурка', 'кошка', 7, 'Аня'),
   ('Шарик', 'собака', 1, NULL),
@@ -1856,7 +1867,7 @@ select klichka, vid from pitomcy;
       <p class="muted" style="margin:6px 0 0">Текст — в <b>'одинарных'</b> кавычках, числа — без. <code>id</code> не пишем. Строки — через запятую, в конце <code>;</code>.</p></div>
   </div>
 
-  <div class="card"><h3>Отобрать строки — where</h3>
+  <div class="card c-whr"><h3>Отобрать строки — where</h3>
 <pre class="cmd">select * from pitomcy where vid = 'собака';
 -- → Рекс, Шарик, Граф
 
@@ -1880,7 +1891,7 @@ select * from pitomcy where vid &lt;&gt; 'собака';
     <p class="muted" style="margin:6px 0 0">Сравнения: <code>=</code> <code>&lt;&gt;</code> <code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code>. Значение пишется точно как в таблице: <code>'Собака'</code> с большой буквы не найдёт ничего.</p></div>
 
   <div class="cols2">
-    <div class="card"><h3>По началу или куску текста — like</h3>
+    <div class="card c-whr"><h3>По началу или куску текста — like</h3>
 <pre class="cmd">select * from pitomcy where klichka like 'Ш%';
 -- → Шарик        (начинается на «Ш»)
 
@@ -1894,7 +1905,7 @@ select * from pitomcy where klichka like '%р%';
 select * from pitomcy where klichka ilike '%р%';
 -- → 5 строк, теперь и Рекс</pre>
       <p class="muted" style="margin:6px 0 0"><code>%</code> — любые символы (и ни одного). <code>ilike</code> — не смотрит на большие и маленькие буквы.</p></div>
-    <div class="card"><h3>Пусто — null</h3>
+    <div class="card c-whr"><h3>Пусто — null</h3>
 <pre class="cmd">select * from pitomcy where hozyain = NULL;
 -- → 0 строк! Так НЕ работает
 
@@ -1910,7 +1921,7 @@ select * from pitomcy where hozyain &lt;&gt; 'Аня';
       <p class="muted" style="margin:6px 0 0"><code>NULL</code> — «неизвестно». Оно не равно ничему, поэтому только <code>is null</code> / <code>is not null</code>.</p></div>
   </div>
 
-  <div class="card"><h3>Сортировка и количество — order by, limit</h3>
+  <div class="card c-ord"><h3>Сортировка и количество — order by, limit</h3>
 <pre class="cmd">select * from pitomcy order by vozrast;
 -- → Шарик 1, Кеша 2, Барсик 3, Рекс 5, Мурка 7, Граф 9
 
@@ -1930,7 +1941,7 @@ select klichka from pitomcy where vid = 'собака' order by vozrast limit 1;
     <p class="muted" style="margin:6px 0 0"><code>desc</code> — от большего к меньшему, без него — от меньшего. Порядок слов всегда такой, как в последнем запросе: <code>select</code>, <code>from</code>, <code>where</code>, <code>order by</code>, <code>limit</code>.</p></div>
 
   <div class="cols2">
-    <div class="card"><h3>Изменить — update</h3>
+    <div class="card c-upd"><h3>Изменить — update</h3>
 <pre class="cmd">-- 1. сначала смотрим, ту ли строку нашли
 select * from pitomcy where klichka = 'Шарик';
 -- 2. меняем, where — тот же
@@ -1942,7 +1953,7 @@ update pitomcy set vozrast = vozrast + 1 where id = 1;
 
 -- два столбца сразу — через запятую
 update pitomcy set vozrast = 6, hozyain = 'Оля' where id = 2;</pre></div>
-    <div class="card"><h3>Удалить — delete</h3>
+    <div class="card c-del"><h3>Удалить — delete</h3>
 <pre class="cmd">select * from pitomcy where id = 5;
 -- → Шарик. Тот? Тогда:
 delete from pitomcy where id = 5;
@@ -1953,7 +1964,7 @@ delete from pitomcy where id = 5;
       Отмены нет. Всегда сначала <code>select * from pitomcy where id = 5;</code>, проверили — тогда <code>delete from pitomcy where id = 5;</code> с тем же <code>where</code>.</div></div>
   </div>
 
-  <div class="card"><h3>Бонус: посчитать — count, sum, avg</h3>
+  <div class="card c-sel"><h3>Бонус: посчитать — count, sum, avg</h3>
 <pre class="cmd">select count(*) from pitomcy;
 -- → 6                      (сколько всего строк)
 
@@ -2029,9 +2040,9 @@ select * from pitomcy;</pre>
 
 </main>
 
-<script src="live.js?v=20261031113048"></script>
-<script src="quiz.js?v=20261031113048"></script>
-<script src="engine.js?v=20261031113048"></script>
+<script src="live.js?v=20261031113246"></script>
+<script src="quiz.js?v=20261031113246"></script>
+<script src="engine.js?v=20261031113246"></script>
 <script>
 (function () {
   "use strict";
@@ -2055,6 +2066,22 @@ select * from pitomcy;</pre>
   }
   $("theme").onclick = () => { theme = themes[(themes.indexOf(theme) + 1) % 3]; store.set("theme", theme); applyTheme(); };
   applyTheme();
+
+  // ---------- подсветка SQL во вкладке «Базы данных» ----------
+  const SQL_KW = new Set(("select from where and or not in between like ilike is null order by desc asc limit insert into values " +
+    "update set delete drop table if exists create primary key generated always as identity bigint text int boolean date " +
+    "default check true false distinct alter enable row level security current_date").split(" "));
+  const SQL_FN = new Set(["count", "sum", "avg", "min", "max"]);
+  function sqlHtml(src) {
+    return src.replace(/(--[^\n]*)|('[^'\n]*')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]+)\b|([^-'\dA-Za-z_]+|.)/g, (m, c, str, n, w) => {
+      if (c) return '<span class="' + (c.startsWith("-- →") || c.startsWith("--   ") ? "sr" : "sc") + '">' + esc(c) + "</span>";
+      if (str) return '<span class="ss">' + esc(str) + "</span>";
+      if (n) return '<span class="sn">' + n + "</span>";
+      if (w) { const l = w.toLowerCase(); return SQL_KW.has(l) ? '<span class="sk">' + w + "</span>" : SQL_FN.has(l) ? '<span class="sf">' + w + "</span>" : w; }
+      return esc(m);
+    });
+  }
+  document.querySelectorAll("#tab-sql pre.cmd, #tab-sql .cheat td:first-child").forEach((e) => (e.innerHTML = sqlHtml(e.textContent)));
 
   // ---------- вкладки ----------
   function showTab(t) {
