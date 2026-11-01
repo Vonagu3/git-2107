@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261031221701">
+<link rel="stylesheet" href="quiz.css?v=20261101231028">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1725,7 +1725,7 @@ git log --oneline --graph -20</pre>
 <section class="tab" id="tab-sql">
   <div class="doc">
   <h1>Практика: первые таблицы и запросы в Supabase</h1>
-  <p class="lead">Занятие 11. Каждый сам, в своём проекте <code>sql-praktika</code>. В каждом задании написано, сколько строк должно получиться, — это самопроверка. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+  <p class="lead">Занятие 11. Каждый сам, в своём проекте <code>sql-praktika</code>. В каждом задании написано, сколько строк должно получиться, — это самопроверка. Отмечайте шаги галочками — они запомнятся в этом браузере. <b><a href="#sql-hw">Домашнее задание к занятию 12 ↓</a></b></p>
 
   <h2>Шаг 0. Свой проект в Supabase · если не успели на занятии</h2>
   <ol class="steps" id="sql0">
@@ -1839,6 +1839,63 @@ select distinct klass from geroi;
 select imya, zoloto / uroven as na_uroven from geroi
 order by na_uroven desc limit 3;</pre>
   <p>Б5. Придумайте таблицу для <b>вашего проекта</b> (3–5 столбцов с типами), создайте её через Table Editor или <code>create table</code> и добавьте 5 строк.</p>
+
+  <h2 id="sql-hw">Домашнее задание к занятию 12</h2>
+  <p>Каждый сам, ~40 минут. Supabase → <code>sql-praktika</code> → SQL Editor. Если таблица героев менялась — сначала запустите <a href="files/geroi.sql" target="_blank" rel="noopener">geroi.sql</a> заново. Как пишутся запросы — <a href="#sql-pitomcy">шпаргалка на питомцах</a> ниже.</p>
+  <ol class="steps" id="sqlhw">
+    <li><h3>Часть 1. Запросы к героям</h3>
+      <p>Для каждого — сам запрос и проверка по ответу после <code>→</code>.</p>
+<pre class="cmd">-- Д1. Воины из «Стальных волков», от богатого к бедному.
+-- → 4 строки, первый Йети
+
+-- Д2. Герои НЕ в сети с уровнем меньше 30.
+-- → 3 строки
+
+-- Д3. 3 самых слабых героя (по уровню).
+-- → Пиксель, Ёрш, Эхо
+
+-- Д4. Сколько героев зарегистрировалось в 2025 году?
+-- → 17
+
+-- Д5. Маги и лекари без гильдии.
+-- → 4 строки
+
+-- Д6. Герои, чьё имя заканчивается на «а».
+-- → 9 строк
+
+-- Д7. Герои с золотом от 1000 до 2000 включительно.
+-- → 7 строк
+
+-- Д8. Уровень от 20 до 30 включительно, по уровню (between 20 and 30).
+-- → Зорро, Юла, Мира
+
+-- Д9. Сколько героев НЕ из «Ночных теней»? Сначала угадайте, потом проверьте через &lt;&gt;.
+-- → 16 строк. Почему не 24?
+
+-- Д10. В имени есть буква «р», любая — большая или маленькая (ilike вместо like).
+-- → 15 строк
+
+-- Д11. Самый новый (по дате регистрации) герой.
+-- → Пиксель</pre>
+      <p>Все 11 запросов сохраните в один файл <code>zaprosy.sql</code> (подпишите: <code>-- Д1</code>, <code>-- Д2</code> …) и пришлите в чат.</p></li>
+    <li><h3>Часть 2. Таблица для вашего проекта</h3>
+      <p>Придумайте одну таблицу, которая нужна вашему проекту: например, напоминания, пользователи, ответы бота.</p>
+      <ul>
+        <li>Создайте её через <code>create table</code> по образцу <code>geroi.sql</code>: <code>id</code> как в образце, 3–6 своих столбцов, у каждого тип (<code>text</code>, <code>int</code>, <code>boolean</code>, <code>date</code>), хотя бы один <code>not null</code> и хотя бы один <code>default</code>.</li>
+        <li>Добавьте 5 строк через <code>insert</code> — пример в карточке <a href="#sql-ins">«Добавить — insert»</a>.</li>
+        <li>Скриншот <code>select * from ваша_таблица;</code> — в чат.</li>
+      </ul>
+      <p>Названия таблицы и столбцов — латиницей, маленькими буквами, через <code>_</code>.</p>
+<pre class="cmd">-- образец: таблица напоминаний
+create table napominaniya (
+  id          bigint generated always as identity primary key,
+  tekst       text    not null,
+  data        date    not null,
+  vypolneno   boolean not null default false
+);</pre></li>
+    <li><h3>Сдать</h3>
+      <p>В чате ваш <code>zaprosy.sql</code> (11 запросов) и скриншот своей таблицы. Застряли больше чем на 5 минут — пишите в чат группы: какой запрос и какую ошибку видите.</p></li>
+  </ol>
 
   <h2 id="sql-pitomcy">Шпаргалка на примере питомцев</h2>
   <p>Те же запросы, что на показе, — к таблице <code>pitomcy</code>. После <code>-- →</code> написано, что получится. В практике делаете то же самое, только вместо <code>pitomcy</code> пишете <code>geroi</code>, а вместо <code>klichka</code>, <code>vid</code>, <code>vozrast</code> — <code>imya</code>, <code>klass</code>, <code>uroven</code> и другие столбцы героев.</p>
@@ -2251,9 +2308,9 @@ limit 3;
 
 </main>
 
-<script src="live.js?v=20261031221701"></script>
-<script src="quiz.js?v=20261031221701"></script>
-<script src="engine.js?v=20261031221701"></script>
+<script src="live.js?v=20261101231028"></script>
+<script src="quiz.js?v=20261101231028"></script>
+<script src="engine.js?v=20261101231028"></script>
 <script>
 (function () {
   "use strict";
@@ -2357,6 +2414,7 @@ limit 3;
   checkSteps("sqlgeroi", "sqlgeroi");
   checkSteps("sqlp1", "sqlp1");
   checkSteps("sqlp2", "sqlp2");
+  checkSteps("sqlhw", "sqlhw");
   checkSteps("sql2p0", "sql2p0");
   checkSteps("sql2p1", "sql2p1");
   checkSteps("sql2p2", "sql2p2");
