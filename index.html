@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261101231028">
+<link rel="stylesheet" href="quiz.css?v=20261101231559">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1844,7 +1844,7 @@ order by na_uroven desc limit 3;</pre>
   <p>Каждый сам, ~40 минут. Supabase → <code>sql-praktika</code> → SQL Editor. Если таблица героев менялась — сначала запустите <a href="files/geroi.sql" target="_blank" rel="noopener">geroi.sql</a> заново. Как пишутся запросы — <a href="#sql-pitomcy">шпаргалка на питомцах</a> ниже.</p>
   <ol class="steps" id="sqlhw">
     <li><h3>Часть 1. Запросы к героям</h3>
-      <p>Для каждого — сам запрос и проверка по ответу после <code>→</code>.</p>
+      <p>Для каждого — сам запрос и проверка по ответу после <code>→</code>. «Сколько строк» — смотрите число строк под результатом в Supabase, новые команды не нужны.</p>
 <pre class="cmd">-- Д1. Воины из «Стальных волков», от богатого к бедному.
 -- → 4 строки, первый Йети
 
@@ -1854,8 +1854,8 @@ order by na_uroven desc limit 3;</pre>
 -- Д3. 3 самых слабых героя (по уровню).
 -- → Пиксель, Ёрш, Эхо
 
--- Д4. Сколько героев зарегистрировалось в 2025 году?
--- → 17
+-- Д4. Герои, зарегистрированные в 2025 году. Сколько строк вышло?
+-- → 17 строк
 
 -- Д5. Маги и лекари без гильдии.
 -- → 4 строки
@@ -1869,7 +1869,7 @@ order by na_uroven desc limit 3;</pre>
 -- Д8. Уровень от 20 до 30 включительно, по уровню (between 20 and 30).
 -- → Зорро, Юла, Мира
 
--- Д9. Сколько героев НЕ из «Ночных теней»? Сначала угадайте, потом проверьте через &lt;&gt;.
+-- Д9. Герои НЕ из «Ночных теней». Сколько строк выйдет? Сначала угадайте, потом проверьте через &lt;&gt;.
 -- → 16 строк. Почему не 24?
 
 -- Д10. В имени есть буква «р», любая — большая или маленькая (ilike вместо like).
@@ -2308,9 +2308,9 @@ limit 3;
 
 </main>
 
-<script src="live.js?v=20261101231028"></script>
-<script src="quiz.js?v=20261101231028"></script>
-<script src="engine.js?v=20261101231028"></script>
+<script src="live.js?v=20261101231559"></script>
+<script src="quiz.js?v=20261101231559"></script>
+<script src="engine.js?v=20261101231559"></script>
 <script>
 (function () {
   "use strict";
