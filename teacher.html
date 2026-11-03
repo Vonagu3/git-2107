@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261101231559">
+<link rel="stylesheet" href="quiz.css?v=20261103223955">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -292,6 +292,7 @@ table.probs td:first-child { width: 40%; }
     <a href="./#excel" target="_blank" rel="noopener">Вкладка Excel у учеников</a>
     <a href="./#sql" target="_blank" rel="noopener">Вкладка «Базы данных» у учеников</a>
     <a href="#lesson-11">Ход занятия ↓</a>
+    <a href="#razbor-11">Разбор практики 1 и домашки ↓</a>
   </div>
 
   <h2>Подготовить заранее</h2>
@@ -301,6 +302,11 @@ table.probs td:first-child { width: 40%; }
   <p class="lead">Нажмите на команду — она скопируется: для своего терминала или для чата группы в Telegram. Скопированные отмечаются зелёным. SQL — в SQL Editor демо-проекта, тексты практики — в чат группы. Ответы (оранжевые блоки) на экран не выводить.</p>
   <nav class="fl-nav" id="flowNav-11"></nav>
   <div class="card" id="flow-11"></div>
+
+  <h2 id="razbor-11">Разбор практики 1 и домашки к занятию 12</h2>
+  <p class="lead">Для показа на экране в <code>sql-demo</code>: каждый запрос копируется кликом. Сначала ребята называют свой запрос, потом запускаете, потом — ловушка. Все результаты проверены на PostgreSQL. Самое важное — Д4 (дата не текст), Д5 (скобки), Д9 (NULL), Д10 (like и ilike).</p>
+  <nav class="fl-nav" id="flowNav-11r"></nav>
+  <div class="card" id="flow-11r"></div>
 
   <h2 id="problems-11">Если у ученика…</h2>
   <div class="card wrap"><table class="probs">
@@ -391,8 +397,8 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
   </section>
 </div>
 </main>
-<script src="quiz.js?v=20261101231559"></script>
-<script src="engine.js?v=20261101231559"></script>
-<script src="teacher.js?v=20261101231559"></script>
+<script src="quiz.js?v=20261103223955"></script>
+<script src="engine.js?v=20261103223955"></script>
+<script src="teacher.js?v=20261103223955"></script>
 </body>
 </html>

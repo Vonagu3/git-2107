@@ -491,7 +491,7 @@
   const PITOMCY = "drop table if exists pitomcy;\ncreate table pitomcy (\n  id bigint generated always as identity primary key,\n  klichka text not null, vid text, vozrast int, hozyain text\n);\ninsert into pitomcy (klichka, vid, vozrast, hozyain) values\n  ('Барсик', 'кот', 3, 'Аня'), ('Рекс', 'собака', 5, 'Миша'), ('Кеша', 'попугай', 2, NULL),\n  ('Мурка', 'кошка', 7, 'Аня'), ('Шарик', 'собака', 1, NULL), ('Граф', 'собака', 9, 'Петя');\nselect * from pitomcy;";
   const FLOW12 = [
     ["0–10", "разбор", "Домашка к занятию 12", [
-      { note: "Пока все подключаются — у кого проект «Paused», жмут Restore. По чату: кто прислал <code>zaprosy.sql</code> и скриншот своей таблицы. Разбираем не всё, а три вещи:" },
+      { note: "Пока все подключаются — у кого проект «Paused», жмут Restore. По чату: кто прислал <code>zaprosy.sql</code> и скриншот своей таблицы. Разбираем не всё, а три вещи (полный разбор с запросами для показа — вкладка «Занятие 11» → «Разбор практики 1 и домашки»):" },
       { ol: ["<b>Д4</b> «сколько в 2025» — как считали? Глазами по строкам → «а если строк 10 000? Сегодня база посчитает сама».",
         "<b>Д9</b> — почему 16, а не 24? Ещё раз <code>NULL</code>: 8 без гильдии не равны и не «не равны» «Ночным теням» — про них неизвестно.",
         "<b>Своя таблица</b> — 1–2 человека показывают свой <code>create table</code>: какие типы, где <code>not null</code>, <code>default</code>. Ошибки — сразу вслух, без оценок."] },
@@ -550,11 +550,74 @@
       { note: "После занятия очистить демо (проект <code>sql-demo</code> не удалять):" },
       C("drop table if exists pitomcy;\ndrop table if exists geroi;")]],
   ];
-  const FLOWS = { 8: FLOW8, 11: FLOW11, 12: FLOW12 };
+  // разбор практики 1 и домашки к 12 — показывать на экране в sql-demo (все результаты проверены на PostgreSQL)
+  const FLOW11R = [
+    ["0", "подготовка", "Герои в sql-demo", [
+      { note: "Чтобы показывать живьём: в <code>sql-demo</code> → SQL Editor → вставить весь <code>Урок_10/geroi.sql</code> (или по ссылке ниже: Ctrl+A, Ctrl+C) → Run → <code>vsego_geroev 30</code>. Порядок разбора: сначала ребята говорят свой запрос, потом вы запускаете, потом — ловушка, если есть." },
+      C(GEROI)]],
+    ["1–4", "практика 1", "Читаем и отбираем", [
+      C("select * from geroi;", "select imya, uroven from geroi;", "select * from geroi where klass = 'маг';", "select * from geroi where uroven > 50;"),
+      { note: "30 · 30 (2 столбца) · 8 · 16. Под результатом Supabase пишет число строк — это и есть самопроверка. Спросить: «Почему <code>'маг'</code> в кавычках, а <code>50</code> — нет?» — текст и число." },
+      { warn: "Частое: <code>where klass = маг</code> → <code>column \"маг\" does not exist</code> (без кавычек база ищет столбец); <code>'Маг'</code> → 0 строк без ошибки." }]],
+    ["5–8", "практика 1", "and, or, in, NULL, like", [
+      C("select imya from geroi where klass = 'маг' and uroven > 50;"),
+      { note: "5: Белла, Жасмин, Нокс, Руна, Ультра. <code>and</code> — оба условия сразу." },
+      C("select * from geroi where klass = 'лучник' or klass = 'лекарь';", "select * from geroi where klass in ('лучник', 'лекарь');"),
+      { note: "13 и 13 — одно и то же, <code>in</code> короче." },
+      C("select * from geroi where gildiya = NULL;", "select * from geroi where gildiya is null;"),
+      { warn: "<b>Ловушка NULL.</b> 0 строк — и 8. «Неизвестно» не равно ничему, даже другому «неизвестно». Только <code>is null</code> / <code>is not null</code>." },
+      C("select * from geroi where imya like 'А%';"),
+      { note: "3: Аргон, Астра, Ангел. <code>%</code> — любые символы после «А»." }]],
+    ["9–12", "практика 1", "Сортировка, даты, true/false", [
+      C("select imya, zoloto from geroi order by zoloto desc limit 5;"),
+      { note: "Ультра 9999, Йети 7800, Гром 5100, Нокс 4600, Ястреб 4200. Без <code>desc</code> — самые бедные. Порядок слов: <code>order by</code> всегда перед <code>limit</code>." },
+      C("select imya, klass, uroven from geroi order by klass, uroven desc;"),
+      { note: "Первые: Йети 95, Гром 88, Ястреб 80 — все воины. Спросить: «Почему воины первые?» — классы по алфавиту: воин, лекарь, лучник, маг. <code>desc</code> относится только к <code>uroven</code>." },
+      C("select imya, data_registracii from geroi where data_registracii >= '2026-01-01';"),
+      { note: "7: Зорро, Юла, Ёрш, Искра, Чешир, Эхо, Пиксель. Дата — в кавычках и всегда год-месяц-день." },
+      C("select imya from geroi where gildiya = 'Стальные волки' and v_seti = true;"),
+      { note: "4: Аргон, Йети, Сокол, Цезарь. <code>true</code> — без кавычек, это не текст." }]],
+    ["Д1–Д4", "домашка", "Домашка: отбор, сортировка, даты", [
+      C("select imya, zoloto from geroi\nwhere klass = 'воин' and gildiya = 'Стальные волки'\norder by zoloto desc;"),
+      { note: "Д1 → Йети 7800, Гром 5100, Цезарь 1600, Аргон 1200." },
+      C("select imya, uroven from geroi where v_seti = false and uroven < 30;"),
+      { note: "Д2 → Ёрш 12, Зорро 23, Эхо 15. Можно и <code>where not v_seti</code> — тоже верно." },
+      C("select imya, uroven from geroi order by uroven limit 3;"),
+      { note: "Д3 → Пиксель 7, Ёрш 12, Эхо 15. «Самые слабые» = по уровню от меньшего, <code>desc</code> не нужен." },
+      C("select * from geroi where data_registracii like '2025%';", "select * from geroi\nwhere data_registracii >= '2025-01-01' and data_registracii < '2026-01-01';", "select * from geroi where data_registracii between '2025-01-01' and '2025-12-31';"),
+      { warn: "<b>Д4 — ловушка «дата не текст».</b> <code>like</code> по дате → ошибка <code>operator does not exist: date ~~ unknown</code>: <code>like</code> только для текста. Правильно — диапазоном: два последних запроса, оба → <b>17 строк</b>. «Считали строки — а на этом занятии база посчитает сама» → мостик к <code>count</code>." }]],
+    ["Д5–Д8", "домашка", "Домашка: скобки, like, between", [
+      C("select imya, klass from geroi where klass = 'маг' or klass = 'лекарь' and gildiya is null;", "select imya, klass from geroi where (klass = 'маг' or klass = 'лекарь') and gildiya is null;", "select imya, klass from geroi where klass in ('маг', 'лекарь') and gildiya is null;"),
+      { warn: "<b>Д5 — ловушка «and сильнее or».</b> Первый запрос → <b>10</b> строк: база читает его как «все маги ИЛИ (лекари без гильдии)». Как в математике умножение раньше сложения. Нужны скобки или <code>in</code> → <b>4</b>: Искра, Чешир, Эхо, Ангел." },
+      C("select imya from geroi where imya like '%а';"),
+      { note: "Д6 → 9: Белла, Дана, Искра, Кира, Мира, Руна, Ультра, Юла, Астра. <code>%</code> — перед «а», значит «кончается на а»." },
+      C("select imya, zoloto from geroi where zoloto between 1000 and 2000 order by zoloto;", "select imya, zoloto from geroi where zoloto >= 1000 and zoloto <= 2000;"),
+      { note: "Д7 → 7: Оникс 1050 … Руна 1900. <code>between</code> включает оба края — то же, что <code>&gt;=</code> и <code>&lt;=</code>." },
+      C("select imya, uroven from geroi where uroven between 20 and 30 order by uroven;"),
+      { note: "Д8 → Зорро 23, Юла 26, Мира 29." }]],
+    ["Д9–Д11", "домашка", "Домашка: снова NULL, ilike, самый новый", [
+      { note: "Д9: сначала спросить — «сколько не из Ночных теней?» Обычно отвечают 30 − 6 = 24." },
+      C("select imya, gildiya from geroi where gildiya <> 'Ночные тени';", "select imya, gildiya from geroi where gildiya <> 'Ночные тени' or gildiya is null;"),
+      { warn: "<b>Д9 — NULL ещё раз.</b> Первый → <b>16</b>: 8 героев без гильдии не попали. Про них неизвестно, в «Ночных тенях» они или нет, — поэтому ни <code>=</code>, ни <code>&lt;&gt;</code> их не берут. Нужны все 24 — добавить <code>or gildiya is null</code>." },
+      C("select imya from geroi where imya like '%р%';", "select imya from geroi where imya ilike '%р%';"),
+      { warn: "<b>Д10.</b> <code>like</code> → 14, <code>ilike</code> → <b>15</b>. Лишний — Руна: у неё большая «Р». <code>like</code> различает большие и маленькие буквы, <code>ilike</code> — нет." },
+      C("select imya, data_registracii from geroi order by data_registracii desc limit 1;"),
+      { note: "Д11 → Пиксель, 2026-09-01. «Самый новый» = самая поздняя дата = сортировка от большей." }]],
+    ["Своя таблица", "домашка", "Домашка, часть 2: таблица своего проекта", [
+      { note: "Показать на экране 1–2 скриншота/запроса из чата (лучше разных команд). По каждому — вслух, по чек-листу:" },
+      { ol: ["<code>id bigint generated always as identity primary key</code> — есть? Без него — нет ключа, строки не различить.",
+        "У каждого столбца подходящий тип: дата — <code>date</code>, а не <code>text</code>; да/нет — <code>boolean</code>; количество — <code>int</code>.",
+        "<code>not null</code> — на том, без чего строка бессмысленна (текст напоминания, имя).",
+        "<code>default</code> — где есть естественное «по умолчанию» (<code>false</code>, <code>0</code>, <code>current_date</code>).",
+        "Названия латиницей, маленькими, через <code>_</code>. Нет ли столбца «про другое» — например, телефон пользователя в таблице напоминаний? Это зацепка к занятию 13, не исправлять."] },
+      C("create table napominaniya (\n  id          bigint generated always as identity primary key,\n  tekst       text    not null,\n  data        date    not null,\n  vypolneno   boolean not null default false\n);\ninsert into napominaniya (tekst, data) values\n  ('Сдать домашку по SQL', '2026-11-05');\nselect * from napominaniya;"),
+      { note: "Образец с сайта — если надо показать, как работает <code>default</code>: <code>vypolneno</code> не указали, а стало <code>false</code>. После показа: <code>drop table napominaniya;</code>" }]],
+  ];
+  const FLOWS = { 8: FLOW8, 11: FLOW11, "11r": FLOW11R, 12: FLOW12 };
   let cmdN = 0;
   function renderFlow(l) {
     const FLOW = FLOWS[l];
-    $("flowNav-" + l).innerHTML = FLOW.map((b, i) => "<a href='#fl" + l + "-" + i + "'>" + b[0] + "</a>").join("") + "<a href='#problems-" + l + "'>Проблемы</a>";
+    $("flowNav-" + l).innerHTML = FLOW.map((b, i) => "<a href='#fl" + l + "-" + i + "'>" + b[0] + "</a>").join("") + ($("problems-" + l) ? "<a href='#problems-" + l + "'>Проблемы</a>" : "");
     $("flow-" + l).innerHTML = FLOW.map((b, i) => "<div class='fl-block' id='fl" + l + "-" + i + "'><div class='fl-time'>" + b[0] + "<small>" + esc(b[1]) + "</small></div><div class='fl-body'><b>" + esc(b[2]) + "</b>" +
       b[3].map((x) => {
         if (x.cmd) return "<div class='fl-cmds'>" + x.cmd.map((c) => { const id = cmdN++; return "<button type='button' class='fl-cmd" + (copied.has(id) ? " done" : "") + "' data-c='" + id + "'><code>" + esc(c) + "</code><span>" + (copied.has(id) ? "скопировано" : "копировать") + "</span></button>"; }).join("") + "</div>";
@@ -690,7 +753,7 @@
     $("login").hidden = true;
     $("app").hidden = false;
     await loadAllAnswers();
-    renderPupils(); cmdN = 0; Object.keys(PREPS).forEach((l) => { renderPrep(l); renderFlow(l); }); renderLive(); renderResults();
+    renderPupils(); cmdN = 0; Object.keys(PREPS).forEach(renderPrep); Object.keys(FLOWS).forEach(renderFlow); renderLive(); renderResults();
     status(pupils.length ? "Учеников: " + pupils.length : "Список пуст — добавьте учеников ниже.");
     clearInterval(timer);
     timer = setInterval(tick, 3000);
