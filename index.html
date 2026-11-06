@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261106213043">
+<link rel="stylesheet" href="quiz.css?v=20261106220503">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -215,6 +215,7 @@ pre.cmd .sn { color: #c9a7ff; } pre.cmd .sc { color: var(--term-muted); } pre.cm
       <button data-tab="excel">Excel</button>
       <button data-tab="sql">Базы данных</button>
       <button data-tab="sql2">Подсчёты</button>
+      <button data-tab="sql3">Связи</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -2305,12 +2306,224 @@ limit 3;
   </div>
 </section>
 
+<section class="tab" id="tab-sql3">
+  <div class="doc">
+  <h1>Практика: таблицы и связи</h1>
+  <p class="lead">Занятие 13. Каждый сам, в своём проекте <code>sql-praktika</code>. Делим героев и гильдии на две таблицы и соединяем их. В каждом задании написано, что должно получиться, — это самопроверка. Как пишутся запросы — <a href="#sql3-cheat">шпаргалка на питомцах</a> внизу страницы. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+
+  <div class="note-box"><b>Отстали или таблицы сломались?</b> Откройте <a href="files/geroi-gildii.sql" target="_blank" rel="noopener">geroi-gildii.sql</a>, скопируйте весь текст в SQL Editor и нажмите Run. Внизу должно быть <code>30</code> и <code>22</code>. Это готовое состояние после задания 6: можно сразу идти к заданию 7.</div>
+
+  <h2>Практика 1. Гильдии отдельной таблицей · 35 минут</h2>
+  <p>Сейчас название гильдии записано в каждом герое текстом. Если гильдия сменит название, менять придётся много строк. Куда записать город гильдии? Тоже в каждого героя? Поэтому у гильдий будет своя таблица.</p>
+  <h3>Делим</h3>
+  <ol class="steps" id="sql3p1">
+    <li><h3>Герои как новые</h3><p>SQL Editor → New query → вставить весь <a href="files/geroi.sql" target="_blank" rel="noopener">geroi.sql</a> → Run. Внизу: <code>vsego_geroev 30</code>.</p></li>
+    <li><h3>Создайте таблицу gildii</h3><p>Три столбца: <code>id</code> — такой же, как в <code>geroi.sql</code>; <code>nazvanie</code> — текст, обязательный; <code>gorod</code> — текст. Названия столбцов — точно такие: они нужны дальше.</p></li>
+    <li><h3>Заполните её</h3><p>Готовый скрипт:</p>
+<pre class="cmd">alter table gildii enable row level security;
+insert into gildii (nazvanie, gorod) values
+  ('Стальные волки', 'Кузня'),
+  ('Звёздный круг',  'Астрал'),
+  ('Ночные тени',    'Кузня'),
+  ('Белые крылья',   'Облака');
+select * from gildii order by id;
+-- → 4 строки, id от 1 до 4</pre></li>
+    <li><h3>Добавьте столбец-ссылку</h3><p>Готовая команда. В новом столбце будет номер гильдии, <code>references</code> делает его внешним ключом. Команду <code>alter table</code> подробно разберём позже.</p>
+<pre class="cmd">alter table geroi add column gildiya_id bigint references gildii(id);</pre></li>
+    <li><h3>Запишите номера гильдий</h3><p>Первый запрос готов, ещё три напишите сами по таблице из шага 3. Потом проверка:</p>
+<pre class="cmd">update geroi set gildiya_id = 1 where gildiya = 'Стальные волки';
+
+select count(gildiya_id), count(*) from geroi;
+-- → 22 и 30</pre><p>Вышло меньше 22 — проверьте, нет ли опечатки в названии гильдии.</p></li>
+    <li><h3>Удалите старый столбец</h3><p>Только когда в шаге 5 вышло 22 и 30.</p>
+<pre class="cmd">alter table geroi drop column gildiya;
+
+select imya, gildiya_id from geroi where id = 1;
+-- → Аргон, 1</pre></li>
+    <li><h3>Проверьте защиту</h3><p>Обе команды должны дать ошибку <code>violates foreign key constraint</code>. Объясните своими словами: почему база отказалась?</p>
+<pre class="cmd">update geroi set gildiya_id = 99 where imya = 'Аргон';
+
+delete from gildii where id = 3;</pre></li>
+  </ol>
+  <h3>Соединяем — join</h3>
+  <ol class="steps" id="sql3p2" style="counter-reset: s 7">
+    <li><h3>Герой и его гильдия</h3><p>Имя героя и название гильдии. → 22 строки. Почему не 30?</p></li>
+    <li><h3>Плюс город</h3><p>Добавьте город, отсортируйте по имени героя, оставьте первых трёх. → Аргон, Астра, Белла</p></li>
+    <li><h3>Герои Звёздного круга</h3><p>Имя и уровень, сильные первыми. → 5 строк, первая — Ультра 99</p></li>
+    <li><h3>Сколько героев в городе Кузня?</h3><p>→ 12</p></li>
+    <li><h3>Сколько героев в каждой гильдии</h3><p>Большие первыми. → 4 строки: 6, 6, 5, 5. На занятии 12 строк было 5. Куда делась пустая группа?</p></li>
+    <li><h3>Золото каждого города</h3><p>Богатые первыми. → Кузня 36410, Астрал 18689, Облака 6270</p></li>
+  </ol>
+  <h3>Имя в одном месте</h3>
+  <ol class="steps" id="sql3p3" style="counter-reset: s 13">
+    <li><h3>Переименуйте гильдию</h3><p>Новое название гильдии 3 — «Ночные совы». Покажите её героев запросом с <code>join</code>. → 6 строк с новым названием. Сколько строк вы изменили?</p></li>
+    <li><h3>Верните название</h3><p>Снова «Ночные тени». Это обязательно: на старое название опираются следующие задания.</p></li>
+  </ol>
+
+  <h2>Практика 2. Свой проект · 15 минут</h2>
+  <p>Возьмите повтор из раздела «Данные» в README вашей команды. Схему обсуждаете командой, запросы каждый запускает у себя.</p>
+  <ol class="steps" id="sql3own">
+    <li><h3>Назовите две сущности</h3><p>Договоритесь и скажите фразой: «одна X — много Y». Например: «один пользователь — много напоминаний».</p></li>
+    <li><h3>Создайте две таблицы</h3><p>Сначала X, потом Y. В Y — столбец-ссылка: <code>x_id bigint references x(id)</code>. Данные про X в таблице Y больше не повторяются.</p></li>
+    <li><h3>Добавьте строки</h3><p>2–3 строки в X, 5 строк в Y. У одной строки X должно быть несколько строк Y.</p></li>
+    <li><h3>Напишите join</h3><p>Строки Y рядом с данными X.</p></li>
+    <li><h3>Получите ошибку</h3><p>Вставьте строку Y с номером 99 в столбце-ссылке. → <code>violates foreign key constraint</code></p></li>
+    <li><h3>Сдать</h3><p>Скриншоты запроса с <code>join</code> и ошибки — в чат.</p></li>
+  </ol>
+
+  <h2>Бонус — для тех, кто быстрее</h2>
+<pre class="cmd">-- Б1. Сколько героев без гильдии?
+-- → 8
+
+-- Б2. Гильдии, где средний уровень больше 50 (1 знак после точки)
+-- → Стальные волки 73.2, Звёздный круг 65.6, Ночные тени 58.3
+
+-- Б3. Города, где в сети больше 5 героев
+-- → Кузня 7
+
+-- Б4. Добавьте гильдию:
+insert into gildii (nazvanie, gorod) values ('Серые плащи', 'Астрал');
+--     Запустите снова запрос из задания 12. Есть в результате новая гильдия?
+--     Как вы думаете, почему? Потом обязательно удалите её:
+delete from gildii where nazvanie = 'Серые плащи';</pre>
+
+  <h2>Домашнее задание к занятию 14</h2>
+  <p>~50 минут. Таблицы сломались — запустите <a href="files/geroi-gildii.sql" target="_blank" rel="noopener">geroi-gildii.sql</a>.</p>
+  <ol class="steps" id="sql3hw">
+    <li><h3>Часть 1. Запросы к героям и гильдиям · каждый сам</h3>
+<pre class="cmd">-- Д1. Воины в гильдиях: имя и город, по имени.
+--                       → 8 строк. Воинов 9 — где девятый?
+-- Д2. Сколько героев в сети в городе Облака?             → 3
+-- Д3. Герои Ночных теней от богатого к бедному.
+--                       → 6 строк, первый Нокс 4600
+-- Д4. Средний уровень в каждом городе, от высокого (1 знак).
+--                       → Кузня 65.8, Астрал 65.6, Облака 43.4
+-- Д5. Гильдия, её город и всё золото, богатые первыми.
+--                       → первая: Стальные волки, Кузня, 22200
+-- Д6. Города, где больше 5 героев.                       → Кузня 12
+-- Д7. Запустите запрос и найдите ошибку:
+select geroi.imya, gildii.nazvanie from geroi
+join gildii on geroi.id = gildii.id;
+--     Сколько строк? Сверьте Вихря и Грома с заданием 8. Что не так?
+--     Напишите ответ в комментарии.</pre>
+      <p>Всё — в один файл <code>svyazi.sql</code> (подпишите <code>-- Д1</code>, <code>-- Д2</code> …) и в чат.</p></li>
+    <li><h3>Часть 2. Пиццерия · каждый сам</h3>
+      <p>Хозяин пиццерии ведёт заказы в одной таблице:</p>
+      <div class="tablewrap"><table>
+        <tr><th>id</th><th>klient</th><th>telefon</th><th>pizza</th><th>cena</th><th>data</th></tr>
+        <tr><td>1</td><td>Оля</td><td>111-22-33</td><td>Маргарита</td><td>500</td><td>2026-11-01</td></tr>
+        <tr><td>2</td><td>Макс</td><td>444-55-66</td><td>Пепперони</td><td>650</td><td>2026-11-01</td></tr>
+        <tr><td>3</td><td>Оля</td><td>111-22-33</td><td>Четыре сыра</td><td>700</td><td>2026-11-02</td></tr>
+        <tr><td>4</td><td>Нина</td><td>777-88-99</td><td>Маргарита</td><td>500</td><td>2026-11-03</td></tr>
+        <tr><td>5</td><td>Макс</td><td>444-55-66</td><td>Маргарита</td><td>500</td><td>2026-11-04</td></tr>
+      </table></div>
+      <ol>
+        <li>Напишите в комментарии три проблемы: что будет при изменении, удалении и добавлении?</li>
+        <li>Создайте две таблицы, <code>klienty</code> и <code>zakazy</code>, со связью и заполните их теми же данными.</li>
+        <li>Все заказы с именем и телефоном клиента, по дате. → 5 строк</li>
+        <li>Сколько заказов у каждого клиента и на какую сумму, большие суммы первыми. → Оля 2 и 1200, Макс 2 и 1150, Нина 1 и 500</li>
+        <li>Вставьте заказ с клиентом номер 99. → <code>violates foreign key constraint</code></li>
+      </ol>
+      <p>Запросы и скриншот ошибки — в чат.</p></li>
+    <li><h3>Часть 3. Командой — к следующему занятию</h3>
+      <p>Обновите раздел <b>«Данные»</b> в README командного репозитория: первичный ключ каждой таблицы, внешние ключи и каждая связь словами — «одна X — много Y». Повторов быть не должно. Если выходит «много с обеих сторон», просто запишите это: разберём на занятии 14.</p></li>
+  </ol>
+
+  <h2 id="sql3-cheat">Шпаргалка на примере питомцев</h2>
+  <p>Хозяева и питомцы, как на показе. Повторить у себя — скрипт ниже. Он заменит вашу старую таблицу <code>pitomcy</code>.</p>
+<pre class="cmd">drop table if exists pitomcy;
+drop table if exists hozyaeva;
+
+-- сначала таблица, на которую будем ссылаться
+create table hozyaeva (
+  id      bigint generated always as identity primary key,
+  imya    text not null,
+  telefon text
+);
+insert into hozyaeva (imya, telefon) values
+  ('Аня', '111-11-11'), ('Миша', '222-22-22'), ('Петя', '333-33-33');
+
+-- потом таблица со ссылкой
+create table pitomcy (
+  id         bigint generated always as identity primary key,
+  klichka    text not null,
+  vid        text,
+  vozrast    int,
+  hozyain_id bigint references hozyaeva(id)
+);
+insert into pitomcy (klichka, vid, vozrast, hozyain_id) values
+  ('Барсик', 'кот', 3, 1), ('Рекс', 'собака', 5, 2), ('Кеша', 'попугай', 2, NULL),
+  ('Мурка', 'кошка', 7, 1), ('Шарик', 'собака', 1, NULL), ('Граф', 'собака', 9, 3);</pre>
+
+  <div class="cols2">
+    <div class="card c-sel"><h3>Соединить — join</h3>
+<pre class="cmd">select pitomcy.klichka, hozyaeva.imya
+from pitomcy
+join hozyaeva on pitomcy.hozyain_id = hozyaeva.id;
+-- → 4 строки: у Кеши и Шарика нет пары
+
+select p.klichka, h.telefon
+from pitomcy p
+join hozyaeva h on p.hozyain_id = h.id
+where h.imya = 'Аня';
+-- → Барсик и Мурка
+--   (p и h — короткие имена таблиц)</pre></div>
+    <div class="card c-ins"><h3>Считать через join</h3>
+<pre class="cmd">select hozyaeva.imya, count(*)
+from pitomcy
+join hozyaeva on pitomcy.hozyain_id = hozyaeva.id
+group by hozyaeva.imya
+order by count(*) desc;
+-- → Аня 2, Миша 1, Петя 1
+
+select hozyaeva.imya, sum(pitomcy.vozrast)
+from pitomcy
+join hozyaeva on pitomcy.hozyain_id = hozyaeva.id
+group by hozyaeva.imya;
+-- → Аня 10, Миша 5, Петя 9</pre></div>
+  </div>
+
+  <div class="cols2">
+    <div class="card c-upd"><h3>Менять в одном месте</h3>
+<pre class="cmd">update hozyaeva set telefon = '999-99-99'
+where id = 1;
+-- одна строка, а новый номер увидят
+-- и Барсик, и Мурка</pre></div>
+    <div class="card c-ord"><h3>База защищает связь</h3>
+<pre class="cmd">insert into pitomcy (klichka, hozyain_id)
+values ('Тузик', 99);
+-- ошибка: хозяина № 99 нет
+
+delete from hozyaeva where id = 1;
+-- ошибка: у Ани есть питомцы</pre></div>
+  </div>
+
+  <div class="note-box"><b>Запомнить.</b> <code>primary key</code> — номер строки: не пустой и не повторяется. <code>references</code> — внешний ключ: номер строки из другой таблицы. В связи «один ко многим» столбец-ссылка лежит в таблице «многих». <code>on</code> читаем вслух: ссылка = первичный ключ.</div>
+
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что видно</th><th>Что делать</th></tr>
+    <tr><td><code>relation "gildii" already exists</code></td><td>Таблица осталась от прошлой попытки: <code>drop table gildii;</code> или запустите <code>geroi-gildii.sql</code>.</td></tr>
+    <tr><td><code>relation "…" does not exist</code></td><td>Таблица, на которую ссылаетесь, ещё не создана. Или опечатка в названии.</td></tr>
+    <tr><td><code>cannot drop table … because other objects depend on it</code></td><td>На таблицу ссылается другая. Сначала удалите ту, в которой столбец-ссылка.</td></tr>
+    <tr><td><code>violates foreign key constraint</code></td><td>Такого номера нет, или на эту строку ссылаются. Иногда это и есть задание.</td></tr>
+    <tr><td><code>column "gildiya" does not exist</code></td><td>Старый столбец уже удалён. Название гильдии теперь в <code>gildii.nazvanie</code>, нужен <code>join</code>.</td></tr>
+    <tr><td><code>column reference "id" is ambiguous</code></td><td>Такой столбец есть в обеих таблицах. Пишите <code>geroi.id</code> или <code>gildii.id</code>.</td></tr>
+    <tr><td><code>syntax error at or near ";"</code> или <code>at end of input</code></td><td>После <code>join</code> нет <code>on …</code>.</td></tr>
+    <tr><td><code>invalid reference to FROM-clause entry</code></td><td>Таблице дали короткое имя, а дальше пишете полное. Выберите что-то одно.</td></tr>
+    <tr><td>Ошибки нет, но строк слишком мало или пары странные</td><td>Прочитайте <code>on</code> вслух: должно быть <code>geroi.gildiya_id = gildii.id</code>.</td></tr>
+    <tr><td>Числа не сходятся с ответом</td><td>Не вернули название гильдии (задание 15), осталась гильдия из Б4 или таблица изменена. Запустите <code>geroi-gildii.sql</code>.</td></tr>
+  </table></div>
+  <p>Застряли больше чем на 5 минут — пишите в чат группы: какое задание, сам запрос и что видите.</p>
+  </div>
+</section>
+
 
 </main>
 
-<script src="live.js?v=20261106213043"></script>
-<script src="quiz.js?v=20261106213043"></script>
-<script src="engine.js?v=20261106213043"></script>
+<script src="live.js?v=20261106220503"></script>
+<script src="quiz.js?v=20261106220503"></script>
+<script src="engine.js?v=20261106220503"></script>
 <script>
 (function () {
   "use strict";
@@ -2338,7 +2551,7 @@ limit 3;
   // ---------- подсветка SQL во вкладке «Базы данных» ----------
   const SQL_KW = new Set(("select from where and or not in between like ilike is null order by desc asc limit insert into values " +
     "update set delete drop table if exists create primary key generated always as identity bigint text int boolean date " +
-    "default check true false distinct alter enable row level security current_date group having year").split(" "));
+    "default check true false distinct alter enable row level security current_date group having year join on references add column").split(" "));
   const SQL_FN = new Set(["count", "sum", "avg", "min", "max", "round", "extract"]);
   function sqlHtml(src) {
     return src.replace(/(--[^\n]*)|('[^'\n]*')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]+)\b|([^-'\dA-Za-z_]+|.)/g, (m, c, str, n, w) => {
@@ -2349,7 +2562,7 @@ limit 3;
       return esc(m);
     });
   }
-  document.querySelectorAll("#tab-sql pre.cmd, #tab-sql2 pre.cmd, #tab-sql .cheat td:first-child").forEach((e) => (e.innerHTML = sqlHtml(e.textContent)));
+  document.querySelectorAll("#tab-sql pre.cmd, #tab-sql2 pre.cmd, #tab-sql3 pre.cmd, #tab-sql .cheat td:first-child").forEach((e) => (e.innerHTML = sqlHtml(e.textContent)));
 
   // ---------- вкладки ----------
   function showTab(t) {
@@ -2362,7 +2575,7 @@ limit 3;
   const hashTab = location.hash.replace("#", "");
   // #proj и другие якоря внутри вкладки: открыть эту вкладку и прокрутить к разделу
   const hashSec = hashTab && document.getElementById(hashTab)?.closest(".tab");
-  showTab(["live", "lesson", "excel", "sql", "sql2", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
+  showTab(["live", "lesson", "excel", "sql", "sql2", "sql3", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
     : hashSec ? hashSec.id.replace("tab-", "") : store.get("tab", "train"));
   if (hashSec) document.getElementById(hashTab).scrollIntoView();
 
@@ -2421,6 +2634,11 @@ limit 3;
   checkSteps("sql2p3", "sql2p3");
   checkSteps("sql2own", "sql2own");
   checkSteps("sql2hw", "sql2hw");
+  checkSteps("sql3p1", "sql3p1");
+  checkSteps("sql3p2", "sql3p2");
+  checkSteps("sql3p3", "sql3p3");
+  checkSteps("sql3own", "sql3own");
+  checkSteps("sql3hw", "sql3hw");
   checkSteps("l8clone", "l8clone");
   checkSteps("l8det", "l8det");
   checkSteps("l8pick", "l8pick");

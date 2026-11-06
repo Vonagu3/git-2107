@@ -296,7 +296,7 @@
   }
 
   // ---------- вкладки: общая «Ученики и опрос» + по одной на каждое занятие ----------
-  const TABS = ["pupils", "l8", "l11", "l12"];
+  const TABS = ["pupils", "l8", "l11", "l12", "l13"];
   function showTab(t) {
     if (!TABS.includes(t)) t = TABS[TABS.length - 1];
     document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
@@ -335,7 +335,7 @@
     "Открыты вкладки: эта страница, sql-demo → SQL Editor, вкладка «Подсчёты» у учеников (#sql2).",
     "Ответы (оранжевые блоки) не показывать на экране. Демонстрировать окно, а не весь экран.",
   ];
-  const PREPS = { 8: PREP8, 11: PREP11, 12: PREP12 };
+  const PREPS = { 8: PREP8, 11: PREP11, 12: PREP12 };  // PREPS[13] добавляется ниже, рядом с занятием 13
   const prepDone = {};
   function renderPrep(l) {
     const box = $("prep-" + l), done = prepDone[l] || (prepDone[l] = []);
@@ -742,7 +742,172 @@
       { note: "Образец раздела — на случай, если README пуст и нужно показать, чего ждём. Ещё два вопроса к повторам команды: «Сколько строк менять, если человек сменит телефон? Что будет, если в одной строке опечататься?»" },
       { warn: "<b>Схему здесь не исправлять и новую таблицу не предлагать.</b> Это тот же вопрос, что «телефон Ани» из конца занятия 12, а ответ — тема занятия 13. Выпишите по одному повтору от каждой команды: на этих примерах и пойдёт занятие 13. Команда без раздела делает его первым делом: без него ей не на чем работать на занятии." }]],
   ];
-  const FLOWS = { 8: FLOW8, 11: FLOW11, "11r": FLOW11R, 12: FLOW12, "12r": FLOW12R };
+  // занятие 13: зачем делить таблицы
+  const GEROI_G = SITE + "files/geroi-gildii.sql";
+  const PITOMCY13A = "drop table if exists pitomcy;\ndrop table if exists hozyaeva;\ncreate table pitomcy (\n  id bigint generated always as identity primary key,\n  klichka text not null, vid text, vozrast int, hozyain text, telefon text\n);\ninsert into pitomcy (klichka, vid, vozrast, hozyain, telefon) values\n  ('Барсик', 'кот', 3, 'Аня', '111-11-11'),\n  ('Рекс', 'собака', 5, 'Миша', '222-22-22'),\n  ('Кеша', 'попугай', 2, NULL, NULL),\n  ('Мурка', 'кошка', 7, 'Аня', '111-11-11'),\n  ('Шарик', 'собака', 1, NULL, NULL),\n  ('Граф', 'собака', 9, 'Петя', '333-33-33');\nselect * from pitomcy order by id;";
+  const PITOMCY13B = "drop table if exists pitomcy;\ndrop table if exists hozyaeva;\n\ncreate table hozyaeva (\n  id      bigint generated always as identity primary key,\n  imya    text not null,\n  telefon text\n);\ninsert into hozyaeva (imya, telefon) values\n  ('Аня', '111-11-11'), ('Миша', '222-22-22'), ('Петя', '333-33-33');\n\ncreate table pitomcy (\n  id         bigint generated always as identity primary key,\n  klichka    text not null,\n  vid        text,\n  vozrast    int,\n  hozyain_id bigint references hozyaeva(id)\n);\ninsert into pitomcy (klichka, vid, vozrast, hozyain_id) values\n  ('Барсик', 'кот', 3, 1), ('Рекс', 'собака', 5, 2), ('Кеша', 'попугай', 2, NULL),\n  ('Мурка', 'кошка', 7, 1), ('Шарик', 'собака', 1, NULL), ('Граф', 'собака', 9, 3);\nselect * from pitomcy order by id;";
+  const GILDII13 = "alter table gildii enable row level security;\ninsert into gildii (nazvanie, gorod) values\n  ('Стальные волки', 'Кузня'),\n  ('Звёздный круг',  'Астрал'),\n  ('Ночные тени',    'Кузня'),\n  ('Белые крылья',   'Облака');\nselect * from gildii order by id;";
+  const SVYAZ = "from geroi\njoin gildii on geroi.gildiya_id = gildii.id";
+  const PREP13 = [
+    "Домашка к 13 проверена по чату: podschet.sql, два своих вопроса, раздел «Данные» в README обеих команд.",
+    "Выбрано по одному повтору от каждой команды: с них начинается занятие и на них строится практика 2.",
+    "Ученикам в чат за день: «Завтра делим таблицы. Откройте Supabase → sql-praktika: если проект Paused — нажмите Restore заранее. Домашку и раздел „Данные“ в README — до занятия».",
+    "sql-demo открывается, таблиц pitomcy, hozyaeva, geroi и gildii в нём нет или их можно удалить: скрипты в ходе занятия начинаются с drop table if exists.",
+    "Открыты вкладки: эта страница, sql-demo → SQL Editor, вкладка «Связи» у учеников (#sql3). На доске есть место для двух таблиц и стрелки.",
+    "Ответы (оранжевые блоки) не показывать на экране. Демонстрировать окно, а не весь экран.",
+  ];
+  PREPS[13] = PREP13;
+  const FLOW13 = [
+    ["0–10", "разбор", "Домашка к занятию 13", [
+      { note: "Пока все подключаются — у кого проект «Paused», жмут Restore. Разбираем не всё, а две вещи (полный разбор с запросами — вкладка «Занятие 12» → «Разбор практик, бонуса и домашки»):" },
+      { ol: ["<b>Д7 и Д8:</b> «Это условие про одного героя или про всю гильдию?» Про строку — <code>where</code>, про группу — <code>having</code>.",
+        "<b>Раздел «Данные»:</b> открыть README каждой команды, каждая называет один повтор. Выписать на доску: «что повторяется и сколько строк придётся менять». Не решать — сейчас к этому вернёмся."] }]],
+    ["10–25", "показ", "Одна таблица: что ломается", [
+      { note: "Напомнить вопрос с прошлого занятия: «Нам нужен телефон Ани. Куда его записать?» Самый простой ответ — столбец в <code>pitomcy</code>. Делаем так и смотрим, что будет:" },
+      C(PITOMCY13A),
+      { note: "<b>1. Повтор.</b> Один и тот же телефон хранится дважды, а если питомцев будет 10 — десять раз:" },
+      C("select klichka, hozyain, telefon from pitomcy where hozyain = 'Аня' order by id;"),
+      { note: "<b>2. Изменение.</b> Аня сменила номер, а поправили только одну строку. Спросить: «Какой номер настоящий?» База этого не знает." },
+      C("update pitomcy set telefon = '999-99-99' where klichka = 'Барсик';", "select klichka, hozyain, telefon from pitomcy where hozyain = 'Аня' order by id;"),
+      { note: "<b>3. Удаление.</b> Граф был единственным питомцем Пети. Удалили Графа — вместе с ним пропал телефон Пети: 0 строк." },
+      C("delete from pitomcy where klichka = 'Граф';", "select telefon from pitomcy where hozyain = 'Петя';"),
+      { note: "<b>4. Добавление.</b> Новая хозяйка Оля ещё без питомца. Записать её некуда: строка таблицы — это питомец, а кличка обязательна." },
+      C(FAILS("insert into pitomcy (hozyain, telefon) values ('Оля', '444-44-44');")),
+      { note: "Вывод на доску: <b>в одной таблице смешались две разные вещи — питомец и человек</b>. Отсюда все четыре проблемы. Вернуться к повторам команд: «Где у вас то же самое?»" }]],
+    ["25–45", "показ", "Две таблицы и внешний ключ", [
+      { note: "Нарисовать на доске две таблицы и стрелку от <code>hozyain_id</code> к <code>id</code>. Слова: <b>сущность</b> — то, о чём храним данные (питомец, хозяин); <b>атрибут</b> — её свойство (кличка, телефон); <b>первичный ключ</b> (<code>primary key</code>) — номер, по которому строка находится точно; <b>внешний ключ</b> (<code>references</code>) — столбец, в котором хранится номер строки из другой таблицы." },
+      C(PITOMCY13B),
+      { note: "Порядок важен: сначала <code>hozyaeva</code>, потом <code>pitomcy</code> — ссылаться можно только на то, что уже есть. У Аниных питомцев Барсика и Мурки <code>hozyain_id</code> = 1. У Кеши и Шарика — <code>NULL</code>: хозяина нет, и это разрешено." },
+      { note: "<b>Один ко многим:</b> один хозяин — много питомцев, а у питомца один хозяин. Столбец-ссылка всегда в таблице «многих». Спросить: «Почему не хранить в <code>hozyaeva</code> столбец <code>pitomcy</code> со списком?» — снова ячейка «Барсик, Мурка», искать и менять неудобно." },
+      { note: "Теперь те же проблемы. Новый номер Ани — в одном месте, одна строка:" },
+      C("update hozyaeva set telefon = '999-99-99' where id = 1;", "insert into hozyaeva (imya, telefon) values ('Оля', '444-44-44');", "delete from pitomcy where klichka = 'Граф';", "select * from hozyaeva order by id;"),
+      { note: "Оля записана без питомца, Граф удалён, а телефон Пети остался: 4 хозяина. Изменение, добавление и удаление больше не мешают друг другу." },
+      { note: "<b>Внешний ключ защищает связь.</b> Попробуем её сломать:" },
+      C(FAILS("insert into pitomcy (klichka, vid, vozrast, hozyain_id)\nvalues ('Тузик', 'собака', 4, 99);"), FAILS("delete from hozyaeva where id = 1;")),
+      { warn: "Обе — ошибка <code>violates foreign key constraint</code>, и это хорошо. Первая: хозяина № 99 нет. Вторая: у Ани есть питомцы, они остались бы без хозяина. Excel записал бы и то и другое." }]],
+    ["45–55", "показ", "join: снова вместе", [
+      { note: "«Данные разделили. А как увидеть кличку рядом с телефоном?» <code>join</code> ставит рядом строки двух таблиц, <code>on</code> говорит, какие строки — пара. Читаем вслух: «номер хозяина у питомца равен номеру у хозяина»." },
+      C(RIGHT("select pitomcy.klichka, hozyaeva.imya, hozyaeva.telefon\nfrom pitomcy\njoin hozyaeva on pitomcy.hozyain_id = hozyaeva.id;")),
+      { note: "После удаления Графа — 3 строки: Барсик и Мурка у Ани с номером 999-99-99, Рекс у Миши. Телефон мы меняли один раз, а показан он в обеих строках Ани. Спросить: «А где Кеша и Шарик?» — <b>не отвечать</b>, это начало занятия 14. Пока: <code>join</code> показывает только строки, у которых есть пара." },
+      C(RIGHT("select p.klichka, h.imya, h.telefon\nfrom pitomcy p\njoin hozyaeva h on p.hozyain_id = h.id;"), RIGHT("select p.klichka from pitomcy p\njoin hozyaeva h on p.hozyain_id = h.id\nwhere h.imya = 'Аня';")),
+      { note: "Короткие имена <code>p</code> и <code>h</code> — то же самое, просто меньше букв. На практике можно писать и так, и полными именами. <code>where</code> работает как обычно: Барсик, Мурка." },
+      C(FAILS("select klichka, imya from pitomcy join hozyaeva;"), FAILS("select id, klichka, imya from pitomcy\njoin hozyaeva on hozyain_id = hozyaeva.id;"), WRONG("select p.klichka, h.imya from pitomcy p\njoin hozyaeva h on p.id = h.id;")),
+      { warn: "<b>Три ловушки.</b> Первая: нет <code>on</code> → <code>syntax error at or near \";\"</code>. Вторая: <code>column reference \"id\" is ambiguous</code> — <code>id</code> есть в обеих таблицах, база не знает, какой взять. <b>Третья опаснее:</b> ошибки нет, но сравниваются номер питомца и номер хозяина. Кеша без хозяина получает Петю. Поэтому читаем <code>on</code> вслух и смотрим на результат." }]],
+    ["55–60", "перерыв", "Перерыв", [{ note: "Открыть вкладку «Связи» и запустить <code>geroi.sql</code>." }]],
+    ["60–95", "практика", "Практика 1: гильдии отдельной таблицей · каждый сам", [
+      C(SITE + "#sql3"),
+      C("ПРАКТИКА 1 · ГИЛЬДИИ ОТДЕЛЬНОЙ ТАБЛИЦЕЙ · занятие 13\nВсё по шагам — вкладка «Связи». Отстали на шагах 2–6 — там есть готовый скрипт.\n\nДЕЛИМ\n 1. geroi.sql заново                                        → 30\n 2. Создайте таблицу gildii: id, nazvanie (обязательно), gorod\n 3. Заполните готовым скриптом с вкладки                    → 4 гильдии, id от 1 до 4\n 4. Столбец-ссылка: готовая команда alter table\n 5. Заполните gildiya_id четырьмя update                    → count(gildiya_id) 22, count(*) 30\n 6. Удалите старый столбец gildiya\n 7. Проверьте защиту: номер гильдии 99 и удаление гильдии 3 → две ошибки foreign key\n\nСОЕДИНЯЕМ\n 8. Герой и его гильдия                                     → 22 строки. Почему не 30?\n 9. Плюс город, по имени героя, первые 3                    → Аргон, Астра, Белла\n10. Герои Звёздного круга, сильные первыми                  → 5 строк, первая Ультра 99\n11. Сколько героев в городе Кузня                           → 12\n12. Сколько героев в каждой гильдии, большие первыми        → 4 строки, по 6, 6, 5, 5\n13. Золото каждого города, богатые первыми                  → Кузня 36410\n\nИМЯ В ОДНОМ МЕСТЕ\n14. Переименуйте гильдию 3 в «Ночные совы», запрос её героев → 6 строк с новым именем\n15. Верните название «Ночные тени»\n\nГотово — пишите в чат «Практика 1 готова»."),
+      { warn: "<b>Ответы:</b> 2) как <code>id</code> в <code>geroi.sql</code>, <code>nazvanie text not null</code>, <code>gorod text</code> · 5) по одному <code>update … where gildiya = …</code>, номера 1, 2, 3, 4 · 8) <code>join gildii on geroi.gildiya_id = gildii.id</code>; 8 героев без гильдии в результат не попадают · 11) <code>where gildii.gorod = 'Кузня'</code> · 12) <code>group by gildii.nazvanie</code> · 13) <code>group by gildii.gorod</code>: 36410, Астрал 18689, Облака 6270. Запросы и ловушки — разбор ниже и <code>Урок_13/Ответы.md</code>." },
+      { note: "Бонус на вкладке (Б1–Б4): без гильдии — 8, средний уровень через <code>join</code> и <code>having</code>, города с более чем 5 героями в сети — Кузня 7, новая гильдия без героев не видна в задании 12 — вопрос к занятию 14." },
+      { ready: "Все написали «Практика 1 готова» (или дошли до 12)" }]],
+    ["95–110", "практика", "Практика 2: повтор из своего проекта", [
+      C("ПРАКТИКА 2 · СВОЙ ПРОЕКТ · 15 минут\nВозьмите повтор из раздела «Данные» в README вашей команды. Схему обсуждаете командой, запросы каждый запускает у себя.\n1. Назовите две сущности и скажите: «одна X — много Y».\n2. Создайте две таблицы: сначала X, потом Y со столбцом x_id bigint references x(id).\n3. Добавьте 2–3 строки в X и 5 строк в Y.\n4. Напишите join: строки Y рядом с данными X.\n5. Вставьте строку Y с номером 99, получите ошибку foreign key.\n6. Скриншоты запроса join и ошибки — в чат."),
+      { note: "Ходить по командам. Вопросы: «Где тут один, а где много? В какой таблице столбец-ссылка? Что будет, если у человека сменится телефон?» Если сущности не выделяются — пример ниже в разборе. Хорошие примеры показать всем." },
+      { ready: "Скриншоты join и ошибки в чате" }]],
+    ["110–120", "итог", "Итог и домашка", [
+      C("ЗАПОМНИТЬ · БАЗЫ ДАННЫХ · занятие 13\n• Если в таблице смешались две сущности, это ломает изменение, удаление и добавление. Делим на две таблицы.\n• primary key — номер строки: не пустой и не повторяется.\n• references — внешний ключ: номер строки из другой таблицы. База не даст сослаться на то, чего нет, и удалить то, на что ссылаются.\n• Один ко многим: столбец-ссылка в таблице «многих».\n• Создаём сначала таблицу, на которую ссылаемся. Удаляем — в обратном порядке.\n• join … on … — поставить рядом строки двух таблиц. Показывает только строки с парой.\n• on читаем вслух: ссылка = первичный ключ. Неверное on ошибки не даст, но результат будет неверным."),
+      C("ДОМАШНЕЕ ЗАДАНИЕ К ЗАНЯТИЮ 14 · ~50 минут\nВсё на вкладке «Связи»: " + SITE + "#sql3\nТаблицы сломались — запустите geroi-gildii.sql с вкладки.\n\nЧАСТЬ 1. Каждый сам — запросы, в файл svyazi.sql (подпишите -- Д1, -- Д2 …) и в чат:\n Д1. Воины в гильдиях: имя и город, по имени.                  → 8 строк. Воинов 9 — где девятый?\n Д2. Сколько героев в сети в городе Облака?                    → 3\n Д3. Герои Ночных теней от богатого к бедному.                 → 6 строк, первый Нокс 4600\n Д4. Средний уровень в каждом городе, от высокого (1 знак).    → Кузня 65.8, Астрал 65.6, Облака 43.4\n Д5. Гильдия, её город и всё золото, богатые первыми.          → первая Стальные волки, Кузня, 22200\n Д6. Города, где больше 5 героев.                              → Кузня 12\n Д7. Найдите ошибку: join gildii on geroi.id = gildii.id.      → Сколько строк и что не так?\n\nЧАСТЬ 2. Каждый сам — пиццерия:\n Разделите таблицу заказов с вкладки на две, заполните, сделайте join и подсчёт по клиентам.\n Получите ошибку foreign key. Запросы и скриншот ошибки — в чат.\n\nЧАСТЬ 3. Командой:\n Обновите раздел «Данные» в README: первичный ключ каждой таблицы, внешние ключи,\n и словами: «одна X — много Y». Повторы должны исчезнуть.\n\nЗастряли больше 5 минут — в чат: какой запрос и какую ошибку видите."),
+      { warn: "<b>Ответы Д1–Д7:</b> полные запросы — разбор ниже. Д1 Оникс без гильдии · Д7 → 4 строки: сравниваются номер героя и номер гильдии, Вихрь без гильдии попадает в Ночные тени, Гром — в Белые крылья." },
+      { note: "После занятия очистить демо (проект <code>sql-demo</code> не удалять). Сначала таблицы со ссылками:" },
+      C("drop table if exists pitomcy;\ndrop table if exists hozyaeva;\ndrop table if exists geroi;\ndrop table if exists gildii;")]],
+  ];
+  // разбор практик, бонуса и домашки к 14 — выполняется сверху вниз в sql-demo (все результаты проверены на PostgreSQL)
+  const FLOW13R = [
+    ["0", "подготовка", "Герои в sql-demo", [
+      { note: "Начинаем с чистого места: удалить старые таблицы, вставить весь <code>geroi.sql</code> (по ссылке ниже: Ctrl+A, Ctrl+C) → Run → <code>vsego_geroev 30</code>. Порядок разбора: сначала ребята говорят свой запрос, потом вы запускаете, потом — ловушка, если есть. Если у ученика числа не сходятся — ему поможет <code>geroi-gildii.sql</code>." },
+      C("drop table if exists geroi;\ndrop table if exists gildii;", GEROI),
+      { note: "Готовое состояние после заданий 1–6, если шаги показывать не нужно. Тогда разбор начинайте с задания 7." },
+      C(GEROI_G)]],
+    ["1–3", "практика 1", "Новая таблица gildii", [
+      C(RIGHT("select count(*) from geroi;")),
+      { note: "1 → 30." },
+      C(RIGHT("create table gildii (\n  id       bigint generated always as identity primary key,\n  nazvanie text not null,\n  gorod    text\n);")),
+      { note: "2. Спросить: «Почему <code>nazvanie</code> обязательно, а <code>gorod</code> нет?» — гильдия без названия бессмысленна. Первичный ключ — такой же, как в <code>geroi</code>." },
+      C(GILDII13),
+      { warn: "3 → 4 строки: Стальные волки 1, Звёздный круг 2, Ночные тени 3, Белые крылья 4. У кого 8 строк — вставили дважды: удалить таблицу и создать снова, иначе номера не совпадут. <code>relation \"gildii\" already exists</code> — создавал раньше: <code>drop table gildii;</code>." }]],
+    ["4–6", "практика 1", "Ссылка вместо текста", [
+      C(RIGHT("alter table geroi add column gildiya_id bigint references gildii(id);")),
+      { note: "4. Читаем вслух: «добавь столбец, в нём номер строки из <code>gildii</code>». Подробно <code>alter table</code> — на занятии 16. Пока столбец пустой у всех." },
+      C(RIGHT("update geroi set gildiya_id = 1 where gildiya = 'Стальные волки';"), RIGHT("update geroi set gildiya_id = 2 where gildiya = 'Звёздный круг';"), RIGHT("update geroi set gildiya_id = 3 where gildiya = 'Ночные тени';"), RIGHT("update geroi set gildiya_id = 4 where gildiya = 'Белые крылья';"), RIGHT("select count(gildiya_id), count(*) from geroi;")),
+      { warn: "<b>5</b> → 22 и 30: как в задании 3 занятия 12, <code>count(столбец)</code> не считает пустые. Если <code>count(gildiya_id)</code> меньше 22 — опечатка в названии: <code>update</code> не нашёл строк, а ошибки не будет. Перепутан номер гильдии — найти этим запросом:" },
+      C("select gildiya, gildiya_id, count(*) from geroi group by gildiya, gildiya_id order by gildiya_id;"),
+      { note: "Должно быть: Стальные волки 1 — 6, Звёздный круг 2 — 5, Ночные тени 3 — 6, Белые крылья 4 — 5, пустая — 8." },
+      C(RIGHT("alter table geroi drop column gildiya;"), "select imya, gildiya_id from geroi where id = 1;"),
+      { note: "6 → Аргон, 1. Названия гильдии у героев больше нет, только номер. Вопрос «как увидеть название?» ведёт к заданию 8." }]],
+    ["7", "практика 1", "Проверяем защиту", [
+      C(FAILS("update geroi set gildiya_id = 99 where imya = 'Аргон';"), FAILS("delete from gildii where id = 3;")),
+      { warn: "Обе → <code>violates foreign key constraint</code>. Первая: гильдии № 99 нет. Вторая: в гильдии 3 есть герои, они ссылались бы на пустоту. Ученику показать: если ошибки нет — столбец создан без <code>references</code>." }]],
+    ["8–11", "практика 1", "Соединяем: join", [
+      C(RIGHT("select geroi.imya, gildii.nazvanie " + SVYAZ + ";"), FAILS("select imya, nazvanie from geroi join gildii;"), WRONG("select geroi.imya, gildii.nazvanie from geroi\njoin gildii on geroi.id = gildii.id;")),
+      { warn: "<b>8</b> → 22 строки. «Почему не 30?» — 8 героев без гильдии: у них нет пары, а <code>join</code> показывает только пары. Второй: нет <code>on</code> → синтаксическая ошибка. Третий — главная ловушка, разбирается в Д7: сравнивает номер героя с номером гильдии." },
+      C(RIGHT("select geroi.imya, gildii.nazvanie, gildii.gorod " + SVYAZ + "\norder by geroi.imya limit 3;")),
+      { note: "9 → Аргон, Астра, Белла. Порядок слов прежний: <code>join … on</code> сразу после <code>from</code>." },
+      C(RIGHT("select geroi.imya, geroi.uroven " + SVYAZ + "\nwhere gildii.nazvanie = 'Звёздный круг'\norder by geroi.uroven desc;")),
+      { note: "10 → Ультра 99, Белла 73, Жасмин 65, Руна 54, Астра 37. В <code>where</code> можно брать столбцы любой из двух таблиц." },
+      C(RIGHT("select count(*) " + SVYAZ + "\nwhere gildii.gorod = 'Кузня';")),
+      { note: "11 → 12: в Кузне две гильдии, по 6 героев. Раньше города в таблице героев не было, а отвечать теперь можно и на такой вопрос." }]],
+    ["12–13", "практика 1", "join и group by", [
+      C(RIGHT("select gildii.nazvanie, count(*) " + SVYAZ + "\ngroup by gildii.nazvanie\norder by count(*) desc;")),
+      { note: "12 → Стальные волки 6, Ночные тени 6, Белые крылья 5, Звёздный круг 5 (порядок равных может отличаться). На занятии 12 было 5 строк с пустой группой, здесь 4: пустой гильдии нет пары." },
+      C(RIGHT("select gildii.gorod, sum(geroi.zoloto) as vsego " + SVYAZ + "\ngroup by gildii.gorod\norder by vsego desc;")),
+      { note: "13 → Кузня 36410, Астрал 18689, Облака 6270. Самопроверка: 22200 + 14210 = 36410, как две гильдии Кузни на занятии 12." }]],
+    ["14–15", "практика 1", "Имя в одном месте", [
+      C(RIGHT("update gildii set nazvanie = 'Ночные совы' where id = 3;"), RIGHT("select geroi.imya, gildii.nazvanie " + SVYAZ + "\nwhere gildii.id = 3;")),
+      { warn: "<b>14</b> → 6 строк, у всех «Ночные совы». Изменили <b>одну</b> строку, а раньше пришлось бы менять шесть. Это и есть ответ на вопрос про телефон Ани." },
+      C(RIGHT("update gildii set nazvanie = 'Ночные тени' where id = 3;")),
+      { note: "15. Вернуть обязательно: на старое название опираются бонус и домашка." }]],
+    ["Практика 2", "практика 2", "Свой повтор → две таблицы", [
+      { note: "Показать 1–2 скриншота из чата, лучше от разных команд. По каждому — вслух, по чек-листу:" },
+      { ol: ["Сказано словами: «одна X — много Y». Если выходит «много — много», это занятие 14: отметить и не решать.",
+        "Столбец-ссылка в таблице «многих», тип <code>bigint</code>, есть <code>references</code>.",
+        "В таблице «многих» больше нет повторяющихся данных из таблицы «один»: имя и телефон только у пользователя.",
+        "<code>join … on</code> читается вслух: ссылка = первичный ключ.",
+        "Ошибка <code>foreign key</code> получена, значит, защита работает."] },
+      { note: "Образец, если хороших примеров в чате нет:" },
+      C("drop table if exists napominaniya;\ndrop table if exists polzovateli;\ncreate table polzovateli (\n  id      bigint generated always as identity primary key,\n  imya    text not null,\n  telefon text\n);\ninsert into polzovateli (imya, telefon) values ('Аня', '111-11-11'), ('Миша', '222-22-22');\ncreate table napominaniya (\n  id            bigint generated always as identity primary key,\n  polzovatel_id bigint not null references polzovateli(id),\n  tekst         text not null,\n  data          date not null\n);\ninsert into napominaniya (polzovatel_id, tekst, data) values\n  (1, 'Сдать SQL', '2026-11-20'),\n  (1, 'Купить тетрадь', '2026-11-21'),\n  (2, 'Тренировка', '2026-11-22'),\n  (2, 'Прочитать главу', '2026-11-23'),\n  (1, 'Позвонить', '2026-11-24');\nselect * from napominaniya order by id;"),
+      C(RIGHT("select polzovateli.imya, polzovateli.telefon, napominaniya.tekst\nfrom napominaniya\njoin polzovateli on napominaniya.polzovatel_id = polzovateli.id\norder by napominaniya.data;"), FAILS("insert into napominaniya (polzovatel_id, tekst, data)\nvalues (99, 'x', '2026-11-20');")),
+      { note: "→ 5 строк, Аня 3 раза, Миша 2 раза, телефон в базе записан по одному разу. Вторая команда — ошибка <code>foreign key</code>. <code>not null</code> на ссылке значит: напоминания без пользователя быть не может, а питомец без хозяина быть мог. После показа:" },
+      C("drop table napominaniya;\ndrop table polzovateli;")]],
+    ["Б1–Б4", "бонус", "Бонус: без пары, having, новая гильдия", [
+      { note: "Для тех, кто успел: пусть они и объясняют свои запросы." },
+      C(RIGHT("select count(*) from geroi where gildiya_id is null;")),
+      { note: "Б1 → 8. <code>join</code> здесь не нужен: ответ есть в одной таблице." },
+      C(RIGHT("select gildii.nazvanie, round(avg(geroi.uroven), 1) " + SVYAZ + "\ngroup by gildii.nazvanie\nhaving avg(geroi.uroven) > 50\norder by 2 desc;")),
+      { note: "Б2 → Стальные волки 73.2, Звёздный круг 65.6, Ночные тени 58.3. Те же числа, что в задании 15 занятия 12." },
+      C(RIGHT("select gildii.gorod, count(*) " + SVYAZ + "\nwhere geroi.v_seti = true\ngroup by gildii.gorod\nhaving count(*) > 5;")),
+      { note: "Б3 → Кузня 7. Про героя — <code>where</code>, про город целиком — <code>having</code>." },
+      C("insert into gildii (nazvanie, gorod) values ('Серые плащи', 'Астрал');", RIGHT("select gildii.nazvanie, count(*) " + SVYAZ + "\ngroup by gildii.nazvanie\norder by count(*) desc;"), "delete from gildii where nazvanie = 'Серые плащи';"),
+      { warn: "<b>Б4</b> → снова 4 строки: новой гильдии с нулём героев в результате нет. У неё нет пары, как у героев без гильдии. Как показать и таких — тема занятия 14. <b>Не забыть удалить гильдию</b>, иначе у ученика сдвинутся ответы." }]],
+    ["Д1–Д3", "часть 1", "Домашка: join и where", [
+      C(RIGHT("select geroi.imya, gildii.gorod " + SVYAZ + "\nwhere geroi.klass = 'воин'\norder by geroi.imya;")),
+      { warn: "<b>Д1</b> → 8 строк: Аргон, Гром, Зорро, Йети, Тень, Хаос, Цезарь, Ястреб, все в Кузне. «Воинов 9 — где девятый?» — Оникс без гильдии, у него нет пары." },
+      C(RIGHT("select count(*) " + SVYAZ + "\nwhere gildii.gorod = 'Облака' and geroi.v_seti = true;")),
+      { note: "Д2 → 3: Дана, Мира, Юла." },
+      C(RIGHT("select geroi.imya, geroi.zoloto " + SVYAZ + "\nwhere gildii.nazvanie = 'Ночные тени'\norder by geroi.zoloto desc;")),
+      { note: "Д3 → 6 строк: Нокс 4600, Ястреб 4200, Тень 2300, Лис 2100, Хаос 700, Зорро 310." }]],
+    ["Д4–Д6", "часть 1", "Домашка: join и подсчёты", [
+      C(RIGHT("select gildii.gorod, round(avg(geroi.uroven), 1) as sredniy " + SVYAZ + "\ngroup by gildii.gorod\norder by sredniy desc;")),
+      { note: "Д4 → Кузня 65.8, Астрал 65.6, Облака 43.4." },
+      C(RIGHT("select gildii.nazvanie, gildii.gorod, sum(geroi.zoloto) as vsego " + SVYAZ + "\ngroup by gildii.nazvanie, gildii.gorod\norder by vsego desc;"), FAILS("select gildii.nazvanie, gildii.gorod, sum(geroi.zoloto) as vsego " + SVYAZ + "\ngroup by gildii.nazvanie\norder by vsego desc;")),
+      { warn: "<b>Д5</b> → Стальные волки, Кузня, 22200; Звёздный круг, Астрал, 18689; Ночные тени, Кузня, 14210; Белые крылья, Облака, 6270. Второй → <code>column \"gildii.gorod\" must appear in the GROUP BY clause</code>: правило занятия 12 работает и с <code>join</code>. В <code>select</code> два столбца — оба в <code>group by</code>." },
+      C(RIGHT("select gildii.gorod, count(*) " + SVYAZ + "\ngroup by gildii.gorod\nhaving count(*) > 5;")),
+      { note: "Д6 → Кузня 12. Астрал и Облака — по 5, а нужно больше 5." }]],
+    ["Д7", "часть 1", "Домашка: найти ошибку", [
+      C(WRONG("select geroi.imya, gildii.nazvanie from geroi\njoin gildii on geroi.id = gildii.id;"), RIGHT("select geroi.imya, gildii.nazvanie " + SVYAZ + ";")),
+      { warn: "<b>Д7</b> → неверный запрос даёт 4 строки: Аргон — Стальные волки, Белла — Звёздный круг, Вихрь — Ночные тени, Гром — Белые крылья. Вихрь на самом деле без гильдии, а Гром — в Стальных волках. <code>on</code> сравнивает номер героя с номером гильдии, ошибки нет, потому что оба столбца — числа. Правильно: <code>on</code> ссылка = первичный ключ, 22 строки." }]],
+    ["Пиццерия", "часть 2", "Домашка: разделить заказы", [
+      { note: "Показать одно решение из чата. Проблемы словами: <b>изменение</b> — Оля сменила телефон, менять в двух заказах; <b>удаление</b> — удалили единственный заказ Нины, пропал её телефон; <b>добавление</b> — клиента без заказа не записать. Образец:" },
+      C("drop table if exists zakazy;\ndrop table if exists klienty;\ncreate table klienty (\n  id      bigint generated always as identity primary key,\n  imya    text not null,\n  telefon text\n);\ninsert into klienty (imya, telefon) values\n  ('Оля', '111-22-33'), ('Макс', '444-55-66'), ('Нина', '777-88-99');\ncreate table zakazy (\n  id        bigint generated always as identity primary key,\n  klient_id bigint not null references klienty(id),\n  pizza     text not null,\n  cena      int  not null,\n  data      date not null\n);\ninsert into zakazy (klient_id, pizza, cena, data) values\n  (1, 'Маргарита',   500, '2026-11-01'),\n  (2, 'Пепперони',   650, '2026-11-01'),\n  (1, 'Четыре сыра', 700, '2026-11-02'),\n  (3, 'Маргарита',   500, '2026-11-03'),\n  (2, 'Маргарита',   500, '2026-11-04');\nselect * from zakazy order by id;"),
+      C(RIGHT("select klienty.imya, klienty.telefon, zakazy.pizza, zakazy.data\nfrom zakazy\njoin klienty on zakazy.klient_id = klienty.id\norder by zakazy.data;"), RIGHT("select klienty.imya, count(*), sum(zakazy.cena)\nfrom zakazy\njoin klienty on zakazy.klient_id = klienty.id\ngroup by klienty.imya\norder by sum(zakazy.cena) desc;"), FAILS("insert into zakazy (klient_id, pizza, cena, data)\nvalues (99, 'Маргарита', 500, '2026-11-05');")),
+      { warn: "Join → 5 строк. Подсчёт → Оля 2 и 1200, Макс 2 и 1150, Нина 1 и 500. Третья команда — ошибка <code>foreign key</code>. <b>Если спросят про название пиццы:</b> «Маргарита» тоже повторяется, и ученик, который это заметил, прав. Пицц и заказов много с обеих сторон — это занятие 14. Сейчас можно оставить как есть." },
+      C("drop table zakazy;\ndrop table klienty;")]],
+    ["README", "часть 3", "Командой: схема в разделе «Данные»", [
+      { note: "Открыть README обеих команд. Рассказывает команда, вы задаёте вопросы. Проверить:" },
+      { ol: ["У каждой таблицы отмечен первичный ключ.", "У таблицы «многих» назван внешний ключ и таблица, на которую он ссылается.", "Каждая связь записана словами: «одна X — много Y».", "Повторы из прошлой домашки исчезли.", "Таблицы взяты из проекта команды, а не скопированы из примера."] },
+      C("## Данные\n\npolzovateli: id (первичный ключ), imya, telefon\nnapominaniya: id (первичный ключ), polzovatel_id → polzovateli.id, tekst, data\n\nОдин пользователь — много напоминаний."),
+      { warn: "Если у команды выходит «много с обеих сторон» (например, ученик и оборудование) — <b>это хорошо, а не ошибка</b>. Выпишите такие случаи: с них начнётся занятие 14, тема «многие ко многим»." }]],
+  ];
+  const FLOWS = { 8: FLOW8, 11: FLOW11, "11r": FLOW11R, 12: FLOW12, "12r": FLOW12R, 13: FLOW13, "13r": FLOW13R };
   const MARK_TEXT = { ok: "✓ Правильно", err: "✗ Ошибка: база не выполнит запрос", bad: "✗ Неверно: ошибки не будет, но результат не тот" };
   let cmdN = 0;
   function renderFlow(l) {

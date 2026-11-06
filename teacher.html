@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261106213043">
+<link rel="stylesheet" href="quiz.css?v=20261106220503">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -155,6 +155,7 @@ table.probs td:first-child { width: 40%; }
     <button data-tab="l8">Занятие 8 · история git</button>
     <button data-tab="l11">Занятие 11 · базы данных</button>
     <button data-tab="l12">Занятие 12 · подсчёты в SQL</button>
+    <button data-tab="l13">Занятие 13 · связи таблиц</button>
   </nav>
 
   <section class="tab" id="tab-pupils">
@@ -410,10 +411,67 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
   <h2>Что сознательно не рассказываем</h2>
   <p>Связи между таблицами, внешний ключ, <code>join</code> — занятие 13 (сегодня только вопрос про телефон хозяина). Подзапросы, <code>case</code>, оконные функции, <code>count(*) filter</code>, деление с дробями (<code>::numeric</code>), индексы, RLS.</p>
   </section>
+
+  <section class="tab" id="tab-l13">
+  <h2>Занятие 13 — зачем делить таблицы: первичный и внешний ключ, join</h2>
+  <p class="lead">Ответ на вопрос с прошлого занятия: куда записать телефон Ани. Сначала показываем, что ломается в одной таблице, потом делим её на две и соединяем через <code>join</code>. На практике гильдии героев становятся отдельной таблицей, затем команды делают то же со своим повтором из README. Конспект — <code>Урок_13/План_урока.md</code>, ответы — <code>Урок_13/Ответы.md</code> (все проверены на PostgreSQL).</p>
+  <div class="links">
+    <a href="https://supabase.com/dashboard/projects" target="_blank" rel="noopener">Supabase (sql-demo)</a>
+    <a href="files/geroi.sql" target="_blank" rel="noopener">geroi.sql</a>
+    <a href="files/geroi-gildii.sql" target="_blank" rel="noopener">geroi-gildii.sql (готово после заданий 1–6)</a>
+    <a href="./#sql3" target="_blank" rel="noopener">Вкладка «Связи» у учеников</a>
+    <a href="#lesson-13">Ход занятия ↓</a>
+    <a href="#razbor-13">Разбор практик, бонуса и домашки ↓</a>
+  </div>
+
+  <h2>Подготовить заранее</h2>
+  <div class="card"><ul class="check" id="prep-13"></ul></div>
+
+  <h2 id="lesson-13">Ход занятия</h2>
+  <p class="lead">Нажмите на команду — она скопируется. SQL — в SQL Editor демо-проекта, тексты практики — в чат группы. Ответы (оранжевые блоки) на экран не выводить. Запросы в показе идут по порядку: каждый следующий опирается на предыдущий.</p>
+  <nav class="fl-nav" id="flowNav-13"></nav>
+  <div class="card" id="flow-13"></div>
+
+  <h2 id="razbor-13">Разбор практик, бонуса и домашки к занятию 14</h2>
+  <p class="lead">Для показа на экране в <code>sql-demo</code>: каждый запрос копируется кликом, блоки выполняются сверху вниз. Сначала ребята называют свой запрос, потом запускаете, потом — ловушка. Все результаты проверены на PostgreSQL. <b>Зелёным</b> с пометкой «Правильно» отмечен ответ на задание, <b>красной полосой</b> — неверный пример. Без отметки — подготовка и проверочные запросы. Самое важное — задание 8 (почему 22, а не 30), 14 (одно изменение вместо шести), Д7 (неверное <code>on</code> без ошибки) и часть 3 (что станет занятием 14).</p>
+  <nav class="fl-nav" id="flowNav-13r"></nav>
+  <div class="card" id="flow-13r"></div>
+
+  <h2 id="problems-13">Если у ученика…</h2>
+  <div class="card wrap"><table class="probs">
+    <tr><th>Видит</th><th>Что сделать</th></tr>
+    <tr><td>Проект «Paused»</td><td>Restore project, 2–3 минуты. Пока — смотрит экран соседа</td></tr>
+    <tr><td>Застрял на заданиях 2–6 или таблицы сломаны</td><td>Запустить весь <code>geroi-gildii.sql</code> → <code>30 и 22</code>, идти к заданию 7</td></tr>
+    <tr><td><code>relation "gildii" already exists</code></td><td>Таблица осталась от прошлой попытки: <code>drop table gildii;</code>. Если это не удаётся — <code>geroi-gildii.sql</code></td></tr>
+    <tr><td><code>relation "hozyaeva" does not exist</code> или <code>"gildii"</code></td><td>Таблица, на которую ссылаются, ещё не создана: сначала она, потом вторая</td></tr>
+    <tr><td><code>cannot drop table … because other objects depend on it</code></td><td>На таблицу ещё ссылаются: сначала удалить ту, в которой столбец-ссылка</td></tr>
+    <tr><td><code>violates foreign key constraint</code></td><td>Защита сработала: такого номера нет или на строку ссылаются. На задании 7 так и задумано</td></tr>
+    <tr><td>Задание 7 прошло без ошибки</td><td>Столбец создан без <code>references</code>. Запустить <code>geroi-gildii.sql</code></td></tr>
+    <tr><td>В задании 3 — 8 строк</td><td>Вставил дважды, номера не те: <code>geroi-gildii.sql</code></td></tr>
+    <tr><td><code>count(gildiya_id)</code> меньше 22</td><td>Опечатка в названии гильдии: <code>update</code> не нашёл строк, а ошибки не дал. Проверочный запрос — в разборе, блок 4–6</td></tr>
+    <tr><td><code>column "gildiya" does not exist</code></td><td>Старый столбец уже удалён: теперь <code>join</code> и <code>gildii.nazvanie</code></td></tr>
+    <tr><td><code>column reference "id" is ambiguous</code></td><td>Столбец есть в обеих таблицах: <code>geroi.id</code> или <code>gildii.id</code></td></tr>
+    <tr><td><code>syntax error at or near ";"</code> или <code>at end of input</code> после <code>join</code></td><td>Нет <code>on …</code></td></tr>
+    <tr><td><code>invalid reference to FROM-clause entry</code></td><td>Таблице дали короткое имя, а дальше пишут полное. Выбрать что-то одно</td></tr>
+    <tr><td>В задании 8 строк не 22</td><td>Читаем <code>on</code> вслух: должно быть <code>geroi.gildiya_id = gildii.id</code></td></tr>
+    <tr><td>Числа не сходятся с ответом</td><td>Не возвращено имя гильдии (задание 15), лишняя гильдия из Б4 или таблица изменена: <code>geroi-gildii.sql</code></td></tr>
+  </table></div>
+
+  <h2>Как помогать</h2>
+  <ul>
+    <li>Практика 1: шаги 1–7 строго по порядку. Кто застрял больше чем на 5 минут — запускает <code>geroi-gildii.sql</code> и идёт дальше, разбираться будем в конце.</li>
+    <li>На любой <code>join</code> — один и тот же вопрос: «Прочитай <code>on</code> вслух».</li>
+    <li>Практика 2: при выборе сущностей спрашивать, а не подсказывать: «Что тут один, а что много?»</li>
+    <li>Отстаёте: задания 12–15 практики 1 — в домашку. Совсем не успеваете — практику 2 делаете одной схемой на экране, каждая команда называет свои сущности.</li>
+  </ul>
+
+  <h2>Что сознательно не рассказываем</h2>
+  <p><code>left join</code> (только вопрос «где Кеша и Шарик?» — занятие 14), многие ко многим и ER-диаграммы (14), нормализация и <code>unique</code> (15), подробности <code>alter table</code> (16), <code>on delete</code>, подзапросы, индексы, RLS.</p>
+  </section>
 </div>
 </main>
-<script src="quiz.js?v=20261106213043"></script>
-<script src="engine.js?v=20261106213043"></script>
-<script src="teacher.js?v=20261106213043"></script>
+<script src="quiz.js?v=20261106220503"></script>
+<script src="engine.js?v=20261106220503"></script>
+<script src="teacher.js?v=20261106220503"></script>
 </body>
 </html>
