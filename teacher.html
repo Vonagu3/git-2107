@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261103231223">
+<link rel="stylesheet" href="quiz.css?v=20261106204902">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -359,6 +359,7 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
     <a href="./#sql2" target="_blank" rel="noopener">Вкладка «Подсчёты» у учеников</a>
     <a href="./#sql-pitomcy" target="_blank" rel="noopener">Шпаргалка питомцев (занятие 11)</a>
     <a href="#lesson-12">Ход занятия ↓</a>
+    <a href="#razbor-12">Разбор практик, бонуса и домашки ↓</a>
   </div>
 
   <h2>Подготовить заранее</h2>
@@ -368,6 +369,11 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
   <p class="lead">Нажмите на команду — она скопируется. SQL — в SQL Editor демо-проекта, тексты практики — в чат группы. Ответы (оранжевые блоки) на экран не выводить.</p>
   <nav class="fl-nav" id="flowNav-12"></nav>
   <div class="card" id="flow-12"></div>
+
+  <h2 id="razbor-12">Разбор практик, бонуса и домашки к занятию 13</h2>
+  <p class="lead">Для показа на экране в <code>sql-demo</code>: каждый запрос копируется кликом. Сначала ребята называют свой запрос, потом запускаете, потом — ловушка. Все результаты проверены на PostgreSQL. Порядок: практики 0–2, бонус, домашка. Самое важное в практике — задания 3 и 10 (<code>NULL</code> при подсчёте), 7 (условие внутри <code>count</code>) и 15 (<code>where</code> вместо <code>having</code> без ошибки). В домашке — Д3 (<code>NULL</code> внутри подсчёта), Д5 (что остаётся после группировки), Д7 и Д8 (<code>where</code> или <code>having</code>) и часть 3 (повторы в таблицах команд: с них начинается занятие 13).</p>
+  <nav class="fl-nav" id="flowNav-12r"></nav>
+  <div class="card" id="flow-12r"></div>
 
   <h2 id="problems-12">Если у ученика…</h2>
   <div class="card wrap"><table class="probs">
@@ -397,8 +403,8 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
   </section>
 </div>
 </main>
-<script src="quiz.js?v=20261103231223"></script>
-<script src="engine.js?v=20261103231223"></script>
-<script src="teacher.js?v=20261103231223"></script>
+<script src="quiz.js?v=20261106204902"></script>
+<script src="engine.js?v=20261106204902"></script>
+<script src="teacher.js?v=20261106204902"></script>
 </body>
 </html>
