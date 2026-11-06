@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261106204902">
+<link rel="stylesheet" href="quiz.css?v=20261106213043">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -106,6 +106,15 @@ table.res th[title] { cursor: help; }
 .fl-cmd span { font-size: 11px; color: var(--muted); white-space: nowrap; }
 .fl-cmd.done { background: color-mix(in srgb, var(--ok) 16%, transparent); }
 .fl-cmd.done span { color: var(--ok); }
+.fl-mark { grid-column: 1 / -1; font-size: 12px; font-weight: 700; }
+.fl-cmd.m-ok { border-left: 5px solid var(--ok); background: color-mix(in srgb, var(--ok) 13%, transparent); }
+.fl-cmd.m-ok .fl-mark { color: var(--ok); }
+.fl-cmd.m-err, .fl-cmd.m-bad { border-left: 5px solid var(--err); }
+.fl-cmd.m-err .fl-mark, .fl-cmd.m-bad .fl-mark { color: var(--err); }
+.fl-cmd.m-err.done, .fl-cmd.m-bad.done { background: color-mix(in srgb, var(--err) 12%, transparent); }
+.fl-cmd.m-err.done span, .fl-cmd.m-bad.done span { color: var(--err); }
+.fl-cmd.m-ok:hover { border-color: var(--accent); border-left-color: var(--ok); }
+.fl-cmd.m-err:hover, .fl-cmd.m-bad:hover { border-color: var(--accent); border-left-color: var(--err); }
 .fl-ready { justify-self: start; font-size: 13px; font-weight: 600; color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); padding: 2px 10px; border-radius: 999px; }
 #tabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 14px 0 4px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
 #tabs button { font: 600 14px var(--sans); border: 0; background: transparent; color: var(--muted); padding: 7px 11px; border-radius: 8px; cursor: pointer; }
@@ -371,7 +380,7 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
   <div class="card" id="flow-12"></div>
 
   <h2 id="razbor-12">Разбор практик, бонуса и домашки к занятию 13</h2>
-  <p class="lead">Для показа на экране в <code>sql-demo</code>: каждый запрос копируется кликом. Сначала ребята называют свой запрос, потом запускаете, потом — ловушка. Все результаты проверены на PostgreSQL. Порядок: практики 0–2, бонус, домашка. Самое важное в практике — задания 3 и 10 (<code>NULL</code> при подсчёте), 7 (условие внутри <code>count</code>) и 15 (<code>where</code> вместо <code>having</code> без ошибки). В домашке — Д3 (<code>NULL</code> внутри подсчёта), Д5 (что остаётся после группировки), Д7 и Д8 (<code>where</code> или <code>having</code>) и часть 3 (повторы в таблицах команд: с них начинается занятие 13).</p>
+  <p class="lead">Для показа на экране в <code>sql-demo</code>: каждый запрос копируется кликом. Сначала ребята называют свой запрос, потом запускаете, потом — ловушка. Все результаты проверены на PostgreSQL. <b>Зелёным</b> с пометкой «Правильно» отмечен ответ на задание, <b>красной полосой</b> — неверный пример. Без отметки — подготовка и проверочные запросы. Порядок: практики 0–2, бонус, домашка. Самое важное в практике — задания 3 и 10 (<code>NULL</code> при подсчёте), 7 (условие внутри <code>count</code>) и 15 (<code>where</code> вместо <code>having</code> без ошибки). В домашке — Д3 (<code>NULL</code> внутри подсчёта), Д5 (что остаётся после группировки), Д7 и Д8 (<code>where</code> или <code>having</code>) и часть 3 (повторы в таблицах команд: с них начинается занятие 13).</p>
   <nav class="fl-nav" id="flowNav-12r"></nav>
   <div class="card" id="flow-12r"></div>
 
@@ -403,8 +412,8 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
   </section>
 </div>
 </main>
-<script src="quiz.js?v=20261106204902"></script>
-<script src="engine.js?v=20261106204902"></script>
-<script src="teacher.js?v=20261106204902"></script>
+<script src="quiz.js?v=20261106213043"></script>
+<script src="engine.js?v=20261106213043"></script>
+<script src="teacher.js?v=20261106213043"></script>
 </body>
 </html>

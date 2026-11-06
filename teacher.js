@@ -630,6 +630,8 @@
       { note: "Образец с сайта — если надо показать, как работает <code>default</code>: <code>vypolneno</code> не указали, а стало <code>false</code>. После показа: <code>drop table napominaniya;</code>" }]],
   ];
   const NAPOM12 = "drop table if exists napominaniya;\ncreate table napominaniya (\n  id          bigint generated always as identity primary key,\n  tekst       text    not null,\n  kategoriya  text    not null,\n  minuty      int     not null,\n  vypolneno   boolean not null default false\n);\ninsert into napominaniya (tekst, kategoriya, minuty, vypolneno) values\n  ('Сдать домашку по SQL', 'учёба', 40, true),\n  ('Прочитать главу', 'учёба', 30, false),\n  ('Тренировка', 'спорт', 60, false),\n  ('Пробежка', 'спорт', 20, true),\n  ('Купить тетрадь', 'дела', 15, false);\nselect * from napominaniya;";
+  // отметки запросов в разборе: правильный, база вернёт ошибку, выполнится, но результат неверный
+  const RIGHT = (t) => ({ t, k: "ok" }), FAILS = (t) => ({ t, k: "err" }), WRONG = (t) => ({ t, k: "bad" });
   // разбор практик, бонуса и домашки к 13 — показывать на экране в sql-demo (все результаты проверены на PostgreSQL)
   const FLOW12R = [
     ["0", "подготовка", "Герои в sql-demo", [
@@ -641,79 +643,79 @@
       { note: "Шаги 1–3 → 30, потом 31, потом строка с <code>id</code> 31, <code>v_seti</code> = false и сегодняшней датой. Спросить: «Мы не писали <code>id</code>, <code>v_seti</code> и дату — откуда они?» — <code>id</code> ставит база, остальное — <code>default</code>." },
       C("select * from geroi where id = 31;", "update geroi set zoloto = zoloto + 500, v_seti = true where id = 31;", "select * from geroi where id = 31;", "update geroi set gildiya = 'Белые крылья' where id = 31;", "select count(*) from geroi;"),
       { note: "Шаг 4 → золото 100 → 600, <code>v_seti</code> = true, гильдия «Белые крылья»; <code>count(*)</code> <b>всё ещё 31</b>: <code>update</code> строк не добавляет. Спросить: «Почему по <code>id</code>, а не по имени?» — два ученика могли выбрать один ник, а <code>id</code> не повторяется." },
-      C("update geroi set zoloto = zoloto + 500 where id = 999;"),
+      C(WRONG("update geroi set zoloto = zoloto + 500 where id = 999;")),
       { warn: "<b>Чужой <code>id</code>.</b> Ошибки нет: такой строки не нашлось, ничего не изменилось. Поэтому <code>select</code> до и после обязателен: ошибка об этом не предупредит. У кого <code>id</code> не 31 — удалял и вставлял снова: номера не используются повторно." },
       C("select * from geroi where id = 31;", "delete from geroi where id = 31;", "select count(*) from geroi;"),
       { note: "Шаг 5 → снова <b>30</b>. Если у ученика не 30 — свой герой не удалён или удалено лишнее: <code>geroi.sql</code> заново." }]],
     ["1–7", "практика 1", "Считаем всю таблицу: count, sum, avg, min, max", [
-      C("select count(*) from geroi;", "select count(*) from geroi where klass = 'маг';"),
+      C(RIGHT("select count(*) from geroi;"), RIGHT("select count(*) from geroi where klass = 'маг';")),
       { note: "1 → 30. 2 → 8: сначала <code>where</code> отобрал, потом <code>count</code> посчитал." },
-      C("select count(gildiya), count(*) from geroi;"),
+      C(RIGHT("select count(gildiya), count(*) from geroi;")),
       { warn: "<b>3</b> → 22 и 30. «Почему разница?» — <code>count(столбец)</code> не считает <code>NULL</code>, а у 8 героев гильдии нет. 30 − 22 = 8." },
-      C("select sum(zoloto), round(avg(uroven), 1) from geroi;", "select max(uroven), min(uroven) from geroi;"),
+      C(RIGHT("select sum(zoloto), round(avg(uroven), 1) from geroi;"), RIGHT("select max(uroven), min(uroven) from geroi;")),
       { note: "4 → 66409 и 52.3. 5 → 99 и 7. Несколько подсчётов в одном <code>select</code> — через запятую." },
-      C("select imya, max(uroven) from geroi;", "select imya, uroven from geroi order by uroven desc limit 1;"),
+      C(FAILS("select imya, max(uroven) from geroi;"), RIGHT("select imya, uroven from geroi order by uroven desc limit 1;")),
       { warn: "<b>Тянет спросить «а кто это?».</b> Первый → <code>column \"geroi.imya\" must appear in the GROUP BY clause</code>: <code>max</code> даёт одно число на всю таблицу, а имён 30. Узнать героя можно старым способом — сортировкой: второй → Ультра 99." },
-      C("select min(data_registracii) from geroi;"),
+      C(RIGHT("select min(data_registracii) from geroi;")),
       { note: "6 → 2024-08-08. <code>min</code> и <code>max</code> работают и с датами: самая ранняя дата — самая маленькая." },
-      C("select count(*) from geroi where uroven > 50;", "select count(uroven > 50) from geroi;"),
+      C(RIGHT("select count(*) from geroi where uroven > 50;"), WRONG("select count(uroven > 50) from geroi;")),
       { warn: "<b>7</b> → <b>16</b>. Второй запрос без ошибки даёт <b>30</b>: <code>count(…)</code> считает все непустые значения, а <code>uroven &gt; 50</code> для каждого героя непусто — true или false. Условие пишем в <code>where</code>." }]],
     ["8–13", "практика 1", "По группам: group by", [
-      C("select klass, count(*) from geroi group by klass order by count(*) desc;"),
+      C(RIGHT("select klass, count(*) from geroi group by klass order by count(*) desc;")),
       { note: "8 → воин 9, маг 8, лучник 7, лекарь 6. Самопроверка: в сумме 30. Одна строка результата = одна кучка." },
-      C("select klass, round(avg(uroven), 1) as sredniy from geroi\ngroup by klass\norder by sredniy desc;"),
+      C(RIGHT("select klass, round(avg(uroven), 1) as sredniy from geroi\ngroup by klass\norder by sredniy desc;")),
       { note: "9 → воин 60.6, маг 59.1, лекарь 44.0, лучник 41.0." },
-      C("select gildiya, count(*) from geroi group by gildiya order by count(*) desc;"),
+      C(RIGHT("select gildiya, count(*) from geroi group by gildiya order by count(*) desc;")),
       { warn: "<b>10</b> → 5 строк: пустая 8, Стальные волки 6, Ночные тени 6, Белые крылья 5, Звёздный круг 5. «Откуда пятая, если гильдий четыре?» — <code>NULL</code> тоже становится группой. Без <code>order by</code> строки могут идти в другом порядке — это не ошибка." },
-      C("select gildiya, sum(zoloto) as vsego from geroi\nwhere gildiya is not null\ngroup by gildiya\norder by vsego desc;"),
+      C(RIGHT("select gildiya, sum(zoloto) as vsego from geroi\nwhere gildiya is not null\ngroup by gildiya\norder by vsego desc;")),
       { note: "11 → Стальные волки 22200, Звёздный круг 18689, Ночные тени 14210, Белые крылья 6270. Без <code>where</code> будет пятая строка: пустая 5040." },
-      C("select v_seti, count(*) from geroi group by v_seti;"),
+      C(RIGHT("select v_seti, count(*) from geroi group by v_seti;")),
       { note: "12 → true 17, false 13. Группировать можно и по <code>boolean</code>: кучек всего две." },
-      C("select klass, count(*) from geroi where uroven > 50 group by klass order by count(*) desc;"),
+      C(RIGHT("select klass, count(*) from geroi where uroven > 50 group by klass order by count(*) desc;")),
       { note: "13 → воин 6, маг 5, лучник 3, лекарь 2. Самопроверка: 6 + 5 + 3 + 2 = 16, как в задании 7. Сначала <code>where</code> убрал слабых, потом база разложила оставшихся." }]],
     ["14–15", "практика 1", "Отбор групп: having", [
-      C("select klass, count(*) from geroi group by klass having count(*) > 7;"),
+      C(RIGHT("select klass, count(*) from geroi group by klass having count(*) > 7;")),
       { note: "14 → воин 9, маг 8. Порядок строк здесь не задан и может отличаться. «Больше 7» — условие про весь класс, поэтому <code>having</code>." },
-      C("select gildiya, round(avg(uroven), 1) from geroi group by gildiya having avg(uroven) > 50 order by 2 desc;", "select gildiya, round(avg(uroven), 1) from geroi group by gildiya order by 2 desc;", "select gildiya, round(avg(uroven), 1) from geroi where uroven > 50 group by gildiya order by 2 desc;"),
+      C(RIGHT("select gildiya, round(avg(uroven), 1) from geroi group by gildiya having avg(uroven) > 50 order by 2 desc;"), "select gildiya, round(avg(uroven), 1) from geroi group by gildiya order by 2 desc;", WRONG("select gildiya, round(avg(uroven), 1) from geroi where uroven > 50 group by gildiya order by 2 desc;")),
       { warn: "<b>15</b> → Стальные волки 73.2, Звёздный круг 65.6, Ночные тени 58.3. Второй запрос показывает, кто отсеялся: Белые крылья 43.4 и пустая 29.4. <b>Третий — хитрая ошибка:</b> первая строка та же (73.2), но строк 5 и остальные средние другие: Звёздный круг 72.8, Ночные тени 72.3, Белые крылья 71.0, пустая 58.0. <code>where</code> заранее выбросил слабых героев, и считалось среднее только по сильным. Поэтому сверять надо весь результат, а не первую строку." }]],
     ["Практика 2", "практика 2", "Своя таблица: count, group by, изменить и удалить", [
       { note: "Показать 1–2 скриншота из чата. Спросить: «Какой вопрос про ваш проект задаёт эта группа?» Хорошо: «сколько напоминаний у каждого пользователя», «сколько ответов на каждый вопрос» — это будет считать их бот. Если своих примеров нет — образец, 5 строк:" },
       C(NAPOM12),
-      C("select count(*) from napominaniya;", "select vypolneno, count(*) from napominaniya group by vypolneno;", "select kategoriya, count(*) from napominaniya group by kategoriya order by count(*) desc;"),
+      C(RIGHT("select count(*) from napominaniya;"), RIGHT("select vypolneno, count(*) from napominaniya group by vypolneno;"), RIGHT("select kategoriya, count(*) from napominaniya group by kategoriya order by count(*) desc;")),
       { note: "Шаги 1–2 → 5 · false 3, true 2 · учёба 2, спорт 2, дела 1 (порядок равных может отличаться)." },
-      C("select tekst, count(*) from napominaniya group by tekst;"),
+      C(WRONG("select tekst, count(*) from napominaniya group by tekst;")),
       { warn: "<b>Столбец без повторов:</b> в каждой из 5 групп будет 1, считать нечего. В задании на этот случай сказано: выбрать другой столбец или добавить строки, чтобы значения повторялись." },
-      C("select * from napominaniya where id = 2;", "update napominaniya set vypolneno = true where id = 2;", "select * from napominaniya where id = 2;", "select * from napominaniya where id = 5;", "delete from napominaniya where id = 5;", "select count(*) from napominaniya;"),
+      C("select * from napominaniya where id = 2;", RIGHT("update napominaniya set vypolneno = true where id = 2;"), "select * from napominaniya where id = 2;", "select * from napominaniya where id = 5;", RIGHT("delete from napominaniya where id = 5;"), "select count(*) from napominaniya;"),
       { note: "Шаг 3 → «Прочитать главу» стало <code>vypolneno</code> = true, «Купить тетрадь» удалена, всего 4. Проверить у учеников: и <code>update</code>, и <code>delete</code> — по <code>id</code>, перед каждым <code>select</code> с тем же <code>where</code>." },
       C("drop table napominaniya;")]],
     ["Б1–Б4", "бонус", "Бонус: годы, distinct, две группы", [
       { note: "Для тех, кто успел: пусть они и объясняют свои запросы." },
-      C("select extract(year from data_registracii) as god, count(*) from geroi\ngroup by god\norder by god;"),
+      C(RIGHT("select extract(year from data_registracii) as god, count(*) from geroi\ngroup by god\norder by god;")),
       { warn: "<b>Б1</b> → 2024: 6, 2025: 17, 2026: 7. 17 — как в Д4 прошлой домашки, там считали строки глазами. <code>extract(year from …)</code> достаёт год из даты. Если спросят: <code>group by god</code> работает, потому что PostgreSQL принимает имя из <code>as</code> в <code>group by</code> и <code>order by</code>. В <code>where</code> и <code>having</code> так нельзя." },
-      C("select count(distinct gildiya) from geroi;", "select distinct gildiya from geroi;"),
+      C(RIGHT("select count(distinct gildiya) from geroi;"), "select distinct gildiya from geroi;"),
       { warn: "<b>Б2</b> → <b>4</b>. «Почему не 5, как в задании 10?» — <code>count(столбец)</code> не считает <code>NULL</code>, и с <code>distinct</code> тоже. Второй запрос показывает 5 строк: <code>distinct</code> сам по себе пустое значение оставляет." },
-      C("select klass, max(uroven), min(uroven) from geroi group by klass order by klass;"),
+      C(RIGHT("select klass, max(uroven), min(uroven) from geroi group by klass order by klass;")),
       { note: "Б3 → воин 95 и 23, лекарь 71 и 15, лучник 78 и 7, маг 99 и 19. Сверка с заданием 5: общий максимум 99 и минимум 7 есть среди этих чисел." },
-      C("select klass, gildiya, count(*) from geroi group by klass, gildiya order by count(*) desc;", "select klass, gildiya, count(*) from geroi\ngroup by klass, gildiya\nhaving count(*) >= 3\norder by count(*) desc;"),
+      C("select klass, gildiya, count(*) from geroi group by klass, gildiya order by count(*) desc;", RIGHT("select klass, gildiya, count(*) from geroi\ngroup by klass, gildiya\nhaving count(*) >= 3\norder by count(*) desc;")),
       { warn: "<b>Б4</b> → 5 строк: маг · Звёздный круг 5; воин · Ночные тени 4; воин · Стальные волки 4; лекарь · Белые крылья 4; лучник · пустая 3 (порядок равных может отличаться). Первый запрос показывает все 12 пар: теперь кучка — это пара «класс + гильдия». Обе колонки должны быть в <code>group by</code>: при <code>group by klass</code> → <code>column \"geroi.gildiya\" must appear in the GROUP BY clause</code>." }]],
     ["Д1–Д3", "часть 1", "Одно число на всех: count, sum, avg", [
-      C("select count(*) from geroi where klass = 'лекарь' and v_seti = true;", "select imya from geroi where klass = 'лекарь' and v_seti = true;"),
+      C(RIGHT("select count(*) from geroi where klass = 'лекарь' and v_seti = true;"), "select imya from geroi where klass = 'лекарь' and v_seti = true;"),
       { note: "Д1 → <b>3</b>: Дана, Мира, Ангел — вторым запросом видно, кого посчитали. Можно и <code>and v_seti</code> без <code>= true</code> — тоже верно. Если получилось 6 — забыто условие про сеть." },
-      C("select sum(zoloto) from geroi where klass = 'маг';", "select klass, sum(zoloto) from geroi where klass = 'маг';"),
+      C(RIGHT("select sum(zoloto) from geroi where klass = 'маг';"), FAILS("select klass, sum(zoloto) from geroi where klass = 'маг';")),
       { warn: "<b>Д2</b> → <b>24689</b>. Второй запрос — ошибка <code>column \"geroi.klass\" must appear in the GROUP BY clause</code>: столбец рядом с подсчётом можно показать, только если есть <code>group by</code>. Здесь столбец и не нужен: класс уже задан в <code>where</code>." },
-      C("select round(avg(uroven), 1) from geroi where gildiya is null;", "select round(avg(uroven), 1) from geroi where gildiya = NULL;", "select count(*) from geroi where gildiya = NULL;"),
+      C(RIGHT("select round(avg(uroven), 1) from geroi where gildiya is null;"), WRONG("select round(avg(uroven), 1) from geroi where gildiya = NULL;"), WRONG("select count(*) from geroi where gildiya = NULL;")),
       { warn: "<b>Д3 — NULL в новом виде.</b> Первый → <b>29.4</b>. Второй: нет ни ошибки, ни «0 строк», а <b>одна пустая строка</b>. Подсчёт без <code>group by</code> всегда возвращает одну строку; героев не нашлось — среднего нет. Третий → <b>0</b>: <code>count</code> в таком случае даёт ноль. Пустой результат — повод проверить <code>where</code>." }]],
     ["Д4–Д6", "часть 1", "Группы: group by и порядок слов", [
-      C("select gildiya, count(*) from geroi\nwhere v_seti = true\ngroup by gildiya\norder by count(*) desc;", "select gildiya, count(*) from geroi group by gildiya where v_seti = true;", "select count(*) from geroi where v_seti = true;"),
+      C(RIGHT("select gildiya, count(*) from geroi\nwhere v_seti = true\ngroup by gildiya\norder by count(*) desc;"), FAILS("select gildiya, count(*) from geroi group by gildiya where v_seti = true;"), "select count(*) from geroi where v_seti = true;"),
       { warn: "<b>Д4</b> → 5 строк: пустая 5, Стальные волки 4, Белые крылья 3, Ночные тени 3, Звёздный круг 2 (порядок равных может отличаться). Пустую строку убирать не надо: в задании её не исключали, <code>NULL</code> — тоже группа. Второй запрос → <code>syntax error at or near \"where\"</code>: <code>where</code> всегда до <code>group by</code>. Самопроверка третьим запросом: 5 + 4 + 3 + 3 + 2 = <b>17</b>." },
-      C("select klass, sum(zoloto) from geroi group by klass order by sum(zoloto) desc;", "select klass, sum(zoloto) as vsego from geroi group by klass order by vsego desc;", "select klass, sum(zoloto) from geroi group by klass order by zoloto desc;"),
+      C(RIGHT("select klass, sum(zoloto) from geroi group by klass order by sum(zoloto) desc;"), RIGHT("select klass, sum(zoloto) as vsego from geroi group by klass order by vsego desc;"), FAILS("select klass, sum(zoloto) from geroi group by klass order by zoloto desc;")),
       { warn: "<b>Д5</b> → маг 24689, воин 24260, лучник 9620, лекарь 7840. Первые два запроса равноценны: в <code>order by</code> своё имя из <code>as</code> работает. Третий → <code>column \"geroi.zoloto\" must appear in the GROUP BY clause</code>: после группировки отдельного золота героя уже нет, есть только сумма. Спросить: «Чьё золото взять, если в группе 9 воинов?»" },
-      C("select gildiya, max(uroven) from geroi\nwhere gildiya is not null\ngroup by gildiya\norder by max(uroven) desc;", "select gildiya, imya, max(uroven) from geroi where gildiya is not null group by gildiya;"),
+      C(RIGHT("select gildiya, max(uroven) from geroi\nwhere gildiya is not null\ngroup by gildiya\norder by max(uroven) desc;"), FAILS("select gildiya, imya, max(uroven) from geroi where gildiya is not null group by gildiya;")),
       { warn: "<b>Д6</b> → Звёздный круг 99, Стальные волки 95, Ночные тени 82, Белые крылья 71. Если вместо <code>where</code> написали <code>having gildiya is not null</code> — результат тот же, это не ошибка; но принято отсекать строки раньше, в <code>where</code>. Второй запрос → <code>column \"geroi.imya\" must appear in the GROUP BY clause</code>: ребята часто хотят увидеть и самого героя. <code>group by</code> этого не умеет — здесь не решаем, это подзапросы, позже." }]],
     ["Д7–Д8", "часть 1", "where и having: главное в этой домашке", [
-      C("select klass, sum(zoloto) from geroi group by klass having sum(zoloto) > 10000;", "select klass, sum(zoloto) from geroi where sum(zoloto) > 10000 group by klass;", "select klass, sum(zoloto) from geroi where zoloto > 10000 group by klass;", "select klass, sum(zoloto) as vsego from geroi group by klass having vsego > 10000;"),
+      C(RIGHT("select klass, sum(zoloto) from geroi group by klass having sum(zoloto) > 10000;"), FAILS("select klass, sum(zoloto) from geroi where sum(zoloto) > 10000 group by klass;"), WRONG("select klass, sum(zoloto) from geroi where zoloto > 10000 group by klass;"), FAILS("select klass, sum(zoloto) as vsego from geroi group by klass having vsego > 10000;")),
       { warn: "<b>Д7</b> → воин 24260, маг 24689 (порядок любой). Второй → <code>aggregate functions are not allowed in WHERE</code>. Третий опаснее: <b>0 строк без ошибки</b> — он спрашивает про золото одного героя, а самый богатый имеет 9999. Четвёртый → <code>column \"vsego\" does not exist</code>: в <code>order by</code> имя из <code>as</code> работало, а в <code>having</code> — нет. Причина — порядок работы базы, можно выписать на экран: <code>from → where → group by → having → select → order by</code>. Имя появляется в <code>select</code>, поэтому <code>having</code> его ещё не знает, а <code>order by</code> уже знает." },
-      C("select gildiya, count(*) from geroi\nwhere v_seti = true and gildiya is not null\ngroup by gildiya\nhaving count(*) >= 3\norder by count(*) desc;", "select gildiya, count(*) from geroi\nwhere v_seti = true\ngroup by gildiya\nhaving count(*) >= 3\norder by count(*) desc;", "select gildiya, count(*) from geroi\nwhere gildiya is not null\ngroup by gildiya\nhaving count(*) >= 3\norder by count(*) desc;", "select gildiya, count(*) from geroi\nwhere gildiya is not null\ngroup by gildiya\nhaving v_seti = true and count(*) >= 3;"),
+      C(RIGHT("select gildiya, count(*) from geroi\nwhere v_seti = true and gildiya is not null\ngroup by gildiya\nhaving count(*) >= 3\norder by count(*) desc;"), WRONG("select gildiya, count(*) from geroi\nwhere v_seti = true\ngroup by gildiya\nhaving count(*) >= 3\norder by count(*) desc;"), WRONG("select gildiya, count(*) from geroi\nwhere gildiya is not null\ngroup by gildiya\nhaving count(*) >= 3\norder by count(*) desc;"), FAILS("select gildiya, count(*) from geroi\nwhere gildiya is not null\ngroup by gildiya\nhaving v_seti = true and count(*) >= 3;")),
       { warn: "<b>Д8</b> → Стальные волки 4, Белые крылья 3, Ночные тени 3 (порядок равных может отличаться). Частые неверные варианты: второй — забыто «без пустой», 4 строки, первая пустая 5; третий — забыто «в сети», 4 строки: Стальные волки 6, Ночные тени 6, Белые крылья 5, Звёздный круг 5; четвёртый — условие про отдельного героя в <code>having</code> → <code>column \"geroi.v_seti\" must appear in the GROUP BY clause</code>. Правило: <b>про строку — в <code>where</code>, про группу — в <code>having</code></b>. Спросить про каждое условие: «Это про одного героя или про всю гильдию?»" }]],
     ["Своя таблица", "часть 2", "Два своих вопроса к таблице проекта", [
       { note: "Показать на экране 1–2 запроса со скриншотами из чата (лучше разных команд). По каждому — вслух, по чек-листу:" },
@@ -724,9 +726,9 @@
         "Практика 2 доделана: <code>update</code> и <code>delete</code> — по <code>id</code>, перед ними <code>select</code> с тем же <code>where</code>."] },
       C(NAPOM12),
       { note: "Образец, если хороших запросов в чате нет или нужно показать ошибки. Результат — 5 строк." },
-      C("select count(*) from napominaniya where vypolneno = false;", "select sum(minuty) from napominaniya where vypolneno = false;", "select kategoriya, count(*), round(avg(minuty), 1) as sredniy\nfrom napominaniya group by kategoriya order by sredniy desc;"),
+      C(RIGHT("select count(*) from napominaniya where vypolneno = false;"), RIGHT("select sum(minuty) from napominaniya where vypolneno = false;"), RIGHT("select kategoriya, count(*), round(avg(minuty), 1) as sredniy\nfrom napominaniya group by kategoriya order by sredniy desc;")),
       { note: "→ 3 · 105 · спорт 2 и 40.0, учёба 2 и 35.0, дела 1 и 15.0. Вопросы словами: «Сколько дел осталось? Сколько минут они займут? Какие дела в среднем самые долгие?»" },
-      C("select sum(tekst) from napominaniya;", "select id, count(*) from napominaniya group by id;"),
+      C(FAILS("select sum(tekst) from napominaniya;"), WRONG("select id, count(*) from napominaniya group by id;")),
       { warn: "Первый → <code>function sum(text) does not exist</code>: текст нельзя сложить. Второй запустится, но в каждой из 5 групп будет 1 — подсчитывать нечего." },
       C("drop table napominaniya;")]],
     ["README", "часть 3", "Командой: раздел «Данные»", [
@@ -741,13 +743,14 @@
       { warn: "<b>Схему здесь не исправлять и новую таблицу не предлагать.</b> Это тот же вопрос, что «телефон Ани» из конца занятия 12, а ответ — тема занятия 13. Выпишите по одному повтору от каждой команды: на этих примерах и пойдёт занятие 13. Команда без раздела делает его первым делом: без него ей не на чем работать на занятии." }]],
   ];
   const FLOWS = { 8: FLOW8, 11: FLOW11, "11r": FLOW11R, 12: FLOW12, "12r": FLOW12R };
+  const MARK_TEXT = { ok: "✓ Правильно", err: "✗ Ошибка: база не выполнит запрос", bad: "✗ Неверно: ошибки не будет, но результат не тот" };
   let cmdN = 0;
   function renderFlow(l) {
     const FLOW = FLOWS[l];
     $("flowNav-" + l).innerHTML = FLOW.map((b, i) => "<a href='#fl" + l + "-" + i + "'>" + b[0] + "</a>").join("") + ($("problems-" + l) ? "<a href='#problems-" + l + "'>Проблемы</a>" : "");
     $("flow-" + l).innerHTML = FLOW.map((b, i) => "<div class='fl-block' id='fl" + l + "-" + i + "'><div class='fl-time'>" + b[0] + "<small>" + esc(b[1]) + "</small></div><div class='fl-body'><b>" + esc(b[2]) + "</b>" +
       b[3].map((x) => {
-        if (x.cmd) return "<div class='fl-cmds'>" + x.cmd.map((c) => { const id = cmdN++; return "<button type='button' class='fl-cmd" + (copied.has(id) ? " done" : "") + "' data-c='" + id + "'><code>" + esc(c) + "</code><span>" + (copied.has(id) ? "скопировано" : "копировать") + "</span></button>"; }).join("") + "</div>";
+        if (x.cmd) return "<div class='fl-cmds'>" + x.cmd.map((c) => { const id = cmdN++; const m = typeof c === "string" ? null : c; return "<button type='button' class='fl-cmd" + (m ? " m-" + m.k : "") + (copied.has(id) ? " done" : "") + "' data-c='" + id + "'>" + (m ? "<b class='fl-mark'>" + MARK_TEXT[m.k] + "</b>" : "") + "<code>" + esc(m ? m.t : c) + "</code><span>" + (copied.has(id) ? "скопировано" : "копировать") + "</span></button>"; }).join("") + "</div>";
         if (x.ol) return "<ol>" + x.ol.map((t) => "<li>" + t + "</li>").join("") + "</ol>";
         if (x.warn) return "<div class='note'>" + x.warn + "</div>";
         if (x.ready) return "<span class='fl-ready'>" + esc(x.ready) + "</span>";
