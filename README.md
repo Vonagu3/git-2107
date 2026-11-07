@@ -23,3 +23,26 @@
 ## Как добавить уровень
 
 В `engine.js` добавить объект в `LEVELS`: `setup` строит стартовый мир, `goals` — цели с проверками, `hints` — подсказки, `solution` — эталонные команды для `тест.mjs`, `bad` — необязательный неправильный путь, который не должен засчитываться. После правки — `node тест.mjs`.
+
+```mermaid
+  erDiagram
+      pitomcy ||--o{ vladeniya : "есть хозяин"
+      hozyaeva ||--o{ vladeniya : "владеет"
+      pitomcy {
+          bigint id PK
+          text klichka
+          text vid
+          int vozrast
+      }
+      hozyaeva {
+          bigint id PK
+          text imya
+          text telefon
+      }
+      vladeniya {
+          bigint id PK
+          bigint pitomec_id FK
+          bigint hozyain_id FK
+      }
+  ```
+
