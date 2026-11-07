@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261107181325">
+<link rel="stylesheet" href="quiz.css?v=20261107183317">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -2315,7 +2315,7 @@ limit 3;
   <h1>Практика: таблицы и связи</h1>
   <p class="lead">Занятие 13. Каждый сам, в своём проекте <code>sql-praktika</code>. Делим героев и гильдии на две таблицы и соединяем их. В каждом задании написано, что должно получиться, — это самопроверка. Как пишутся запросы — <a href="#sql3-cheat">шпаргалка на питомцах</a> внизу страницы. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
 
-  <div class="note-box"><b>Отстали или таблицы сломались?</b> Откройте <a href="files/geroi-gildii.sql" target="_blank" rel="noopener">geroi-gildii.sql</a>, скопируйте весь текст в SQL Editor и нажмите Run. Внизу должно быть <code>30</code> и <code>22</code>. Это готовое состояние после задания 6: можно сразу идти к заданию 7.</div>
+  <div class="note-box"><b>Отстали или таблицы сломались?</b> Есть готовый скрипт <a href="files/geroi-gildii.sql" target="_blank" rel="noopener">geroi-gildii.sql</a>: он заново создаёт героев и гильдии — всё, что получается после задания 6. Ваши изменения в этих двух таблицах сотрутся, остальные таблицы он не трогает. Скопируйте весь текст в SQL Editor и нажмите Run. Внизу должно быть <code>30</code> и <code>22</code> — это героев всего и героев в гильдиях. Дальше идите к заданию 7.</div>
 
   <h2>Практика 1. Гильдии отдельной таблицей · 35 минут</h2>
   <p>Сейчас название гильдии записано в каждом герое текстом. Если гильдия сменит название, менять придётся много строк. Куда записать город гильдии? Тоже в каждого героя? Поэтому у гильдий будет своя таблица.</p>
@@ -2525,7 +2525,7 @@ delete from hozyaeva where id = 1;
   <h1>Практика: типы связей</h1>
   <p class="lead">Занятие 14. Каждый сам, в своём проекте <code>sql-praktika</code>. Добавляем героям квесты — это связь «многие ко многим», учимся не терять строки без пары и рисуем схему. В каждом задании написано, что должно получиться, — это самопроверка. Как пишутся запросы — <a href="#sql4-cheat">шпаргалка</a> внизу страницы. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
 
-  <div class="note-box"><b>Отстали или таблицы сломались?</b> Откройте <a href="files/kvesty.sql" target="_blank" rel="noopener">kvesty.sql</a>, скопируйте весь текст в SQL Editor и нажмите Run. Внизу должно быть <code>30</code>, <code>5</code> и <code>15</code>. Это готовое состояние после задания 5: можно сразу идти к заданию 6.</div>
+  <div class="note-box"><b>Отстали или таблицы сломались?</b> Есть готовый скрипт <a href="files/kvesty.sql" target="_blank" rel="noopener">kvesty.sql</a>: он заново создаёт героев, гильдии, квесты и участия — всё, что получается после задания 5. Ваши изменения в этих четырёх таблицах сотрутся, остальные таблицы он не трогает. Скопируйте весь текст в SQL Editor и нажмите Run. Внизу должно быть <code>30</code>, <code>5</code> и <code>15</code> — это героев, квестов и участий. Дальше идите к заданию 6.</div>
 
   <h2>Практика 1. Герои и квесты · 25 минут</h2>
   <p>Герой может пойти во много квестов, а в квесте много героев. Ссылку некуда положить ни в героя, ни в квест — нужна третья таблица-связка <code>uchastie</code>: одна строка = один герой в одном квесте. Вот что получится:</p>
@@ -2597,8 +2597,10 @@ select count(*) from uchastie;
 --     Потом обязательно удалите лишнюю строку:
 delete from uchastie where id &gt; 15;
 
--- Б4. Нарисуйте на mermaid.live схему питомцев и хозяев.
---     У питомца может не быть хозяина — какой значок на конце?</pre>
+-- Б4. Один к одному: у питомца один ветеринарный паспорт,
+--     у паспорта — один питомец. Нарисуйте на mermaid.live
+--     таблицы pitomcy и pasporta (id, pitomec_id, nomer) и связь.
+--     Какие значки на концах? Бывает питомец без паспорта?</pre>
 
   <h2>Домашнее задание к занятию 15</h2>
   <p>~50 минут. Таблицы героев сломались — запустите <a href="files/kvesty.sql" target="_blank" rel="noopener">kvesty.sql</a>. Всё — в один файл <code>svyazi2.sql</code> (подпишите <code>-- Д1</code>, <code>-- Д2</code> …) и в чат.</p>
@@ -2626,8 +2628,9 @@ delete from uchastie where id &gt; 15;
   </ol>
 
   <h2 id="sql4-cheat">Шпаргалка</h2>
-  <p>Питомцы, хозяева и кружки. Чтобы повторить у себя, сначала запустите скрипт — он заменит ваши таблицы <code>pitomcy</code> и <code>hozyaeva</code>.</p>
-<pre class="cmd">drop table if exists pitomcy;
+  <p>Питомцы и хозяева. Чтобы повторить у себя, сначала запустите скрипт — он заменит ваши таблицы <code>pitomcy</code> и <code>hozyaeva</code>.</p>
+<pre class="cmd">drop table if exists vladeniya;
+drop table if exists pitomcy;
 drop table if exists hozyaeva;
 create table hozyaeva (
   id      bigint generated always as identity primary key,
@@ -2677,67 +2680,78 @@ group by hozyaeva.imya;
   </div>
 
   <h3>Многие ко многим — таблица-связка</h3>
-  <p>Ученик ходит в несколько кружков, в кружке много учеников. Связка <code>zapisi</code>: одна строка = один ученик в одном кружке.</p>
+  <p>Мурка живёт в семье, её хозяева — Аня и Петя. В <code>hozyain_id</code> помещается только один номер, а <code>hozyain2_id</code>, <code>hozyain3_id</code>… — не выход: сколько их понадобится? У питомца может быть много хозяев, у хозяина — много питомцев. Нужна третья таблица-связка <code>vladeniya</code>: одна строка = один хозяин одного питомца. Столбец <code>hozyain_id</code> у питомца больше не нужен.</p>
+  <p class="muted">Этот скрипт создаёт питомцев заново, уже без <code>hozyain_id</code>, поэтому запросы из начала шпаргалки после него работать не будут. Вернуться к ним — запустить первый скрипт ещё раз.</p>
   <div class="cols2">
     <div class="card c-upd"><h3>Таблицы</h3>
-<pre class="cmd">drop table if exists zapisi;
-drop table if exists ucheniki;
-drop table if exists kruzhki;
-create table ucheniki (
-  id   bigint generated always as identity primary key,
-  imya text not null
+<pre class="cmd">drop table if exists vladeniya;
+drop table if exists pitomcy;
+drop table if exists hozyaeva;
+create table hozyaeva (
+  id      bigint generated always as identity primary key,
+  imya    text not null,
+  telefon text
 );
-create table kruzhki (
-  id       bigint generated always as identity primary key,
-  nazvanie text not null
+insert into hozyaeva (imya, telefon) values
+  ('Аня', '111-11-11'), ('Миша', '222-22-22'),
+  ('Петя', '333-33-33'), ('Оля', '444-44-44');
+create table pitomcy (
+  id      bigint generated always as identity primary key,
+  klichka text not null,
+  vid     text,
+  vozrast int
 );
-create table zapisi (
+insert into pitomcy (klichka, vid, vozrast) values
+  ('Барсик', 'кот', 3), ('Рекс', 'собака', 5),
+  ('Кеша', 'попугай', 2), ('Мурка', 'кошка', 7),
+  ('Шарик', 'собака', 1), ('Граф', 'собака', 9);
+create table vladeniya (
   id         bigint generated always as identity primary key,
-  uchenik_id bigint not null references ucheniki(id),
-  kruzhok_id bigint not null references kruzhki(id)
+  pitomec_id bigint not null references pitomcy(id),
+  hozyain_id bigint not null references hozyaeva(id)
 );
-insert into ucheniki (imya) values ('Аня'), ('Боря'), ('Вика'), ('Гоша');
-insert into kruzhki (nazvanie) values
-  ('Шахматы'), ('Робототехника'), ('Рисование'), ('Театр');
-insert into zapisi (uchenik_id, kruzhok_id) values
-  (1, 1), (1, 2), (2, 2), (3, 1), (3, 2), (3, 3);</pre></div>
+insert into vladeniya (pitomec_id, hozyain_id) values
+  (1, 1), (2, 2), (4, 1), (4, 3), (6, 3);</pre></div>
     <div class="card c-ord"><h3>Запросы</h3>
-<pre class="cmd">-- кто в каком кружке: от связки два join
-select ucheniki.imya, kruzhki.nazvanie
-from zapisi
-join ucheniki on zapisi.uchenik_id = ucheniki.id
-join kruzhki on zapisi.kruzhok_id = kruzhki.id;
--- → 6 строк
+<pre class="cmd">-- чей питомец: от связки два join
+select pitomcy.klichka, hozyaeva.imya
+from vladeniya
+join pitomcy on vladeniya.pitomec_id = pitomcy.id
+join hozyaeva on vladeniya.hozyain_id = hozyaeva.id;
+-- → 5 строк, Мурка дважды: Аня и Петя
 
--- сколько учеников в каждом кружке
-select kruzhki.nazvanie, count(zapisi.id)
-from kruzhki
-left join zapisi on zapisi.kruzhok_id = kruzhki.id
-group by kruzhki.nazvanie;
--- → Робототехника 3, Шахматы 2,
---   Рисование 1, Театр 0</pre></div>
+-- сколько хозяев у каждого питомца
+select pitomcy.klichka, count(vladeniya.id)
+from pitomcy
+left join vladeniya on vladeniya.pitomec_id = pitomcy.id
+group by pitomcy.klichka;
+-- → Мурка 2, Барсик, Рекс, Граф по 1,
+--   Кеша и Шарик по 0</pre></div>
   </div>
 
   <h3>Диаграмма на mermaid.live</h3>
   <div class="cols2">
     <div class="card"><h3>Код</h3>
 <pre class="cmd mm">erDiagram
-    ucheniki ||--o{ zapisi : "записан"
-    kruzhki ||--o{ zapisi : "в кружке"
-    ucheniki {
+    pitomcy ||--o{ vladeniya : "есть хозяин"
+    hozyaeva ||--o{ vladeniya : "владеет"
+    pitomcy {
+        bigint id PK
+        text klichka
+        text vid
+        int vozrast
+    }
+    hozyaeva {
         bigint id PK
         text imya
+        text telefon
     }
-    kruzhki {
+    vladeniya {
         bigint id PK
-        text nazvanie
-    }
-    zapisi {
-        bigint id PK
-        bigint uchenik_id FK
-        bigint kruzhok_id FK
+        bigint pitomec_id FK
+        bigint hozyain_id FK
     }</pre></div>
-    <div class="card"><h3>Что получится</h3><div class="er"><img src="files/er-kruzhki.svg" alt="Схема: ученики, кружки и связка записей" loading="lazy"></div></div>
+    <div class="card"><h3>Что получится</h3><div class="er"><img src="files/er-vladeniya.svg" alt="Схема: питомцы, хозяева и связка владения" loading="lazy"></div></div>
   </div>
   <div class="tablewrap"><table>
     <tr><th>Значок на конце линии</th><th>Значит</th></tr>
@@ -2746,9 +2760,9 @@ group by kruzhki.nazvanie;
     <tr><td><code>|{</code> (с другой стороны <code>}|</code>)</td><td>один или много</td></tr>
     <tr><td><code>o{</code> (с другой стороны <code>}o</code>)</td><td>ноль или много</td></tr>
   </table></div>
-  <p>Читаем <code>ucheniki ||--o{ zapisi</code> так: «у записи ровно один ученик, у ученика ноль или много записей». GitHub рисует такую диаграмму сам, если вставить код в README между строками <code>```mermaid</code> и <code>```</code>.</p>
+  <p>Читаем <code>pitomcy ||--o{ vladeniya</code> так: «у строки владения ровно один питомец, у питомца ноль или много строк владения». До связки, на занятии 13, было <code>hozyaeva |o--o{ pitomcy</code>: у питомца ноль или один хозяин. GitHub рисует такую диаграмму сам, если вставить код в README между строками <code>```mermaid</code> и <code>```</code>.</p>
 
-  <div class="note-box"><b>Запомнить.</b> <code>join</code> показывает только пары, <code>left join</code> — все строки из таблицы в <code>from</code>. Кто без пары — <code>where правая.id is null</code>. Считать с <code>left join</code> — <code>count(правая.id)</code>. Один к одному — редко, один ко многим — ссылка у «многих», многие ко многим — таблица-связка с двумя ссылками.</div>
+  <div class="note-box"><b>Запомнить.</b> <code>join</code> показывает только пары, <code>left join</code> — все строки из таблицы в <code>from</code>. Кто без пары — <code>where правая.id is null</code>. Считать с <code>left join</code> — <code>count(правая.id)</code>. Один к одному — редко, один ко многим — ссылка у «многих», многие ко многим — таблица-связка с двумя ссылками (питомцы и хозяева — <code>vladeniya</code>).</div>
 
   <h2>Если что-то пошло не так</h2>
   <div class="tablewrap"><table>
@@ -2762,7 +2776,7 @@ group by kruzhki.nazvanie;
     <tr><td><code>left join</code> не показал строки без пары</td><td>Таблица, которую нужно показать целиком, должна стоять в <code>from</code>.</td></tr>
     <tr><td>Кто без пары — 0 строк</td><td>Нужно <code>is null</code>, а не <code>= NULL</code>.</td></tr>
     <tr><td>Числа не сходятся с ответом</td><td>Осталась лишняя строка из Б3 или вставили дважды. Запустите <code>kvesty.sql</code>.</td></tr>
-    <tr><td>mermaid.live пишет «Syntax error»</td><td>Проверьте пробелы в <code>ucheniki ||--o{ zapisi : "записан"</code>, кавычки у русской подписи и закрытые <code>}</code>.</td></tr>
+    <tr><td>mermaid.live пишет «Syntax error»</td><td>Проверьте пробелы в <code>pitomcy ||--o{ vladeniya : "есть хозяин"</code>, кавычки у русской подписи и закрытые <code>}</code>.</td></tr>
   </table></div>
   <p>Застряли больше чем на 5 минут — пишите в чат группы: какое задание, сам запрос и что видите.</p>
   </div>
@@ -2771,9 +2785,9 @@ group by kruzhki.nazvanie;
 
 </main>
 
-<script src="live.js?v=20261107181325"></script>
-<script src="quiz.js?v=20261107181325"></script>
-<script src="engine.js?v=20261107181325"></script>
+<script src="live.js?v=20261107183317"></script>
+<script src="quiz.js?v=20261107183317"></script>
+<script src="engine.js?v=20261107183317"></script>
 <script>
 (function () {
   "use strict";
