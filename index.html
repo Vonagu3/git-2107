@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261107175150">
+<link rel="stylesheet" href="quiz.css?v=20261107181325">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -173,6 +173,9 @@ dialog textarea { width: 100%; height: 360px; border: 0; padding: 12px 16px; fon
 pre.cmd { font-variant-ligatures: none; background: var(--term-bg); color: var(--term-ink); padding: 10px 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
 .note-box { border-left: 4px solid var(--accent); background: var(--chip); padding: 8px 12px; border-radius: 0 8px 8px 0; margin: 10px 0; }
 .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cols2 > * { min-width: 0; }
+.er { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin: 10px 0; text-align: center; }
+.er img { max-width: 100%; height: auto; }
 .cheat td:first-child { white-space: nowrap; font-family: var(--mono); font-size: 13px; }
 /* подсветка SQL во вкладке «Базы данных» */
 .sk { color: var(--lane2); font-weight: 700; } .sf { color: var(--lane3); font-weight: 700; }
@@ -216,6 +219,7 @@ pre.cmd .sn { color: #c9a7ff; } pre.cmd .sc { color: var(--term-muted); } pre.cm
       <button data-tab="sql">Базы данных</button>
       <button data-tab="sql2">Подсчёты</button>
       <button data-tab="sql3">Связи</button>
+      <button data-tab="sql4">Типы связей</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -2516,12 +2520,260 @@ delete from hozyaeva where id = 1;
   </div>
 </section>
 
+<section class="tab" id="tab-sql4">
+  <div class="doc">
+  <h1>Практика: типы связей</h1>
+  <p class="lead">Занятие 14. Каждый сам, в своём проекте <code>sql-praktika</code>. Добавляем героям квесты — это связь «многие ко многим», учимся не терять строки без пары и рисуем схему. В каждом задании написано, что должно получиться, — это самопроверка. Как пишутся запросы — <a href="#sql4-cheat">шпаргалка</a> внизу страницы. Отмечайте шаги галочками — они запомнятся в этом браузере.</p>
+
+  <div class="note-box"><b>Отстали или таблицы сломались?</b> Откройте <a href="files/kvesty.sql" target="_blank" rel="noopener">kvesty.sql</a>, скопируйте весь текст в SQL Editor и нажмите Run. Внизу должно быть <code>30</code>, <code>5</code> и <code>15</code>. Это готовое состояние после задания 5: можно сразу идти к заданию 6.</div>
+
+  <h2>Практика 1. Герои и квесты · 25 минут</h2>
+  <p>Герой может пойти во много квестов, а в квесте много героев. Ссылку некуда положить ни в героя, ни в квест — нужна третья таблица-связка <code>uchastie</code>: одна строка = один герой в одном квесте. Вот что получится:</p>
+  <div class="er"><img src="files/er-kvesty.svg" alt="Схема: гильдии, герои, квесты и связка участия" loading="lazy"></div>
+  <h3>Делаем</h3>
+  <ol class="steps" id="sql4p1">
+    <li><h3>Герои и гильдии как новые</h3><p>Запустите весь <a href="files/geroi-gildii.sql" target="_blank" rel="noopener">geroi-gildii.sql</a>. Внизу: <code>30</code> и <code>22</code>.</p></li>
+    <li><h3>Создайте таблицу kvesty</h3><p>Три столбца: <code>id</code> — как в <code>geroi.sql</code>; <code>nazvanie</code> — текст, обязательный; <code>nagrada</code> — число, обязательное. Названия — точно такие.</p></li>
+    <li><h3>Заполните её</h3><p>Готовый скрипт:</p>
+<pre class="cmd">alter table kvesty enable row level security;
+insert into kvesty (nazvanie, nagrada) values
+  ('Пещера дракона',     500),
+  ('Спасти деревню',     200),
+  ('Тёмный лес',         300),
+  ('Башня мага',         400),
+  ('Затонувший корабль', 600);
+select * from kvesty order by id;
+-- → 5 квестов, id от 1 до 5</pre></li>
+    <li><h3>Создайте связку uchastie</h3><p>Три столбца: <code>id</code>; <code>geroy_id</code> — ссылка на <code>geroi</code>; <code>kvest_id</code> — ссылка на <code>kvesty</code>. Обе ссылки обязательные: участия без героя или без квеста не бывает. Как пишется ссылка — помните по <code>gildiya_id</code>.</p></li>
+    <li><h3>Заполните связку</h3><p>Готовый скрипт. В каждой паре: номер героя, номер квеста.</p>
+<pre class="cmd">alter table uchastie enable row level security;
+insert into uchastie (geroy_id, kvest_id) values
+  (10, 1), (20, 1), (4, 1), (5, 1),
+  (1, 2), (5, 2), (16, 2), (3, 2),
+  (12, 3), (14, 3), (20, 3),
+  (2, 4), (14, 4), (20, 4), (9, 4);
+select count(*) from uchastie;
+-- → 15</pre></li>
+    <li><h3>Проверьте защиту</h3><p>Запишите героя 1 в квест 99. → <code>violates foreign key constraint</code>. Почему?</p></li>
+  </ol>
+  <h3>left join — не терять строки без пары</h3>
+  <ol class="steps" id="sql4p2" style="counter-reset: s 6">
+    <li><h3>Все герои и их гильдия</h3><p>Включая героев без гильдии. → 30 строк, у 8 гильдия пустая. С обычным <code>join</code> было 22.</p></li>
+  </ol>
+  <h3>Три таблицы</h3>
+  <ol class="steps" id="sql4p3" style="counter-reset: s 7">
+    <li><h3>Кто в каком квесте</h3><p>Имя героя и название квеста, по имени героя. Начните со связки: <code>from uchastie</code> и два <code>join</code>. → 15 строк</p></li>
+    <li><h3>Участники «Пещеры дракона»</h3><p>Имя и уровень, сильные первыми. → Ультра 99, Йети 95, Гром 88, Дана 41</p></li>
+    <li><h3>Сколько квестов у каждого участника</h3><p>Больше — первыми. → 11 строк, первая — Ультра 3</p></li>
+  </ol>
+  <h3>left join и подсчёт</h3>
+  <ol class="steps" id="sql4p4" style="counter-reset: s 10">
+    <li><h3>Сколько участников в каждом квесте</h3><p>Включая квесты без участников. → 5 строк, у «Затонувшего корабля» 0. Получилось 1? Посмотрите в шпаргалку, что считать.</p></li>
+    <li><h3>Сколько героев не участвует ни в одном квесте?</h3><p>→ 19</p></li>
+    <li><h3>Сумма наград каждого героя</h3><p>Первые три. → Ультра 1200, потом Дана и Нокс по 700</p></li>
+  </ol>
+
+  <h2>Практика 2. Схема школьной библиотеки · в парах · 15 минут</h2>
+  <p>SQL не пишем — только схема. Рисуем на <a href="https://mermaid.live" target="_blank" rel="noopener">mermaid.live</a>: слева пишете код, справа сразу видна диаграмма. Как пишется — <a href="#sql4-cheat">шпаргалка</a>.</p>
+  <div class="note-box">В библиотеке есть книги: у книги название и год издания. У книги может быть несколько авторов, у автора — несколько книг. Читатели — ученики: имя и класс. Ученик берёт книгу и потом возвращает. Библиотекарю нужно знать, у кого какая книга сейчас, и историю: кто и когда брал.</div>
+  <ol class="steps" id="sql4own">
+    <li><h3>Сущности</h3><p>Выпишите существительные: какие будут таблицы?</p></li>
+    <li><h3>Связи</h3><p>Для каждой пары: один к одному, один ко многим или многие ко многим?</p></li>
+    <li><h3>Диаграмма</h3><p>Таблицы, столбцы, <code>PK</code> и <code>FK</code>, связи с правильными концами.</p></li>
+    <li><h3>Даты</h3><p>Где хранить «когда взял» и «когда вернул»? Не у книги и не у читателя — почему?</p></li>
+    <li><h3>Сдать</h3><p>Скриншот диаграммы — в чат.</p></li>
+  </ol>
+
+  <h2>Бонус — для тех, кто быстрее</h2>
+<pre class="cmd">-- Б1. В каких квестах герои Звёздного круга? Имя героя и квест.
+--     Нужны четыре таблицы.                → 4 строки
+--     Ошибка «nazvanie is ambiguous» — чьё это nazvanie?
+
+-- Б2. Сколько участий у героев каждой гильдии?
+--                                          → Звёздный круг 4 — первой
+
+-- Б3. Запишите Ультру (20) в Пещеру дракона (1) ещё раз.
+--     Получилось? Сколько теперь строк с этой парой?
+--     Потом обязательно удалите лишнюю строку:
+delete from uchastie where id &gt; 15;
+
+-- Б4. Нарисуйте на mermaid.live схему питомцев и хозяев.
+--     У питомца может не быть хозяина — какой значок на конце?</pre>
+
+  <h2>Домашнее задание к занятию 15</h2>
+  <p>~50 минут. Таблицы героев сломались — запустите <a href="files/kvesty.sql" target="_blank" rel="noopener">kvesty.sql</a>. Всё — в один файл <code>svyazi2.sql</code> (подпишите <code>-- Д1</code>, <code>-- Д2</code> …) и в чат.</p>
+  <ol class="steps" id="sql4hw">
+    <li><h3>Часть 1. Герои и квесты · каждый сам</h3>
+<pre class="cmd">-- Д1. В каких квестах Ультра?
+--                       → 3: Пещера дракона, Тёмный лес, Башня мага
+-- Д2. Сколько участий у каждого класса героев?
+--                       → маг 7, воин 3, лучник 3, лекарь 2
+-- Д3. Квесты, где участников 4 и больше.          → 3 квеста
+-- Д4. Сколько участий у героев без гильдии?       → 3
+-- Д5. Стальные волки, которые не участвуют ни в одном квесте.
+--                       → Сокол, Цезарь, Шторм</pre></li>
+    <li><h3>Часть 2. Школьная библиотека · каждый сам</h3>
+      <p>Запустите весь <a href="files/biblioteka.sql" target="_blank" rel="noopener">biblioteka.sql</a> — внизу <code>7</code> и <code>7</code>. Прочитайте, какие в нём таблицы, и сравните со своей схемой из практики 2: два отличия — в комментарии в начале файла.</p>
+<pre class="cmd">-- Д6. Книги на руках: книга, читатель, дата выдачи, с самых давних.
+--                       → 4 строки, первая: Война и мир, Вика
+-- Д7. Авторы каждой книги, по названию книги.
+--                       → 8 строк. У каких книг два автора?
+-- Д8. Книга, у которой нет автора.               → Энциклопедия школьника
+-- Д9. Сколько раз брали каждую книгу, включая ни разу.
+--                       → 7 строк, Энциклопедия школьника 0
+-- Д10. Кто из читателей ни разу не брал книг?    → Дина</pre>
+      <p>Подсказка: книга «на руках», если её ещё не вернули — <code>data_vozvrata</code> пустая.</p></li>
+  </ol>
+
+  <h2 id="sql4-cheat">Шпаргалка</h2>
+  <p>Питомцы, хозяева и кружки. Чтобы повторить у себя, сначала запустите скрипт — он заменит ваши таблицы <code>pitomcy</code> и <code>hozyaeva</code>.</p>
+<pre class="cmd">drop table if exists pitomcy;
+drop table if exists hozyaeva;
+create table hozyaeva (
+  id      bigint generated always as identity primary key,
+  imya    text not null,
+  telefon text
+);
+insert into hozyaeva (imya, telefon) values
+  ('Аня', '111-11-11'), ('Миша', '222-22-22'), ('Петя', '333-33-33'), ('Оля', '444-44-44');
+create table pitomcy (
+  id         bigint generated always as identity primary key,
+  klichka    text not null,
+  vid        text,
+  vozrast    int,
+  hozyain_id bigint references hozyaeva(id)
+);
+insert into pitomcy (klichka, vid, vozrast, hozyain_id) values
+  ('Барсик', 'кот', 3, 1), ('Рекс', 'собака', 5, 2), ('Кеша', 'попугай', 2, NULL),
+  ('Мурка', 'кошка', 7, 1), ('Шарик', 'собака', 1, NULL), ('Граф', 'собака', 9, 3);</pre>
+  <div class="cols2">
+    <div class="card c-sel"><h3>left join — все строки из таблицы в from</h3>
+<pre class="cmd">-- все питомцы, даже без хозяина
+select pitomcy.klichka, hozyaeva.imya
+from pitomcy
+left join hozyaeva on pitomcy.hozyain_id = hozyaeva.id;
+-- → 6 строк, у Кеши и Шарика хозяин пустой
+
+-- все хозяева, даже без питомцев
+select hozyaeva.imya, pitomcy.klichka
+from hozyaeva
+left join pitomcy on pitomcy.hozyain_id = hozyaeva.id;
+-- → 5 строк, у Оли питомец пустой</pre></div>
+    <div class="card c-ins"><h3>Без пары и подсчёт</h3>
+<pre class="cmd">-- у кого нет пары
+select hozyaeva.imya
+from hozyaeva
+left join pitomcy on pitomcy.hozyain_id = hozyaeva.id
+where pitomcy.id is null;
+-- → Оля
+
+-- считаем питомцев, а не строки!
+select hozyaeva.imya, count(pitomcy.id)
+from hozyaeva
+left join pitomcy on pitomcy.hozyain_id = hozyaeva.id
+group by hozyaeva.imya;
+-- → Аня 2, Миша 1, Петя 1, Оля 0
+--   с count(*) у Оли было бы 1</pre></div>
+  </div>
+
+  <h3>Многие ко многим — таблица-связка</h3>
+  <p>Ученик ходит в несколько кружков, в кружке много учеников. Связка <code>zapisi</code>: одна строка = один ученик в одном кружке.</p>
+  <div class="cols2">
+    <div class="card c-upd"><h3>Таблицы</h3>
+<pre class="cmd">drop table if exists zapisi;
+drop table if exists ucheniki;
+drop table if exists kruzhki;
+create table ucheniki (
+  id   bigint generated always as identity primary key,
+  imya text not null
+);
+create table kruzhki (
+  id       bigint generated always as identity primary key,
+  nazvanie text not null
+);
+create table zapisi (
+  id         bigint generated always as identity primary key,
+  uchenik_id bigint not null references ucheniki(id),
+  kruzhok_id bigint not null references kruzhki(id)
+);
+insert into ucheniki (imya) values ('Аня'), ('Боря'), ('Вика'), ('Гоша');
+insert into kruzhki (nazvanie) values
+  ('Шахматы'), ('Робототехника'), ('Рисование'), ('Театр');
+insert into zapisi (uchenik_id, kruzhok_id) values
+  (1, 1), (1, 2), (2, 2), (3, 1), (3, 2), (3, 3);</pre></div>
+    <div class="card c-ord"><h3>Запросы</h3>
+<pre class="cmd">-- кто в каком кружке: от связки два join
+select ucheniki.imya, kruzhki.nazvanie
+from zapisi
+join ucheniki on zapisi.uchenik_id = ucheniki.id
+join kruzhki on zapisi.kruzhok_id = kruzhki.id;
+-- → 6 строк
+
+-- сколько учеников в каждом кружке
+select kruzhki.nazvanie, count(zapisi.id)
+from kruzhki
+left join zapisi on zapisi.kruzhok_id = kruzhki.id
+group by kruzhki.nazvanie;
+-- → Робототехника 3, Шахматы 2,
+--   Рисование 1, Театр 0</pre></div>
+  </div>
+
+  <h3>Диаграмма на mermaid.live</h3>
+  <div class="cols2">
+    <div class="card"><h3>Код</h3>
+<pre class="cmd mm">erDiagram
+    ucheniki ||--o{ zapisi : "записан"
+    kruzhki ||--o{ zapisi : "в кружке"
+    ucheniki {
+        bigint id PK
+        text imya
+    }
+    kruzhki {
+        bigint id PK
+        text nazvanie
+    }
+    zapisi {
+        bigint id PK
+        bigint uchenik_id FK
+        bigint kruzhok_id FK
+    }</pre></div>
+    <div class="card"><h3>Что получится</h3><div class="er"><img src="files/er-kruzhki.svg" alt="Схема: ученики, кружки и связка записей" loading="lazy"></div></div>
+  </div>
+  <div class="tablewrap"><table>
+    <tr><th>Значок на конце линии</th><th>Значит</th></tr>
+    <tr><td><code>||</code></td><td>ровно один</td></tr>
+    <tr><td><code>o|</code> (с другой стороны пишется <code>|o</code>)</td><td>ноль или один</td></tr>
+    <tr><td><code>|{</code> (с другой стороны <code>}|</code>)</td><td>один или много</td></tr>
+    <tr><td><code>o{</code> (с другой стороны <code>}o</code>)</td><td>ноль или много</td></tr>
+  </table></div>
+  <p>Читаем <code>ucheniki ||--o{ zapisi</code> так: «у записи ровно один ученик, у ученика ноль или много записей». GitHub рисует такую диаграмму сам, если вставить код в README между строками <code>```mermaid</code> и <code>```</code>.</p>
+
+  <div class="note-box"><b>Запомнить.</b> <code>join</code> показывает только пары, <code>left join</code> — все строки из таблицы в <code>from</code>. Кто без пары — <code>where правая.id is null</code>. Считать с <code>left join</code> — <code>count(правая.id)</code>. Один к одному — редко, один ко многим — ссылка у «многих», многие ко многим — таблица-связка с двумя ссылками.</div>
+
+  <h2>Если что-то пошло не так</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Что видно</th><th>Что делать</th></tr>
+    <tr><td><code>relation "kvesty" already exists</code> или <code>"uchastie"</code></td><td>Осталась от прошлой попытки. Запустите <code>kvesty.sql</code>.</td></tr>
+    <tr><td><code>cannot drop table geroi because other objects depend on it</code></td><td>На героев ссылается <code>uchastie</code>. Запускайте <code>kvesty.sql</code>, а не <code>geroi-gildii.sql</code>.</td></tr>
+    <tr><td><code>violates foreign key constraint</code></td><td>Нет героя или квеста с таким номером. На шаге 6 так и задумано.</td></tr>
+    <tr><td><code>column "nazvanie" does not exist</code></td><td>Забыт второй <code>join</code>: название квеста — в таблице <code>kvesty</code>.</td></tr>
+    <tr><td><code>column reference "nazvanie" is ambiguous</code></td><td>Такой столбец есть в двух таблицах: <code>kvesty.nazvanie</code> или <code>gildii.nazvanie</code>.</td></tr>
+    <tr><td>У пустого квеста или книги 1 вместо 0</td><td>Считайте <code>count(uchastie.id)</code> или <code>count(vydachi.id)</code>, а не <code>count(*)</code>.</td></tr>
+    <tr><td><code>left join</code> не показал строки без пары</td><td>Таблица, которую нужно показать целиком, должна стоять в <code>from</code>.</td></tr>
+    <tr><td>Кто без пары — 0 строк</td><td>Нужно <code>is null</code>, а не <code>= NULL</code>.</td></tr>
+    <tr><td>Числа не сходятся с ответом</td><td>Осталась лишняя строка из Б3 или вставили дважды. Запустите <code>kvesty.sql</code>.</td></tr>
+    <tr><td>mermaid.live пишет «Syntax error»</td><td>Проверьте пробелы в <code>ucheniki ||--o{ zapisi : "записан"</code>, кавычки у русской подписи и закрытые <code>}</code>.</td></tr>
+  </table></div>
+  <p>Застряли больше чем на 5 минут — пишите в чат группы: какое задание, сам запрос и что видите.</p>
+  </div>
+</section>
+
 
 </main>
 
-<script src="live.js?v=20261107175150"></script>
-<script src="quiz.js?v=20261107175150"></script>
-<script src="engine.js?v=20261107175150"></script>
+<script src="live.js?v=20261107181325"></script>
+<script src="quiz.js?v=20261107181325"></script>
+<script src="engine.js?v=20261107181325"></script>
 <script>
 (function () {
   "use strict";
@@ -2549,7 +2801,7 @@ delete from hozyaeva where id = 1;
   // ---------- подсветка SQL во вкладке «Базы данных» ----------
   const SQL_KW = new Set(("select from where and or not in between like ilike is null order by desc asc limit insert into values " +
     "update set delete drop table if exists create primary key generated always as identity bigint text int boolean date " +
-    "default check true false distinct alter enable row level security current_date group having year join on references add column").split(" "));
+    "default check true false distinct alter enable row level security current_date group having year join on references add column left").split(" "));
   const SQL_FN = new Set(["count", "sum", "avg", "min", "max", "round", "extract"]);
   function sqlHtml(src) {
     return src.replace(/(--[^\n]*)|('[^'\n]*')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]+)\b|([^-'\dA-Za-z_]+|.)/g, (m, c, str, n, w) => {
@@ -2560,7 +2812,7 @@ delete from hozyaeva where id = 1;
       return esc(m);
     });
   }
-  document.querySelectorAll("#tab-sql pre.cmd, #tab-sql2 pre.cmd, #tab-sql3 pre.cmd, #tab-sql .cheat td:first-child").forEach((e) => (e.innerHTML = sqlHtml(e.textContent)));
+  document.querySelectorAll("#tab-sql pre.cmd, #tab-sql2 pre.cmd, #tab-sql3 pre.cmd, #tab-sql4 pre.cmd:not(.mm), #tab-sql .cheat td:first-child").forEach((e) => (e.innerHTML = sqlHtml(e.textContent)));
 
   // ---------- вкладки ----------
   function showTab(t) {
@@ -2573,7 +2825,7 @@ delete from hozyaeva where id = 1;
   const hashTab = location.hash.replace("#", "");
   // #proj и другие якоря внутри вкладки: открыть эту вкладку и прокрутить к разделу
   const hashSec = hashTab && document.getElementById(hashTab)?.closest(".tab");
-  showTab(["live", "lesson", "excel", "sql", "sql2", "sql3", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
+  showTab(["live", "lesson", "excel", "sql", "sql2", "sql3", "sql4", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
     : hashSec ? hashSec.id.replace("tab-", "") : store.get("tab", "train"));
   if (hashSec) document.getElementById(hashTab).scrollIntoView();
 
@@ -2637,6 +2889,12 @@ delete from hozyaeva where id = 1;
   checkSteps("sql3p3", "sql3p3");
   checkSteps("sql3own", "sql3own");
   checkSteps("sql3hw", "sql3hw");
+  checkSteps("sql4p1", "sql4p1");
+  checkSteps("sql4p2", "sql4p2");
+  checkSteps("sql4p3", "sql4p3");
+  checkSteps("sql4p4", "sql4p4");
+  checkSteps("sql4own", "sql4own");
+  checkSteps("sql4hw", "sql4hw");
   checkSteps("l8clone", "l8clone");
   checkSteps("l8det", "l8det");
   checkSteps("l8pick", "l8pick");

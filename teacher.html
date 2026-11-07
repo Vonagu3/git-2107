@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261107175150">
+<link rel="stylesheet" href="quiz.css?v=20261107181325">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -156,6 +156,7 @@ table.probs td:first-child { width: 40%; }
     <button data-tab="l11">Занятие 11 · базы данных</button>
     <button data-tab="l12">Занятие 12 · подсчёты в SQL</button>
     <button data-tab="l13">Занятие 13 · связи таблиц</button>
+    <button data-tab="l14">Занятие 14 · типы связей</button>
   </nav>
 
   <section class="tab" id="tab-pupils">
@@ -468,10 +469,66 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
   <h2>Что сознательно не рассказываем</h2>
   <p><code>left join</code> (только вопрос «где Кеша и Шарик?» — занятие 14), многие ко многим и ER-диаграммы (14), нормализация и <code>unique</code> (15), подробности <code>alter table</code> (16), <code>on delete</code>, подзапросы, индексы, RLS.</p>
   </section>
+
+  <section class="tab" id="tab-l14">
+  <h2>Занятие 14 — left join, типы связей, многие ко многим, диаграмма</h2>
+  <p class="lead">На занятии 13 <code>join</code> терял строки без пары (Б4, Д1), а в пиццерии повторялось название пиццы. Сегодня — <code>left join</code>, три типа связей, таблица-связка для «многие ко многим» и схема в Mermaid. Практика: квесты героев и схема школьной библиотеки (одна задача для всех — темы проектов ещё не выбраны). Конспект — <code>Урок_14/План_урока.md</code>, ответы — <code>Урок_14/Ответы.md</code> (все проверены на PostgreSQL).</p>
+  <div class="links">
+    <a href="https://supabase.com/dashboard/projects" target="_blank" rel="noopener">Supabase (sql-demo)</a>
+    <a href="https://mermaid.live" target="_blank" rel="noopener">mermaid.live</a>
+    <a href="files/geroi-gildii.sql" target="_blank" rel="noopener">geroi-gildii.sql</a>
+    <a href="files/kvesty.sql" target="_blank" rel="noopener">kvesty.sql (готово после заданий 1–5)</a>
+    <a href="files/biblioteka.sql" target="_blank" rel="noopener">biblioteka.sql (домашка)</a>
+    <a href="./#sql4" target="_blank" rel="noopener">Вкладка «Типы связей» у учеников</a>
+    <a href="#lesson-14">Ход занятия ↓</a>
+    <a href="#razbor-14">Разбор практик, бонуса и домашки ↓</a>
+  </div>
+
+  <h2>Подготовить заранее</h2>
+  <div class="card"><ul class="check" id="prep-14"></ul></div>
+
+  <h2 id="lesson-14">Ход занятия</h2>
+  <p class="lead">Нажмите на команду — она скопируется. SQL — в SQL Editor демо-проекта, диаграммы — на mermaid.live, тексты практики — в чат группы. Ответы (оранжевые блоки) на экран не выводить. Запросы показа идут по порядку: каждый следующий опирается на предыдущий.</p>
+  <nav class="fl-nav" id="flowNav-14"></nav>
+  <div class="card" id="flow-14"></div>
+
+  <h2 id="razbor-14">Разбор практик, бонуса и домашки к занятию 15</h2>
+  <p class="lead">Для показа на экране в <code>sql-demo</code>: каждый запрос копируется кликом, блоки выполняются сверху вниз. Все результаты проверены на PostgreSQL. <b>Зелёным</b> с пометкой «Правильно» отмечен ответ на задание, <b>красной полосой</b> — неверный пример. Без отметки — подготовка и проверочные запросы. Самое важное — задание 11 и Д9 (<code>count(*)</code> с <code>left join</code>), задание 7 (какая таблица в <code>from</code>), Б3 (повтор пары — вход в занятие 15) и практика 2 (связка со своими столбцами).</p>
+  <nav class="fl-nav" id="flowNav-14r"></nav>
+  <div class="card" id="flow-14r"></div>
+
+  <h2 id="problems-14">Если у ученика…</h2>
+  <div class="card wrap"><table class="probs">
+    <tr><th>Видит</th><th>Что сделать</th></tr>
+    <tr><td>Проект «Paused»</td><td>Restore project, 2–3 минуты. Пока — смотрит экран соседа</td></tr>
+    <tr><td>Застрял на заданиях 2–5 или таблицы сломаны</td><td>Запустить весь <code>kvesty.sql</code> → <code>30, 5 и 15</code>, идти к заданию 6</td></tr>
+    <tr><td><code>relation "kvesty" already exists</code> или <code>"uchastie"</code></td><td>Осталась от прошлой попытки: <code>kvesty.sql</code></td></tr>
+    <tr><td><code>cannot drop table geroi because other objects depend on it</code></td><td>Запускал <code>geroi.sql</code> или <code>geroi-gildii.sql</code>, а на героев уже ссылается <code>uchastie</code>. Запустить <code>kvesty.sql</code> — он удаляет в правильном порядке</td></tr>
+    <tr><td><code>violates foreign key constraint</code> на шаге 5</td><td>Нет героев или квестов с такими номерами: квесты вставлены дважды или герои не из <code>geroi-gildii.sql</code>. Запустить <code>kvesty.sql</code></td></tr>
+    <tr><td><code>column "nazvanie" does not exist</code></td><td>Забыт второй <code>join</code>: названия квеста в <code>geroi</code> и <code>uchastie</code> нет</td></tr>
+    <tr><td><code>column reference "nazvanie" is ambiguous</code></td><td>Столбец есть и у гильдии, и у квеста: <code>gildii.nazvanie</code> или <code>kvesty.nazvanie</code></td></tr>
+    <tr><td>У пустого квеста или книги 1 вместо 0</td><td><code>count(*)</code> → <code>count(uchastie.id)</code>: считаем строки правой таблицы</td></tr>
+    <tr><td><code>left join</code> не показал строки без пары</td><td>Таблицы не в том порядке: целиком показывается та, что в <code>from</code></td></tr>
+    <tr><td>Кто без пары — 0 строк</td><td><code>= NULL</code> → <code>is null</code></td></tr>
+    <tr><td>Числа не сходятся с ответом</td><td>Лишняя строка из Б3 или вставлено дважды: <code>kvesty.sql</code></td></tr>
+    <tr><td>mermaid.live: «Syntax error»</td><td>Чаще всего — нет пробела между частями <code>ucheniki ||--o{ zapisi : "записан"</code>, русская подпись без кавычек или незакрытая <code>}</code></td></tr>
+  </table></div>
+
+  <h2>Как помогать</h2>
+  <ul>
+    <li>На любой <code>left join</code> — вопрос: «Какую таблицу показываем целиком? Она в <code>from</code>?»</li>
+    <li>На любой <code>join</code> — «Прочитай <code>on</code> вслух».</li>
+    <li>Практика 2 — в парах, спрашивать, а не подсказывать: «Кто тут „многие“?»</li>
+    <li>Отстаёте: задания 12–13 практики 1 — в домашку. Совсем не успеваете — практику 2 делаете вместе на экране, ответ показываете в конце.</li>
+  </ul>
+
+  <h2>Что сознательно не рассказываем</h2>
+  <p><code>right join</code> и <code>full join</code> (то же, что <code>left join</code>, если поменять таблицы), <code>unique</code> и запрет повтора пары (занятие 15), составной первичный ключ, <code>on delete</code>, подзапросы, нормализация (15).</p>
+  </section>
 </div>
 </main>
-<script src="quiz.js?v=20261107175150"></script>
-<script src="engine.js?v=20261107175150"></script>
-<script src="teacher.js?v=20261107175150"></script>
+<script src="quiz.js?v=20261107181325"></script>
+<script src="engine.js?v=20261107181325"></script>
+<script src="teacher.js?v=20261107181325"></script>
 </body>
 </html>

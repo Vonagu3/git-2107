@@ -296,7 +296,7 @@
   }
 
   // ---------- вкладки: общая «Ученики и опрос» + по одной на каждое занятие ----------
-  const TABS = ["pupils", "l8", "l11", "l12", "l13"];
+  const TABS = ["pupils", "l8", "l11", "l12", "l13", "l14"];
   function showTab(t) {
     if (!TABS.includes(t)) t = TABS[TABS.length - 1];
     document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
@@ -902,7 +902,157 @@
       { warn: "Join → 5 строк. Подсчёт → Оля 2 и 1200, Макс 2 и 1150, Нина 1 и 500. Третья команда — ошибка <code>foreign key</code>. <b>Если спросят про название пиццы:</b> «Маргарита» тоже повторяется, и ученик, который это заметил, прав. Пицц и заказов много с обеих сторон — это занятие 14. Сейчас можно оставить как есть." },
       C("drop table zakazy;\ndrop table klienty;")]],
   ];
-  const FLOWS = { 8: FLOW8, 11: FLOW11, "11r": FLOW11R, 12: FLOW12, "12r": FLOW12R, 13: FLOW13, "13r": FLOW13R };
+  // занятие 14: left join, типы связей, многие ко многим, диаграмма Mermaid
+  const GEROI_K = SITE + "files/kvesty.sql", BIBL = SITE + "files/biblioteka.sql";
+  const PITOMCY14 = "drop table if exists pitomcy;\ndrop table if exists hozyaeva;\n\ncreate table hozyaeva (\n  id      bigint generated always as identity primary key,\n  imya    text not null,\n  telefon text\n);\ninsert into hozyaeva (imya, telefon) values\n  ('Аня', '111-11-11'), ('Миша', '222-22-22'), ('Петя', '333-33-33'), ('Оля', '444-44-44');\n\ncreate table pitomcy (\n  id         bigint generated always as identity primary key,\n  klichka    text not null,\n  vid        text,\n  vozrast    int,\n  hozyain_id bigint references hozyaeva(id)\n);\ninsert into pitomcy (klichka, vid, vozrast, hozyain_id) values\n  ('Барсик', 'кот', 3, 1), ('Рекс', 'собака', 5, 2), ('Кеша', 'попугай', 2, NULL),\n  ('Мурка', 'кошка', 7, 1), ('Шарик', 'собака', 1, NULL), ('Граф', 'собака', 9, 3);\nselect * from pitomcy order by id;";
+  const KRUZHKI14 = "drop table if exists zapisi;\ndrop table if exists ucheniki;\ndrop table if exists kruzhki;\n\ncreate table ucheniki (\n  id   bigint generated always as identity primary key,\n  imya text not null\n);\ncreate table kruzhki (\n  id       bigint generated always as identity primary key,\n  nazvanie text not null\n);\n-- таблица-связка: одна строка = один ученик записан в один кружок\ncreate table zapisi (\n  id         bigint generated always as identity primary key,\n  uchenik_id bigint not null references ucheniki(id),\n  kruzhok_id bigint not null references kruzhki(id)\n);\n\ninsert into ucheniki (imya) values ('Аня'), ('Боря'), ('Вика'), ('Гоша');\ninsert into kruzhki (nazvanie) values ('Шахматы'), ('Робототехника'), ('Рисование'), ('Театр');\ninsert into zapisi (uchenik_id, kruzhok_id) values\n  (1, 1), (1, 2), (2, 2), (3, 1), (3, 2), (3, 3);\nselect * from zapisi order by id;";
+  const KVESTY14 = "alter table kvesty enable row level security;\ninsert into kvesty (nazvanie, nagrada) values\n  ('Пещера дракона',     500),\n  ('Спасти деревню',     200),\n  ('Тёмный лес',         300),\n  ('Башня мага',         400),\n  ('Затонувший корабль', 600);\nselect * from kvesty order by id;";
+  const UCHASTIE14 = "alter table uchastie enable row level security;\ninsert into uchastie (geroy_id, kvest_id) values\n  (10, 1), (20, 1), (4, 1), (5, 1),\n  (1, 2), (5, 2), (16, 2), (3, 2),\n  (12, 3), (14, 3), (20, 3),\n  (2, 4), (14, 4), (20, 4), (9, 4);\nselect count(*) from uchastie;";
+  const J3 = "from uchastie\njoin geroi on uchastie.geroy_id = geroi.id\njoin kvesty on uchastie.kvest_id = kvesty.id";
+  const MM_KRUZHKI = "erDiagram\n    ucheniki ||--o{ zapisi : \"записан\"\n    kruzhki ||--o{ zapisi : \"в кружке\"\n    ucheniki {\n        bigint id PK\n        text imya\n    }\n    kruzhki {\n        bigint id PK\n        text nazvanie\n    }\n    zapisi {\n        bigint id PK\n        bigint uchenik_id FK\n        bigint kruzhok_id FK\n    }";
+  const MM_PITOMCY = "erDiagram\n    hozyaeva |o--o{ pitomcy : \"хозяин\"\n    hozyaeva {\n        bigint id PK\n        text imya\n        text telefon\n    }\n    pitomcy {\n        bigint id PK\n        text klichka\n        bigint hozyain_id FK\n    }";
+  const MM_KVESTY = "erDiagram\n    gildii |o--o{ geroi : \"состоит\"\n    geroi ||--o{ uchastie : \"участвует\"\n    kvesty ||--o{ uchastie : \"в квесте\"\n    gildii {\n        bigint id PK\n        text nazvanie\n        text gorod\n    }\n    geroi {\n        bigint id PK\n        text imya\n        text klass\n        int uroven\n        bigint gildiya_id FK\n    }\n    kvesty {\n        bigint id PK\n        text nazvanie\n        int nagrada\n    }\n    uchastie {\n        bigint id PK\n        bigint geroy_id FK\n        bigint kvest_id FK\n    }";
+  const MM_BIBL = "erDiagram\n    knigi ||--o{ knigi_avtory : \"написана\"\n    avtory ||--o{ knigi_avtory : \"написал\"\n    knigi ||--o{ vydachi : \"выдана\"\n    chitateli ||--o{ vydachi : \"взял\"\n    avtory {\n        bigint id PK\n        text imya\n    }\n    knigi {\n        bigint id PK\n        text nazvanie\n        int god\n    }\n    knigi_avtory {\n        bigint id PK\n        bigint kniga_id FK\n        bigint avtor_id FK\n    }\n    chitateli {\n        bigint id PK\n        text imya\n        text klass\n    }\n    vydachi {\n        bigint id PK\n        bigint kniga_id FK\n        bigint chitatel_id FK\n        date data_vydachi\n        date data_vozvrata\n    }";
+  const PREP14 = [
+    "Домашка к 14 проверена по чату: svyazi.sql (Д1–Д7), пиццерия, бонус Б1–Б4. Отмечено, кто заметил, что «Маргарита» тоже повторяется, — это вход в «многие ко многим».",
+    "Ученикам в чат за день: «Завтра — типы связей. Откройте Supabase → sql-praktika: если проект Paused — нажмите Restore заранее. Домашку — до занятия».",
+    "sql-demo открывается. Все скрипты в ходе занятия начинаются с drop table if exists — старые таблицы мешать не будут.",
+    "Открыт mermaid.live — на нём рисуем диаграммы. Проверить, что он открывается с того интернета, откуда ведёте занятие.",
+    "Открыты вкладки: эта страница, sql-demo → SQL Editor, mermaid.live, вкладка «Типы связей» у учеников (#sql4).",
+    "Ответы (оранжевые блоки) и схему библиотеки не показывать на экране до разбора практики 2.",
+  ];
+  PREPS[14] = PREP14;
+  const FLOW14 = [
+    ["0–15", "разбор", "Домашка к занятию 14", [
+      { note: "Пока все подключаются — у кого проект «Paused», жмут Restore. Полный разбор с запросами — вкладка «Занятие 13» → «Разбор практик, бонуса и домашки». Сегодня оттуда — четыре вещи, все ведут в новую тему:" },
+      { ol: ["<b>Б4:</b> новая гильдия без героев не появилась в подсчёте. «Почему?» — у неё нет пары.",
+        "<b>Д1:</b> воинов 9, а строк 8. «Где девятый?» — Оникс без гильдии, у него тоже нет пары. Вывод: <code>join</code> теряет строки без пары. Сегодня научимся их не терять.",
+        "<b>Д7:</b> неверное <code>on</code> — ошибки нет, ответ неверный. Читаем <code>on</code> вслух.",
+        "<b>Пиццерия:</b> «Кто заметил, что „Маргарита“ тоже повторяется?» Пицца бывает во многих заказах, а в заказе может быть много пицц. Это второй новый вопрос: связь «многие ко многим»."] }]],
+    ["15–35", "показ", "left join: не терять строки без пары", [
+      { note: "Питомцы и хозяева, как в конце занятия 13: у Кеши и Шарика хозяина нет, у Оли нет питомцев." },
+      C(PITOMCY14),
+      C("select pitomcy.klichka, hozyaeva.imya\nfrom pitomcy\njoin hozyaeva on pitomcy.hozyain_id = hozyaeva.id;", RIGHT("select pitomcy.klichka, hozyaeva.imya\nfrom pitomcy\nleft join hozyaeva on pitomcy.hozyain_id = hozyaeva.id;")),
+      { note: "4 строки и 6 строк. <code>left join</code> — «все строки из левой таблицы, той, что в <code>from</code>; пара — если есть». У Кеши и Шарика в столбце хозяина <code>NULL</code>." },
+      C(RIGHT("select hozyaeva.imya, pitomcy.klichka\nfrom hozyaeva\nleft join pitomcy on pitomcy.hozyain_id = hozyaeva.id;")),
+      { note: "Поменяли таблицы местами — теперь «все хозяева»: 5 строк, Оля с пустым питомцем, а Кеши и Шарика нет. <b>Какая таблица в <code>from</code>, такую и показываем целиком.</b>" },
+      C(RIGHT("select hozyaeva.imya\nfrom hozyaeva\nleft join pitomcy on pitomcy.hozyain_id = hozyaeva.id\nwhere pitomcy.id is null;"), WRONG("select hozyaeva.imya\nfrom hozyaeva\nleft join pitomcy on pitomcy.hozyain_id = hozyaeva.id\nwhere pitomcy.id = NULL;")),
+      { warn: "<b>Кто без пары.</b> Первый → Оля: оставляем только строки, где пары не нашлось. Второй → 0 строк, без ошибки: снова ловушка <code>= NULL</code>, только <code>is null</code>." },
+      C(WRONG("select hozyaeva.imya, count(*)\nfrom hozyaeva\nleft join pitomcy on pitomcy.hozyain_id = hozyaeva.id\ngroup by hozyaeva.imya;"), RIGHT("select hozyaeva.imya, count(pitomcy.id)\nfrom hozyaeva\nleft join pitomcy on pitomcy.hozyain_id = hozyaeva.id\ngroup by hozyaeva.imya;")),
+      { warn: "<b>Ловушка подсчёта.</b> С <code>count(*)</code> у Оли <b>1</b>: строка-то есть, хоть и с пустым питомцем. Нужно считать питомцев: <code>count(pitomcy.id)</code> → Оля 0 (вспоминаем: <code>count(столбец)</code> не считает <code>NULL</code>). Аня 2, Миша 1, Петя 1 — порядок строк любой." }]],
+    ["35–55", "показ", "Типы связей и многие ко многим", [
+      { note: "На доске три типа. <b>Один ко многим</b> — уже знаем: хозяин и питомцы, гильдия и герои; ссылка в таблице «многих». <b>Один к одному</b> — редко: у ученика один пропуск, у пропуска один ученик; часто это просто столбцы той же таблицы. <b>Многие ко многим</b> — ученик ходит в несколько кружков, в кружке много учеников." },
+      { note: "Спросить: «Куда записать, кто в каком кружке?» Столбец <code>kruzhok</code> у ученика — а если кружков три? Столбец <code>ucheniki</code> у кружка — «Аня, Вика» через запятую. Обе таблицы — «многие», ссылку класть некуда. <b>Ответ: третья таблица-связка</b>, одна строка = одна пара «ученик — кружок»." },
+      C(KRUZHKI14),
+      { note: "Связка <code>zapisi</code> — это два «один ко многим»: у ученика много записей, у кружка много записей. Вика записана в три кружка, Гоша — ни в один, в Театр — никто." },
+      C(RIGHT("select ucheniki.imya, kruzhki.nazvanie\nfrom zapisi\njoin ucheniki on zapisi.uchenik_id = ucheniki.id\njoin kruzhki on zapisi.kruzhok_id = kruzhki.id\norder by ucheniki.imya;")),
+      { note: "6 строк. Два <code>join</code> подряд: от связки к ученику и от связки к кружку. Начинаем со связки — у неё обе ссылки." },
+      C(RIGHT("select kruzhki.nazvanie, count(zapisi.id)\nfrom kruzhki\nleft join zapisi on zapisi.kruzhok_id = kruzhki.id\ngroup by kruzhki.nazvanie\norder by count(zapisi.id) desc;"), RIGHT("select ucheniki.imya\nfrom ucheniki\nleft join zapisi on zapisi.uchenik_id = ucheniki.id\nwhere zapisi.id is null;")),
+      { note: "Робототехника 3, Шахматы 2, Рисование 1, Театр 0. Без записей — Гоша. Здесь хватает двух таблиц: названия второй стороны не нужны." },
+      C(WRONG("select ucheniki.imya, kruzhki.nazvanie\nfrom zapisi\njoin ucheniki on zapisi.uchenik_id = ucheniki.id\njoin kruzhki on zapisi.id = kruzhki.id;")),
+      { warn: "Ловушка из Д7 в новом виде: номер записи сравнивается с номером кружка. Ошибки нет, 4 строки, Боря «в Рисовании», Вика «в Театре»." },
+      C("insert into zapisi (uchenik_id, kruzhok_id) values (1, 1);", "select count(*) from zapisi where uchenik_id = 1 and kruzhok_id = 1;"),
+      { note: "→ 2. Аня записана в Шахматы дважды, база не возразила. Не исправлять: «как запретить повтор пары — занятие 15»." }]],
+    ["55–60", "перерыв", "Перерыв", [{ note: "Пока перерыв — открыть mermaid.live на экране." }]],
+    ["60–75", "показ", "Диаграмма: рисуем схему кодом", [
+      { note: "Схему удобно рисовать не руками, а текстом: Mermaid. GitHub сам рисует такую диаграмму в README, а на mermaid.live её видно сразу. Вставить на mermaid.live:" },
+      C(MM_KRUZHKI),
+      { note: "Разобрать по частям: прямоугольник — таблица, внутри — столбцы, <code>PK</code> — первичный ключ, <code>FK</code> — внешний. Линия — связь, на концах — сколько." },
+      { ol: ["<code>||</code> — ровно один", "<code>o|</code> — ноль или один", "<code>|{</code> — один или много", "<code>o{</code> — ноль или много"] },
+      { note: "Читаем вслух: «у ученика ноль или много записей, у записи ровно один ученик». Задание всем — нарисовать питомцев и хозяев. Подсказка: у питомца может не быть хозяина. Ответ:" },
+      C(MM_PITOMCY),
+      { warn: "<code>|o</code> со стороны хозяина: питомцу хозяин не обязателен (<code>hozyain_id</code> без <code>not null</code>). Если ученик поставил <code>||</code> — разобрать: «а Кеша?»" }]],
+    ["75–100", "практика", "Практика 1: квесты героев · каждый сам", [
+      C(SITE + "#sql4"),
+      C("ПРАКТИКА 1 · ГЕРОИ И КВЕСТЫ · занятие 14\nВсё по шагам — вкладка «Типы связей». Отстали на шагах 2–5 — там есть готовый скрипт.\n\nДЕЛАЕМ\n 1. geroi-gildii.sql с вкладки                              → 30 и 22\n 2. Создайте kvesty: id, nazvanie (обязательно), nagrada (число, обязательно)\n 3. Заполните готовым скриптом                              → 5 квестов\n 4. Создайте связку uchastie: id, geroy_id → geroi, kvest_id → kvesty (обе обязательны)\n 5. Заполните готовым скриптом                              → 15\n 6. Проверьте защиту: квест номер 99                        → ошибка foreign key\n\nLEFT JOIN\n 7. Все герои и их гильдия, включая без гильдии             → 30 строк, у 8 пусто\n\nТРИ ТАБЛИЦЫ\n 8. Кто в каком квесте, по имени героя                      → 15 строк\n 9. Участники «Пещеры дракона», сильные первыми             → Ультра 99, Йети 95, Гром 88, Дана 41\n10. Сколько квестов у каждого участника, больше первыми     → 11 строк, первая Ультра 3\n\nLEFT JOIN И ПОДСЧЁТ\n11. Сколько участников в каждом квесте, включая пустые      → 5 строк, Затонувший корабль 0\n12. Сколько героев не участвует ни в одном квесте           → 19\n13. Сумма наград каждого героя, первые 3                    → Ультра 1200, потом Дана и Нокс по 700\n\nГотово — пишите в чат «Практика 1 готова»."),
+      { warn: "<b>Ответы:</b> 4) <code>geroy_id bigint not null references geroi(id)</code>, так же <code>kvest_id</code> · 7) <code>from geroi left join gildii on geroi.gildiya_id = gildii.id</code> · 8) <code>from uchastie join geroi … join kvesty …</code> · 11) <code>from kvesty left join uchastie …</code>, <code>count(uchastie.id)</code> · 12) <code>from geroi left join uchastie … where uchastie.id is null</code> · 13) <code>sum(kvesty.nagrada)</code> по героям. Запросы и ловушки — разбор ниже и <code>Урок_14/Ответы.md</code>." },
+      { note: "Бонус на вкладке: квесты Звёздного круга (четыре таблицы, ловушка <code>nazvanie</code> is ambiguous), участия по гильдиям, Ультра в Пещере дважды (вопрос к занятию 15), диаграмма питомцев." },
+      { ready: "Все написали «Практика 1 готова» (или дошли до 11)" }]],
+    ["100–115", "практика", "Практика 2: схема школьной библиотеки · в парах", [
+      C("ПРАКТИКА 2 · СХЕМА БИБЛИОТЕКИ · в парах · 15 минут\nSQL не пишем — только схема на mermaid.live.\n\nВ библиотеке есть книги: у книги название и год издания. У книги может быть\nнесколько авторов, у автора — несколько книг. Читатели — ученики: имя и класс.\nУченик берёт книгу и потом возвращает. Библиотекарю нужно знать, у кого какая\nкнига сейчас, и историю: кто и когда брал.\n\n1. Выпишите сущности (существительные): какие будут таблицы?\n2. Для каждой пары: один к одному, один ко многим или многие ко многим?\n3. Нарисуйте диаграмму: таблицы, столбцы, PK и FK, связи.\n4. Где хранить «когда взял» и «когда вернул»?\n5. Скриншот диаграммы — в чат."),
+      { note: "Ходить по парам и спрашивать, а не подсказывать: «Книга и автор — кто тут „многие“? А книга и читатель?» Хорошие диаграммы — показать всем. Ответ — после того как пары прислали скриншоты:" },
+      C(MM_BIBL),
+      { warn: "<b>Главное:</b> две связи «многие ко многим», и они разные. <code>knigi_avtory</code> — просто пары. <code>vydachi</code> — связка <b>со своими столбцами</b>: даты относятся не к книге и не к читателю, а к конкретной выдаче. Частые ошибки: столбец <code>avtor</code> в книге (а у «Двенадцати стульев» двое авторов), <code>kniga</code> или даты у читателя (а если он взял три книги?). Пустая <code>data_vozvrata</code> значит «ещё на руках». Дома они получат эту схему готовой в <code>biblioteka.sql</code> и сравнят со своей." }]],
+    ["115–120", "итог", "Итог и домашка", [
+      C("ЗАПОМНИТЬ · БАЗЫ ДАННЫХ · занятие 14\n• join показывает только пары. left join — все строки из таблицы в from, пара — если есть, иначе NULL.\n• Кто без пары: left join … where правая.id is null.\n• Считать с left join — count(правая.id), а не count(*): иначе «пустой» получит 1.\n• Связи: один к одному (редко), один ко многим (ссылка у «многих»), многие ко многим (таблица-связка).\n• Связка — это две ссылки. Запрос: от связки два join.\n• Связка может хранить и свои данные: даты выдачи книги.\n• Mermaid: || ровно один, o| ноль или один, |{ один или много, o{ ноль или много."),
+      C("ДОМАШНЕЕ ЗАДАНИЕ К ЗАНЯТИЮ 15 · ~50 минут\nВсё на вкладке «Типы связей»: " + SITE + "#sql4\nТаблицы сломались — запустите kvesty.sql с вкладки.\n\nЧАСТЬ 1. Герои и квесты · каждый сам:\n Д1. В каких квестах Ультра?                                → 3: Пещера дракона, Тёмный лес, Башня мага\n Д2. Сколько участий у каждого класса героев?               → маг 7, воин 3, лучник 3, лекарь 2\n Д3. Квесты, где участников 4 и больше.                     → 3 квеста\n Д4. Сколько участий у героев без гильдии?                  → 3\n Д5. Стальные волки, которые не участвуют ни в одном квесте. → Сокол, Цезарь, Шторм\n\nЧАСТЬ 2. Школьная библиотека · каждый сам:\n Запустите biblioteka.sql с вкладки → 7 и 7.\n Сравните готовую схему со своей из практики 2: два отличия — в комментарии.\n Д6. Книги на руках: книга, читатель, дата, с давних.        → 4 строки, первая Война и мир, Вика\n Д7. Авторы каждой книги, по названию.                      → 8 строк. У каких книг два автора?\n Д8. Книга без автора.                                      → Энциклопедия школьника\n Д9. Сколько раз брали каждую книгу, включая ни разу.       → 7 строк, Энциклопедия 0\n Д10. Кто ни разу не брал книг.                             → Дина\n\nВсё — в файл svyazi2.sql (подпишите -- Д1 …) и в чат.\nЗастряли больше 5 минут — в чат: какой запрос и какую ошибку видите."),
+      { warn: "<b>Ответы Д1–Д10:</b> полные запросы — разбор ниже и <code>Урок_14/Ответы.md</code>. Ловушки: Д9 <code>count(*)</code> даёт Энциклопедии 1; Д6 <code>data_vozvrata = NULL</code> даёт 0 строк." },
+      { note: "После занятия очистить демо (проект <code>sql-demo</code> не удалять). Сначала таблицы со ссылками:" },
+      C("drop table if exists pitomcy;\ndrop table if exists hozyaeva;\ndrop table if exists zapisi;\ndrop table if exists ucheniki;\ndrop table if exists kruzhki;\ndrop table if exists uchastie;\ndrop table if exists kvesty;\ndrop table if exists geroi;\ndrop table if exists gildii;")]],
+  ];
+  // разбор практик, бонуса и домашки к 15 — выполняется сверху вниз в sql-demo (все результаты проверены на PostgreSQL)
+  const FLOW14R = [
+    ["0", "подготовка", "Герои и гильдии в sql-demo", [
+      { note: "Начинаем с чистого места: удалить квесты, вставить весь <code>geroi-gildii.sql</code> (по ссылке ниже) → Run → <code>30 и 22</code>. Порядок разбора: сначала ребята говорят свой запрос, потом вы запускаете, потом — ловушка, если есть." },
+      C("drop table if exists uchastie;\ndrop table if exists kvesty;", GEROI_G),
+      { note: "Готовое состояние после заданий 1–5, если шаги показывать не нужно. Тогда разбор начинайте с задания 6." },
+      C(GEROI_K)]],
+    ["1–3", "практика 1", "Таблица kvesty", [
+      C(RIGHT("select count(*), count(gildiya_id) from geroi;")),
+      { note: "1 → 30 и 22. Файл ставит всё заново, в том числе убирает «Серые плащи», если кто-то не удалил их в бонусе занятия 13." },
+      C(RIGHT("create table kvesty (\n  id       bigint generated always as identity primary key,\n  nazvanie text not null,\n  nagrada  int  not null\n);"), KVESTY14),
+      { note: "2–3 → 5 квестов, номера 1–5. У кого 10 строк — вставил дважды: <code>kvesty.sql</code>." }]],
+    ["4–6", "практика 1", "Связка uchastie", [
+      C(RIGHT("create table uchastie (\n  id       bigint generated always as identity primary key,\n  geroy_id bigint not null references geroi(id),\n  kvest_id bigint not null references kvesty(id)\n);")),
+      { note: "4. Спросить: «Почему обе ссылки <code>not null</code>?» — участие без героя или без квеста бессмысленно. Сравнить с <code>gildiya_id</code>, где пустое значение разрешено." },
+      C(UCHASTIE14),
+      { note: "5 → 15. Ультра (20) — в трёх квестах, Затонувший корабль (5) — ни у кого." },
+      C(FAILS("insert into uchastie (geroy_id, kvest_id) values (1, 99);")),
+      { note: "6 → <code>violates foreign key constraint</code>: квеста 99 нет." }]],
+    ["7", "практика 1", "left join: все герои", [
+      C(RIGHT("select geroi.imya, gildii.nazvanie\nfrom geroi\nleft join gildii on geroi.gildiya_id = gildii.id;"), WRONG("select geroi.imya, gildii.nazvanie\nfrom gildii\nleft join geroi on geroi.gildiya_id = gildii.id;")),
+      { warn: "<b>7</b> → 30 строк, у 8 героев гильдия пустая. Второй запрос — таблицы поменяли местами: теперь «все гильдии», 22 строки, герои без гильдии опять пропали. Какая таблица в <code>from</code>, такую и показываем целиком." }]],
+    ["8–10", "практика 1", "Три таблицы", [
+      C(RIGHT("select geroi.imya, kvesty.nazvanie\n" + J3 + "\norder by geroi.imya;"), FAILS("select imya, nazvanie\nfrom geroi\njoin uchastie on uchastie.geroy_id = geroi.id;"), WRONG("select geroi.imya, kvesty.nazvanie\nfrom uchastie\njoin geroi on uchastie.geroy_id = geroi.id\njoin kvesty on uchastie.id = kvesty.id;")),
+      { warn: "<b>8</b> → 15 строк. Второй — забыт второй <code>join</code>: <code>column \"nazvanie\" does not exist</code>, названия квеста в этих таблицах нет. Третий — снова неверное <code>on</code>: 5 строк, номер участия сравнивается с номером квеста." },
+      C(RIGHT("select geroi.imya, geroi.uroven\n" + J3 + "\nwhere kvesty.nazvanie = 'Пещера дракона'\norder by geroi.uroven desc;")),
+      { note: "9 → Ультра 99, Йети 95, Гром 88, Дана 41." },
+      C(RIGHT("select geroi.imya, count(*)\nfrom uchastie\njoin geroi on uchastie.geroy_id = geroi.id\ngroup by geroi.imya\norder by count(*) desc;")),
+      { note: "10 → 11 строк: Ультра 3, Дана 2, Нокс 2, остальные по 1. Таблица <code>kvesty</code> здесь не нужна: считаем строки связки. Можно и с тремя таблицами — ответ тот же." }]],
+    ["11–13", "практика 1", "left join и подсчёт", [
+      C(RIGHT("select kvesty.nazvanie, count(uchastie.id)\nfrom kvesty\nleft join uchastie on uchastie.kvest_id = kvesty.id\ngroup by kvesty.nazvanie\norder by count(uchastie.id) desc;"), WRONG("select kvesty.nazvanie, count(*)\nfrom kvesty\nleft join uchastie on uchastie.kvest_id = kvesty.id\ngroup by kvesty.nazvanie\norder by count(*) desc;"), WRONG("select kvesty.nazvanie, count(*)\nfrom kvesty\njoin uchastie on uchastie.kvest_id = kvesty.id\ngroup by kvesty.nazvanie;")),
+      { warn: "<b>11</b> → Спасти деревню 4, Пещера дракона 4, Башня мага 4, Тёмный лес 3, Затонувший корабль <b>0</b>. Второй — <code>count(*)</code>: у Затонувшего корабля 1. Третий — обычный <code>join</code>: Затонувшего корабля нет совсем, 4 строки." },
+      C(RIGHT("select count(*)\nfrom geroi\nleft join uchastie on uchastie.geroy_id = geroi.id\nwhere uchastie.id is null;")),
+      { note: "12 → 19. Самопроверка: в квестах 11 разных героев, 30 − 11 = 19. Здесь <code>count(*)</code> верен: считаем строки, оставшиеся после <code>where</code>." },
+      C(RIGHT("select geroi.imya, sum(kvesty.nagrada) as nagrady\n" + J3 + "\ngroup by geroi.imya\norder by nagrady desc\nlimit 3;")),
+      { note: "13 → Ультра 1200 (500 + 300 + 400), Дана 700, Нокс 700. Дана и Нокс могут идти в любом порядке." }]],
+    ["Б1–Б3", "бонус", "Бонус: четыре таблицы и повтор пары", [
+      C(FAILS("select geroi.imya, nazvanie\n" + J3 + "\njoin gildii on geroi.gildiya_id = gildii.id;"), RIGHT("select geroi.imya, kvesty.nazvanie\n" + J3 + "\njoin gildii on geroi.gildiya_id = gildii.id\nwhere gildii.nazvanie = 'Звёздный круг'\norder by geroi.imya;")),
+      { warn: "<b>Б1</b> → 4 строки: Белла — Башня мага, Ультра — три квеста. Первый → <code>column reference \"nazvanie\" is ambiguous</code>: <code>nazvanie</code> есть и у гильдии, и у квеста. Четыре таблицы — это три <code>join</code> подряд." },
+      C(RIGHT("select gildii.nazvanie, count(*)\nfrom uchastie\njoin geroi on uchastie.geroy_id = geroi.id\njoin gildii on geroi.gildiya_id = gildii.id\ngroup by gildii.nazvanie\norder by count(*) desc;")),
+      { note: "Б2 → Звёздный круг 4, Стальные волки 3, Ночные тени 3, Белые крылья 2. Вместе 12, ещё 3 участия — у героев без гильдии (это Д4)." },
+      C("insert into uchastie (geroy_id, kvest_id) values (20, 1);", "select count(*) from uchastie where geroy_id = 20 and kvest_id = 1;", "delete from uchastie where id > 15;"),
+      { warn: "<b>Б3</b> → 2: база разрешила записать Ультру в Пещеру дважды. Как это запретить — занятие 15. Удалить лишнюю строку обязательно, иначе разъедутся ответы домашки." },
+      { note: "Б4 — диаграмма питомцев на mermaid.live, ответ — в ходе занятия, блок 60–75." }]],
+    ["Практика 2", "практика 2", "Схема библиотеки", [
+      { note: "Показать 2–3 скриншота из чата и сравнить с ответом. Ответ — в ходе занятия, блок 100–115, там же частые ошибки. Дома ученики загружают эту схему из <code>biblioteka.sql</code> и сравнивают со своей." },
+      C(MM_BIBL)]],
+    ["Д1–Д5", "часть 1", "Домашка: герои и квесты", [
+      C(RIGHT("select kvesty.nazvanie\n" + J3 + "\nwhere geroi.imya = 'Ультра';")),
+      { note: "Д1 → Пещера дракона, Тёмный лес, Башня мага." },
+      C(RIGHT("select geroi.klass, count(*)\nfrom uchastie\njoin geroi on uchastie.geroy_id = geroi.id\ngroup by geroi.klass\norder by count(*) desc;")),
+      { note: "Д2 → маг 7, воин 3, лучник 3, лекарь 2. Это участия, а не герои: Ультра даёт магам 3." },
+      C(RIGHT("select kvesty.nazvanie, count(*)\nfrom uchastie\njoin kvesty on uchastie.kvest_id = kvesty.id\ngroup by kvesty.nazvanie\nhaving count(*) >= 4;")),
+      { note: "Д3 → Пещера дракона, Спасти деревню, Башня мага, по 4. Порядок любой." },
+      C(RIGHT("select count(*)\nfrom uchastie\njoin geroi on uchastie.geroy_id = geroi.id\nwhere geroi.gildiya_id is null;")),
+      { note: "Д4 → 3: Вихрь, Пиксель, Искра. Сходится с Б2: 15 − 12 = 3." },
+      C(RIGHT("select geroi.imya\nfrom geroi\njoin gildii on geroi.gildiya_id = gildii.id\nleft join uchastie on uchastie.geroy_id = geroi.id\nwhere gildii.nazvanie = 'Стальные волки' and uchastie.id is null\norder by geroi.imya;")),
+      { warn: "<b>Д5</b> → Сокол, Цезарь, Шторм. Обычный <code>join</code> к гильдии и <code>left join</code> к участию в одном запросе — так можно. Условие на гильдию в <code>where</code> здесь безопасно: гильдия — не та таблица, где мы ищем пропуски." }]],
+    ["Д6–Д10", "часть 2", "Домашка: библиотека", [
+      C(BIBL),
+      { note: "Загрузить <code>biblioteka.sql</code> → 7 и 7. Сначала спросить, какие отличия от своей схемы нашли." },
+      C(RIGHT("select knigi.nazvanie, chitateli.imya, vydachi.data_vydachi\nfrom vydachi\njoin knigi on vydachi.kniga_id = knigi.id\njoin chitateli on vydachi.chitatel_id = chitateli.id\nwhere vydachi.data_vozvrata is null\norder by vydachi.data_vydachi;"), WRONG("select knigi.nazvanie, chitateli.imya\nfrom vydachi\njoin knigi on vydachi.kniga_id = knigi.id\njoin chitateli on vydachi.chitatel_id = chitateli.id\nwhere vydachi.data_vozvrata = NULL;")),
+      { warn: "<b>Д6</b> → Война и мир — Вика, Незнайка на Луне — Аня, Золотой телёнок — Боря, Двенадцать стульев — Гоша. С <code>= NULL</code> — 0 строк без ошибки." },
+      C(RIGHT("select knigi.nazvanie, avtory.imya\nfrom knigi_avtory\njoin knigi on knigi_avtory.kniga_id = knigi.id\njoin avtory on knigi_avtory.avtor_id = avtory.id\norder by knigi.nazvanie;")),
+      { note: "Д7 → 8 строк. Два автора у «Двенадцати стульев» и «Золотого телёнка»: Ильф и Петров. Энциклопедии в результате нет — у неё нет пары, это Д8." },
+      C(RIGHT("select knigi.nazvanie\nfrom knigi\nleft join knigi_avtory on knigi_avtory.kniga_id = knigi.id\nwhere knigi_avtory.id is null;")),
+      { note: "Д8 → Энциклопедия школьника." },
+      C(RIGHT("select knigi.nazvanie, count(vydachi.id)\nfrom knigi\nleft join vydachi on vydachi.kniga_id = knigi.id\ngroup by knigi.nazvanie\norder by count(vydachi.id) desc;"), WRONG("select knigi.nazvanie, count(*)\nfrom knigi\nleft join vydachi on vydachi.kniga_id = knigi.id\ngroup by knigi.nazvanie;")),
+      { warn: "<b>Д9</b> → 7 строк: Двенадцать стульев 2, Энциклопедия школьника 0, остальные по 1. С <code>count(*)</code> у Энциклопедии 1 — та же ловушка, что на показе с Олей." },
+      C(RIGHT("select chitateli.imya\nfrom chitateli\nleft join vydachi on vydachi.chitatel_id = chitateli.id\nwhere vydachi.id is null;")),
+      { note: "Д10 → Дина." }]],
+  ];
+  const FLOWS = { 8: FLOW8, 11: FLOW11, "11r": FLOW11R, 12: FLOW12, "12r": FLOW12R, 13: FLOW13, "13r": FLOW13R, 14: FLOW14, "14r": FLOW14R };
   const MARK_TEXT = { ok: "✓ Правильно", err: "✗ Ошибка: база не выполнит запрос", bad: "✗ Неверно: ошибки не будет, но результат не тот" };
   let cmdN = 0;
   function renderFlow(l) {
