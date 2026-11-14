@@ -26,7 +26,7 @@
 
 ```mermaid
 erDiagram
-    hozyaeva |o--o{ pitomcy : " "
+    hozyaeva |o--o{ pitomcy : "id - hozyain_id"
     hozyaeva {
         bigint id PK
         text imya
