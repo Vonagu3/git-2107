@@ -26,15 +26,22 @@
 
 ```mermaid
 erDiagram
-    hozyaeva |o--o{ pitomcy : "id - hozyain_id"
+    pitomcy ||--o{ vladeniya : "есть хозяин"
+    hozyaeva ||--o{ vladeniya : "владеет"
+    pitomcy {
+        bigint id PK
+        text klichka
+        text vid
+        int vozrast
+    }
     hozyaeva {
         bigint id PK
         text imya
         text telefon
     }
-    pitomcy {
+    vladeniya {
         bigint id PK
-        text klichka
+        bigint pitomec_id FK
         bigint hozyain_id FK
     }
   ```
