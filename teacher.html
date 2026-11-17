@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261117190948">
+<link rel="stylesheet" href="quiz.css?v=20261117192032">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -127,6 +127,12 @@ table.probs td { vertical-align: top; font-size: 14px; }
 table.probs td:first-child { width: 40%; }
 @media (max-width: 600px) { .fl-block { grid-template-columns: 1fr; gap: 4px; } }
 @media (max-width: 700px) { h1 { font-size: 22px; } }
+
+.answer-schema { margin: 18px 0; padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.answer-schema figcaption { font-weight: 600; margin-bottom: 12px; }
+.mermaid-output { overflow-x: auto; background: #fff; border-radius: 8px; }
+.mermaid-output svg { display: block; margin: auto; height: auto; }
+.mermaid-source { overflow-x: auto; white-space: pre; }
 </style>
 </head>
 <body>
@@ -555,23 +561,306 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
 <h2>Занятие 15 — ответы (ученикам не отправлять)</h2>
 <p>Обозначения: <code>1:N</code> — один ко многим, <code>M:N</code> — многие ко многим. Все таблицы ниже имеют собственный первичный ключ <code>id</code>; поля с суффиксом <code>_id</code> — внешние ключи на соответствующие таблицы. В неоднозначных карточках приведены примеры, а не единственные допустимые ответы.</p>
 <h3>Проба и раунд 1</h3>
-<p>0. <strong>Аккаунт → персонажи, 1:N.</strong> <code>characters(id, account_id, name)</code>. Аккаунт 1 имеет персонажей 10 и 11; каждый ссылается на аккаунт 1.</p>
-<p>1. <strong>Стример → трансляции, 1:N.</strong> <code>streams(id, streamer_id)</code>. Владелец и приглашённый ведущий — разные понятия: вопрос только о владельце.</p>
-<p>2. <strong>Игроки ↔ достижения, M:N.</strong> <code>players</code>, <code>achievements</code>, <code>player_achievements(id, player_id, achievement_id)</code>. Пример пар: (1,10), (1,11), (2,10).</p>
-<p>3. <strong>Плейлисты ↔ треки, M:N.</strong> <code>playlists</code>, <code>tracks</code>, <code>playlist_tracks(id, playlist_id, track_id)</code>. Пример пар: (1,10), (1,11), (2,10).</p>
-<p>4. <strong>Категория → каналы, 1:N.</strong> <code>channels(id, category_id)</code>. Наличие только одного канала в тестовых данных не меняет правила.</p>
+<p>0. <strong>Аккаунт → персонажи, 1:N.</strong> <code>characters(id, account_id, name)</code>. Аккаунт 1 имеет персонажей 10 и 11; каждый ссылается на аккаунт 1.</p><figure class="answer-schema"><figcaption>Аккаунт и персонажи</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    accounts {
+        bigint id PK
+        text name
+    }
+    characters {
+        bigint id PK
+        bigint account_id FK
+        text name
+    }
+    accounts ||--o{ characters : &quot;содержит&quot;
+</pre></details></figure>
+<p>1. <strong>Стример → трансляции, 1:N.</strong> <code>streams(id, streamer_id)</code>. Владелец и приглашённый ведущий — разные понятия: вопрос только о владельце.</p><figure class="answer-schema"><figcaption>Владелец трансляции</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    streamers {
+        bigint id PK
+        text name
+    }
+    streams {
+        bigint id PK
+        bigint streamer_id FK
+    }
+    streamers ||--o{ streams : &quot;содержит&quot;
+</pre></details></figure>
+<p>2. <strong>Игроки ↔ достижения, M:N.</strong> <code>players</code>, <code>achievements</code>, <code>player_achievements(id, player_id, achievement_id)</code>. Пример пар: (1,10), (1,11), (2,10).</p><figure class="answer-schema"><figcaption>Достижения игроков</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    players {
+        bigint id PK
+        text name
+    }
+    achievements {
+        bigint id PK
+        text name
+    }
+    player_achievements {
+        bigint id PK
+        bigint player_id FK
+        bigint achievement_id FK
+    }
+    players ||--o{ player_achievements : &quot;участие&quot;
+    achievements ||--o{ player_achievements : &quot;участие&quot;
+</pre></details></figure>
+<p>3. <strong>Плейлисты ↔ треки, M:N.</strong> <code>playlists</code>, <code>tracks</code>, <code>playlist_tracks(id, playlist_id, track_id)</code>. Пример пар: (1,10), (1,11), (2,10).</p><figure class="answer-schema"><figcaption>Треки в плейлистах</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    playlists {
+        bigint id PK
+        text name
+    }
+    tracks {
+        bigint id PK
+        text name
+    }
+    playlist_tracks {
+        bigint id PK
+        bigint playlist_id FK
+        bigint track_id FK
+    }
+    playlists ||--o{ playlist_tracks : &quot;участие&quot;
+    tracks ||--o{ playlist_tracks : &quot;участие&quot;
+</pre></details></figure>
+<p>4. <strong>Категория → каналы, 1:N.</strong> <code>channels(id, category_id)</code>. Наличие только одного канала в тестовых данных не меняет правила.</p><figure class="answer-schema"><figcaption>Категории и каналы</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    categories {
+        bigint id PK
+        text name
+    }
+    channels {
+        bigint id PK
+        bigint category_id FK
+    }
+    categories ||--o{ channels : &quot;содержит&quot;
+</pre></details></figure>
 <h3>Раунд 2 — допустимые контексты</h3>
-<p>5. <strong>Команда → игроки, 1:N:</strong> игрок состоит в одной текущей команде. <strong>M:N:</strong> игрок выступает за разные команды по дисциплинам. Связка <code>memberships(id, player_id, team_id, discipline)</code>; уточнить допустимость нескольких команд в одной дисциплине. Вопрос заказчику: учитываем одну текущую команду, разные дисциплины или историю?</p>
-<p>6. <strong>Автор → видео, 1:N:</strong> у публикации один владелец. <strong>M:N:</strong> учитываем соавторов; <code>video_authors(id, video_id, author_id)</code>. Не смешивать владельца публикации с авторством. Вопрос: кто здесь автор и может ли их быть несколько?</p>
-<p>7. <strong>Жанр → игры, 1:N:</strong> у игры один основной жанр. <strong>M:N:</strong> у игры несколько жанров; <code>game_genres(id, game_id, genre_id)</code>. Вопрос: выбираем один основной жанр или все подходящие?</p>
-<p>8. <strong>Пользователь — текущая подписка, 1:1 с возможностью отсутствия:</strong> отдельная запись текущей подписки, максимум одна на пользователя и принадлежащая только ему. <strong>Пользователь → оформления подписки, 1:N:</strong> отдельная строка на каждое оформление/продление. Если подписка означает тариф, возможна другая модель: тариф → пользователи. Засчитывать при ясном определении сущности. Вопрос: подписка — состояние, оформление или тариф?</p>
+<p>5. <strong>Команда → игроки, 1:N:</strong> игрок состоит в одной текущей команде. <strong>M:N:</strong> игрок выступает за разные команды по дисциплинам. Связка <code>memberships(id, player_id, team_id, discipline)</code>; уточнить допустимость нескольких команд в одной дисциплине. Вопрос заказчику: учитываем одну текущую команду, разные дисциплины или историю?</p><figure class="answer-schema"><figcaption>Вариант: один ко многим</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    teams {
+        bigint id PK
+        text name
+    }
+    players {
+        bigint id PK
+        bigint team_id FK
+    }
+    teams ||--o{ players : &quot;содержит&quot;
+</pre></details></figure><figure class="answer-schema"><figcaption>Вариант: многие ко многим</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    teams {
+        bigint id PK
+        text name
+    }
+    players {
+        bigint id PK
+        text name
+    }
+    memberships {
+        bigint id PK
+        bigint team_id FK
+        bigint player_id FK
+        text discipline
+    }
+    teams ||--o{ memberships : &quot;участие&quot;
+    players ||--o{ memberships : &quot;участие&quot;
+</pre></details></figure>
+<p>6. <strong>Автор → видео, 1:N:</strong> у публикации один владелец. <strong>M:N:</strong> учитываем соавторов; <code>video_authors(id, video_id, author_id)</code>. Не смешивать владельца публикации с авторством. Вопрос: кто здесь автор и может ли их быть несколько?</p><figure class="answer-schema"><figcaption>Вариант: один ко многим</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    authors {
+        bigint id PK
+        text name
+    }
+    videos {
+        bigint id PK
+        bigint author_id FK
+    }
+    authors ||--o{ videos : &quot;содержит&quot;
+</pre></details></figure><figure class="answer-schema"><figcaption>Вариант: многие ко многим</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    authors {
+        bigint id PK
+        text name
+    }
+    videos {
+        bigint id PK
+        text name
+    }
+    video_authors {
+        bigint id PK
+        bigint author_id FK
+        bigint video_id FK
+    }
+    authors ||--o{ video_authors : &quot;участие&quot;
+    videos ||--o{ video_authors : &quot;участие&quot;
+</pre></details></figure>
+<p>7. <strong>Жанр → игры, 1:N:</strong> у игры один основной жанр. <strong>M:N:</strong> у игры несколько жанров; <code>game_genres(id, game_id, genre_id)</code>. Вопрос: выбираем один основной жанр или все подходящие?</p><figure class="answer-schema"><figcaption>Вариант: один ко многим</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    genres {
+        bigint id PK
+        text name
+    }
+    games {
+        bigint id PK
+        bigint genre_id FK
+    }
+    genres ||--o{ games : &quot;содержит&quot;
+</pre></details></figure><figure class="answer-schema"><figcaption>Вариант: многие ко многим</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    genres {
+        bigint id PK
+        text name
+    }
+    games {
+        bigint id PK
+        text name
+    }
+    game_genres {
+        bigint id PK
+        bigint genre_id FK
+        bigint game_id FK
+    }
+    genres ||--o{ game_genres : &quot;участие&quot;
+    games ||--o{ game_genres : &quot;участие&quot;
+</pre></details></figure>
+<p>8. <strong>Пользователь — текущая подписка, 1:1 с возможностью отсутствия:</strong> отдельная запись текущей подписки, максимум одна на пользователя и принадлежащая только ему. <strong>Пользователь → оформления подписки, 1:N:</strong> отдельная строка на каждое оформление/продление. Если подписка означает тариф, возможна другая модель: тариф → пользователи. Засчитывать при ясном определении сущности. Вопрос: подписка — состояние, оформление или тариф?</p><figure class="answer-schema"><figcaption>Одна текущая подписка</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    users {
+        bigint id PK
+        text nickname
+    }
+    subscriptions {
+        bigint id PK
+        bigint user_id FK
+    }
+    users ||--o| subscriptions : &quot;текущая подписка&quot;
+</pre></details><p>Для subscriptions.user_id нужен UNIQUE: внешний ключ сам по себе не ограничивает число подписок.</p></figure><figure class="answer-schema"><figcaption>История оформлений</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    users {
+        bigint id PK
+        text name
+    }
+    subscriptions {
+        bigint id PK
+        bigint user_id FK
+        text started_at
+        text ends_at
+    }
+    users ||--o{ subscriptions : &quot;содержит&quot;
+</pre></details></figure><figure class="answer-schema"><figcaption>Подписка означает тариф</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    plans {
+        bigint id PK
+        text name
+    }
+    users {
+        bigint id PK
+        bigint plan_id FK
+        text nickname
+    }
+    plans ||--o{ users : &quot;содержит&quot;
+</pre></details></figure>
 <p>Во всех случаях просить примеры, которые различают модели. Не требовать именно перечисленных сюжетов.</p>
 <h3>Раунд 3 — схемы до и после</h3>
-<p>9. До: <code>hosts(id, name)</code>, <code>streams(id, host_id)</code>. После: <code>hosts</code>, <code>streams</code>, <code>stream_hosts(id, stream_id, host_id)</code>. Убрать единственный <code>host_id</code> из трансляции. Пары (эфир 1, ведущий 1), (эфир 1, ведущий 2), (эфир 2, ведущий 1) демонстрируют M:N.</p>
-<p>10. До: <code>players</code>, <code>items(id, owner_id)</code> — каждый предмет здесь отдельный экземпляр. После добавить <code>transfers(id, item_id, sender_id, recipient_id, transferred_at)</code>. Отправитель и получатель ссылаются на игроков. Одна строка — событие передачи: предмет 10, игрок 1 → 2, затем тот же предмет 2 → 1. Простая связка «игрок — предмет» без времени и направления историю не описывает. Для квиза допустимо оставить текущего владельца и историю отдельно; при передаче они должны согласованно обновляться. SQL-механизм обновления не разбираем.</p>
-<p>11. До: <code>playlist_tracks(id, playlist_id, track_id, position)</code>; пара плейлист–трек не повторяется. После: те же поля, но пара может повторяться, каждая строка — отдельное вхождение со своим <code>id</code>. Пример: (id 1, плейлист 5, трек 8, позиция 1), (id 2, плейлист 5, трек 9, позиция 2), (id 3, плейлист 5, трек 8, позиция 3). Позиции внутри плейлиста различаются. Связь остаётся M:N; меняются правила повторов. Если ученики назовут <code>unique</code>, обсудить устно, синтаксис не требуется.</p>
+<p>9. До: <code>hosts(id, name)</code>, <code>streams(id, host_id)</code>. После: <code>hosts</code>, <code>streams</code>, <code>stream_hosts(id, stream_id, host_id)</code>. Убрать единственный <code>host_id</code> из трансляции. Пары (эфир 1, ведущий 1), (эфир 1, ведущий 2), (эфир 2, ведущий 1) демонстрируют M:N.</p><figure class="answer-schema"><figcaption>До: один ведущий</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    hosts {
+        bigint id PK
+        text name
+    }
+    streams {
+        bigint id PK
+        bigint host_id FK
+    }
+    hosts ||--o{ streams : &quot;содержит&quot;
+</pre></details></figure><figure class="answer-schema"><figcaption>После: совместные эфиры</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    hosts {
+        bigint id PK
+        text name
+    }
+    streams {
+        bigint id PK
+        text name
+    }
+    stream_hosts {
+        bigint id PK
+        bigint host_id FK
+        bigint stream_id FK
+    }
+    hosts ||--o{ stream_hosts : &quot;участие&quot;
+    streams ||--o{ stream_hosts : &quot;участие&quot;
+</pre></details></figure>
+<p>10. До: <code>players</code>, <code>items(id, owner_id)</code> — каждый предмет здесь отдельный экземпляр. После добавить <code>transfers(id, item_id, sender_id, recipient_id, transferred_at)</code>. Отправитель и получатель ссылаются на игроков. Одна строка — событие передачи: предмет 10, игрок 1 → 2, затем тот же предмет 2 → 1. Простая связка «игрок — предмет» без времени и направления историю не описывает. Для квиза допустимо оставить текущего владельца и историю отдельно; при передаче они должны согласованно обновляться. SQL-механизм обновления не разбираем.</p><figure class="answer-schema"><figcaption>До: текущий владелец</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    players {
+        bigint id PK
+        text name
+    }
+    items {
+        bigint id PK
+        bigint owner_id FK
+    }
+    players ||--o{ items : &quot;содержит&quot;
+</pre></details></figure><figure class="answer-schema"><figcaption>После: текущий владелец и история передач</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    players {
+        bigint id PK
+        text nickname
+    }
+    items {
+        bigint id PK
+        bigint owner_id FK
+    }
+    transfers {
+        bigint id PK
+        bigint item_id FK
+        bigint sender_id FK
+        bigint recipient_id FK
+        text transferred_at
+    }
+    players ||--o{ items : &quot;текущий владелец&quot;
+    items ||--o{ transfers : &quot;история&quot;
+    players ||--o{ transfers : &quot;отправитель&quot;
+    players ||--o{ transfers : &quot;получатель&quot;
+</pre></details></figure>
+<p>11. До: <code>playlist_tracks(id, playlist_id, track_id, position)</code>; пара плейлист–трек не повторяется. После: те же поля, но пара может повторяться, каждая строка — отдельное вхождение со своим <code>id</code>. Пример: (id 1, плейлист 5, трек 8, позиция 1), (id 2, плейлист 5, трек 9, позиция 2), (id 3, плейлист 5, трек 8, позиция 3). Позиции внутри плейлиста различаются. Связь остаётся M:N; меняются правила повторов. Если ученики назовут <code>unique</code>, обсудить устно, синтаксис не требуется.</p><figure class="answer-schema"><figcaption>До: один трек один раз</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    playlists {
+        bigint id PK
+        text name
+    }
+    tracks {
+        bigint id PK
+        text name
+    }
+    playlist_tracks {
+        bigint id PK
+        bigint playlist_id FK
+        bigint track_id FK
+        bigint position
+    }
+    playlists ||--o{ playlist_tracks : &quot;участие&quot;
+    tracks ||--o{ playlist_tracks : &quot;участие&quot;
+</pre></details><p>До: уникальна пара playlist_id + track_id. После: повторы пары разрешены; отдельный id у каждого вхождения. В обоих вариантах позиция уникальна внутри плейлиста.</p></figure><figure class="answer-schema"><figcaption>После: повторные вхождения</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    playlists {
+        bigint id PK
+        text name
+    }
+    tracks {
+        bigint id PK
+        text name
+    }
+    playlist_tracks {
+        bigint id PK
+        bigint playlist_id FK
+        bigint track_id FK
+        bigint position
+    }
+    playlists ||--o{ playlist_tracks : &quot;участие&quot;
+    tracks ||--o{ playlist_tracks : &quot;участие&quot;
+</pre></details><p>До: уникальна пара playlist_id + track_id. После: повторы пары разрешены; отдельный id у каждого вхождения. В обоих вариантах позиция уникальна внутри плейлиста.</p></figure>
 <h3>Раунд 4 — эталонные модели</h3>
-<p>12. <code>players(id, nickname)</code>, <code>raids(id, starts_at)</code>, <code>participations(id, player_id, raid_id, role, confirmation_status)</code>.</p>
+<p>12. <code>players(id, nickname)</code>, <code>raids(id, starts_at)</code>, <code>participations(id, player_id, raid_id, role, confirmation_status)</code>.</p><figure class="answer-schema"><figcaption>Состав рейдов</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    players {
+        bigint id PK
+        text nickname
+    }
+    raids {
+        bigint id PK
+        text starts_at
+    }
+    participations {
+        bigint id PK
+        bigint player_id FK
+        bigint raid_id FK
+        text role
+        text confirmation_status
+    }
+    players ||--o{ participations : &quot;участвует&quot;
+    raids ||--o{ participations : &quot;состав&quot;
+</pre></details></figure>
 <div class="tablewrap"><table>
 <tr><td>id участия</td><td>player_id</td><td>raid_id</td><td>role</td><td>confirmation_status</td></tr>
 <tr><td>1</td><td>1</td><td>10</td><td>лекарь</td><td>подтверждено</td></tr>
@@ -579,7 +868,26 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
 <tr><td>3</td><td>2</td><td>10</td><td>танк</td><td>подтверждено</td></tr>
 </table></div>
 <p>Рейд 12 существует в <code>raids</code>, строк участия у него нет. Роль и статус не относятся к игроку вообще: они зависят от конкретного рейда. Пара игрок–рейд не повторяется.</p>
-<p>13. <code>users(id, nickname)</code>, <code>skins(id, name, rarity)</code>, <code>user_skins(id, user_id, skin_id, quantity, first_received_at)</code>.</p>
+<p>13. <code>users(id, nickname)</code>, <code>skins(id, name, rarity)</code>, <code>user_skins(id, user_id, skin_id, quantity, first_received_at)</code>.</p><figure class="answer-schema"><figcaption>Коллекции скинов</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    users {
+        bigint id PK
+        text nickname
+    }
+    skins {
+        bigint id PK
+        text name
+        text rarity
+    }
+    user_skins {
+        bigint id PK
+        bigint user_id FK
+        bigint skin_id FK
+        bigint quantity
+        text first_received_at
+    }
+    users ||--o{ user_skins : &quot;коллекция&quot;
+    skins ||--o{ user_skins : &quot;владения&quot;
+</pre></details></figure>
 <div class="tablewrap"><table>
 <tr><td>id владения</td><td>user_id</td><td>skin_id</td><td>quantity</td><td>first_received_at</td></tr>
 <tr><td>1</td><td>1</td><td>20</td><td>3</td><td>2026-10-01</td></tr>
@@ -588,14 +896,43 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
 </table></div>
 <p>Пользователь 3 существует без строк владения. Название и редкость скина общие; количество и дата первого получения относятся к паре. Не вводить одну дату для всех отдельных копий: по условию хранится именно первое получение типа. Пара пользователь–скин не повторяется.</p>
 <h3>Индивидуальный финал</h3>
-<p>14. <strong>1:N:</strong> каждый пользователь закреплён за одним чатом, в чате много пользователей; <code>users.chat_id</code>. <strong>M:N:</strong> пользователь входит в разные групповые чаты, в каждом много пользователей. Таблицы: <code>users(id, nickname)</code>, <code>chats(id, name)</code>, <code>chat_members(id, user_id, chat_id, joined_at)</code>. Дата вступления относится к участию. Пример пар: (1,10), (1,11), (2,10). Пользователь или чат может существовать без участия.</p>
+<p>14. <strong>1:N:</strong> каждый пользователь закреплён за одним чатом, в чате много пользователей; <code>users.chat_id</code>. <strong>M:N:</strong> пользователь входит в разные групповые чаты, в каждом много пользователей. Таблицы: <code>users(id, nickname)</code>, <code>chats(id, name)</code>, <code>chat_members(id, user_id, chat_id, joined_at)</code>. Дата вступления относится к участию. Пример пар: (1,10), (1,11), (2,10). Пользователь или чат может существовать без участия.</p><figure class="answer-schema"><figcaption>Вариант: один чат на пользователя</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    chats {
+        bigint id PK
+        text name
+    }
+    users {
+        bigint id PK
+        bigint chat_id FK
+        text nickname
+    }
+    chats ||--o{ users : &quot;содержит&quot;
+</pre></details></figure><figure class="answer-schema"><figcaption>Вариант: групповые чаты</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    users {
+        bigint id PK
+        text name
+    }
+    chats {
+        bigint id PK
+        text name
+    }
+    chat_members {
+        bigint id PK
+        bigint user_id FK
+        bigint chat_id FK
+        text joined_at
+    }
+    users ||--o{ chat_members : &quot;участие&quot;
+    chats ||--o{ chat_members : &quot;участие&quot;
+</pre></details></figure>
 <p>Проверить: правило в обе стороны; пример, подтверждающий правило; дата в связке. Если ученик предложил историю вступлений, признать модель допустимой, но напомнить, что финал просит только одно текущее участие на пару.</p>
 </details></section>
 
 </div>
 </main>
-<script src="quiz.js?v=20261117190948"></script>
-<script src="engine.js?v=20261117190948"></script>
-<script src="teacher.js?v=20261117190948"></script>
+<script src="quiz.js?v=20261117192032"></script>
+<script src="engine.js?v=20261117192032"></script>
+<script src="teacher.js?v=20261117192032"></script>
+<script type="module" src="answer-diagrams.js"></script>
 </body>
 </html>
