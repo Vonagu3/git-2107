@@ -296,7 +296,7 @@
   }
 
   // ---------- вкладки: общая «Ученики и опрос» + по одной на каждое занятие ----------
-  const TABS = ["pupils", "l8", "l11", "l12", "l13", "l14"];
+  const TABS = ["pupils", "l8", "l11", "l12", "l13", "l14", "l15"];
   function showTab(t) {
     if (!TABS.includes(t)) t = TABS[TABS.length - 1];
     document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
