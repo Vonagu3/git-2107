@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261121101056">
+<link rel="stylesheet" href="quiz.css?v=20261121102937">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -775,6 +775,40 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
     arenas ||--o{ tournament_arenas : &quot;участие&quot;
     tournaments ||--o{ tournament_arenas : &quot;участие&quot;
 </pre></details></figure>
+
+<details class="card quiz-sql"><summary>SQL · задание 9: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-9.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
+-- Временные таблицы доступны до закрытия соединения.
+-- Повторный запуск пересоздаёт только временные учебные таблицы.
+DROP TABLE IF EXISTS pg_temp.tournament_arenas, pg_temp.tournaments, pg_temp.arenas CASCADE;
+
+-- ДО: одна арена на турнир.
+CREATE TEMP TABLE arenas (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TEMP TABLE tournaments (
+    id integer PRIMARY KEY, name text NOT NULL,
+    arena_id integer NOT NULL REFERENCES arenas(id)
+);
+INSERT INTO arenas VALUES (1, &#x27;Север&#x27;), (2, &#x27;Юг&#x27;);
+INSERT INTO tournaments VALUES (1, &#x27;Весенний кубок&#x27;, 1), (2, &#x27;Летний кубок&#x27;, 1);
+SELECT * FROM tournaments ORDER BY id;
+
+-- ПОСЛЕ: переносим существующие связи в отдельную таблицу.
+CREATE TEMP TABLE tournament_arenas (
+    id integer PRIMARY KEY,
+    tournament_id integer NOT NULL REFERENCES tournaments(id),
+    arena_id integer NOT NULL REFERENCES arenas(id),
+    UNIQUE (tournament_id, arena_id)
+);
+INSERT INTO tournament_arenas (id, tournament_id, arena_id)
+SELECT id, id, arena_id FROM tournaments;
+ALTER TABLE tournaments DROP COLUMN arena_id;
+INSERT INTO tournament_arenas VALUES (3, 1, 2);
+-- Три строки: Весенний кубок — Север и Юг; Летний кубок — Север.
+SELECT t.name AS tournament, a.name AS arena
+FROM tournament_arenas ta
+JOIN tournaments t ON t.id = ta.tournament_id
+JOIN arenas a ON a.id = ta.arena_id
+ORDER BY t.id, a.id;
+</code></pre></details>
 <p>10. До: <code>players</code>, <code>items(id, owner_id)</code> — каждый предмет здесь отдельный экземпляр. После добавить <code>transfers(id, item_id, sender_id, recipient_id, transferred_at)</code>. Отправитель и получатель ссылаются на игроков. Одна строка — событие передачи: предмет 10, игрок 1 → 2, затем тот же предмет 2 → 1. Простая связка «игрок — предмет» без времени и направления историю не описывает. Для квиза допустимо оставить текущего владельца и историю отдельно; при передаче они должны согласованно обновляться. SQL-механизм обновления не разбираем.</p><figure class="answer-schema"><figcaption>До: текущий владелец</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     players {
         bigint id PK
@@ -806,6 +840,53 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
     players ||--o{ transfers : &quot;отправитель&quot;
     players ||--o{ transfers : &quot;получатель&quot;
 </pre></details></figure>
+
+<details class="card quiz-sql"><summary>SQL · задание 10: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-10.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
+-- Временные таблицы доступны до закрытия соединения.
+-- Повторный запуск пересоздаёт только временные учебные таблицы.
+DROP TABLE IF EXISTS pg_temp.transfers, pg_temp.items, pg_temp.players CASCADE;
+
+-- ДО: отдельные экземпляры предметов и их текущие владельцы.
+CREATE TEMP TABLE players (id integer PRIMARY KEY, nickname text NOT NULL);
+CREATE TEMP TABLE items (
+    id integer PRIMARY KEY, name text NOT NULL,
+    owner_id integer NOT NULL REFERENCES players(id)
+);
+INSERT INTO players VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;);
+INSERT INTO items VALUES (10, &#x27;Меч&#x27;, 1), (11, &#x27;Щит&#x27;, 2);
+SELECT * FROM items ORDER BY id;
+
+-- ПОСЛЕ: история передач. Начальное получение сюда не записываем.
+CREATE TEMP TABLE transfers (
+    id integer PRIMARY KEY,
+    item_id integer NOT NULL REFERENCES items(id),
+    sender_id integer NOT NULL REFERENCES players(id),
+    recipient_id integer NOT NULL REFERENCES players(id),
+    transferred_at timestamp NOT NULL,
+    CHECK (sender_id &lt;&gt; recipient_id)
+);
+-- Каждую передачу и смену владельца выполняем вместе.
+BEGIN;
+INSERT INTO transfers VALUES (1, 10, 1, 2, &#x27;2026-11-20 12:00&#x27;);
+UPDATE items SET owner_id = 2 WHERE id = 10;
+COMMIT;
+BEGIN;
+INSERT INTO transfers VALUES (2, 10, 2, 1, &#x27;2026-11-20 13:00&#x27;);
+UPDATE items SET owner_id = 1 WHERE id = 10;
+COMMIT;
+-- Две передачи меча: Лис → Сова, затем Сова → Лис.
+SELECT i.name, s.nickname AS sender, r.nickname AS recipient, t.transferred_at
+FROM transfers t
+JOIN items i ON i.id = t.item_id
+JOIN players s ON s.id = t.sender_id
+JOIN players r ON r.id = t.recipient_id
+ORDER BY t.transferred_at, t.id;
+-- Текущий владелец меча — Лис; у щита передач нет.
+SELECT i.name, p.nickname AS owner
+FROM items i JOIN players p ON p.id = i.owner_id ORDER BY i.id;
+-- FK проверяет существование игроков, но не совпадение отправителя
+-- с текущим владельцем: в приложении это отдельная проверка.
+</code></pre></details>
 <p>11. До: <code>users(id, nickname)</code>, <code>messages(id, author_id, text, sent_at)</code> — пользователь → сообщения, 1:N. После: <code>users(id, nickname)</code>, <code>messages(id, sender_id, recipient_id, text, sent_at)</code>. Поле автора становится <code>sender_id</code>, добавляется <code>recipient_id</code>. Оба внешних ключа ссылаются на <code>users.id</code>, но обозначают разные роли. На схеме две связи 1:N: пользователь отправляет много сообщений и получает много сообщений; у каждого сообщения ровно один отправитель и ровно один получатель. Отдельные таблицы отправителей и получателей не нужны. Пример: (id 1, отправитель 7, получатель 9, «Привет!»), (id 2, отправитель 9, получатель 7, «Привет!»), (id 3, отправитель 7, получатель 9, «Как дела?»). Одна строка — отдельное сообщение, поэтому пара отправитель–получатель может повторяться. Получателя старых публичных сообщений нельзя определить автоматически: для них нужно отдельное правило переноса или архивирования.</p><figure class="answer-schema"><figcaption>До: автор сообщения</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     users {
         bigint id PK
@@ -833,6 +914,43 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
     users ||--o{ messages : &quot;отправляет&quot;
     users ||--o{ messages : &quot;получает&quot;
 </pre></details></figure>
+
+<details class="card quiz-sql"><summary>SQL · задание 11: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-11.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
+-- Временные таблицы доступны до закрытия соединения.
+-- Повторный запуск пересоздаёт только временные учебные таблицы.
+DROP TABLE IF EXISTS pg_temp.public_messages, pg_temp.messages, pg_temp.users CASCADE;
+
+-- ДО: общая лента.
+CREATE TEMP TABLE users (id integer PRIMARY KEY, nickname text NOT NULL);
+CREATE TEMP TABLE messages (
+    id integer PRIMARY KEY,
+    author_id integer NOT NULL REFERENCES users(id),
+    text text NOT NULL, sent_at timestamp NOT NULL
+);
+INSERT INTO users VALUES (7, &#x27;Лис&#x27;), (9, &#x27;Сова&#x27;), (10, &#x27;Кот&#x27;);
+INSERT INTO messages VALUES (1, 7, &#x27;Привет всем!&#x27;, &#x27;2026-11-20 10:00&#x27;);
+SELECT * FROM messages;
+
+-- ПОСЛЕ: публичную ленту сохраняем отдельно: получателя у неё нет.
+ALTER TABLE messages RENAME TO public_messages;
+CREATE TEMP TABLE messages (
+    id integer PRIMARY KEY,
+    sender_id integer NOT NULL REFERENCES users(id),
+    recipient_id integer NOT NULL REFERENCES users(id),
+    text text NOT NULL, sent_at timestamp NOT NULL
+);
+INSERT INTO messages VALUES
+    (1, 7, 9, &#x27;Привет!&#x27;, &#x27;2026-11-20 12:00&#x27;),
+    (2, 9, 7, &#x27;Привет!&#x27;, &#x27;2026-11-20 12:01&#x27;),
+    (3, 7, 9, &#x27;Как дела?&#x27;, &#x27;2026-11-20 12:02&#x27;);
+-- Одна таблица users присоединяется дважды, с разными псевдонимами.
+SELECT s.nickname AS sender, r.nickname AS recipient, m.text, m.sent_at
+FROM messages m
+JOIN users s ON s.id = m.sender_id
+JOIN users r ON r.id = m.recipient_id
+ORDER BY m.sent_at, m.id;
+-- Три сообщения; Кот пока ни с кем не переписывался.
+</code></pre></details>
 <h3>Раунд 4 — эталонные модели</h3>
 <p>12. <code>players(id, nickname)</code>, <code>raids(id, starts_at)</code>, <code>participations(id, player_id, raid_id, role, confirmation_status)</code>.</p><figure class="answer-schema"><figcaption>Состав рейдов</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     players {
@@ -860,6 +978,39 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
 <tr><td>3</td><td>2</td><td>10</td><td>танк</td><td>подтверждено</td></tr>
 </table></div>
 <p>Рейд 12 существует в <code>raids</code>, строк участия у него нет. Роль и статус не относятся к игроку вообще: они зависят от конкретного рейда. Пара игрок–рейд не повторяется.</p>
+
+<details class="card quiz-sql"><summary>SQL · задание 12: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-12.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
+-- Временные таблицы доступны до закрытия соединения.
+-- Повторный запуск пересоздаёт только временные учебные таблицы.
+DROP TABLE IF EXISTS pg_temp.participations, pg_temp.raids, pg_temp.players CASCADE;
+
+CREATE TEMP TABLE players (id integer PRIMARY KEY, nickname text NOT NULL);
+CREATE TEMP TABLE raids (id integer PRIMARY KEY, starts_at timestamp NOT NULL);
+CREATE TEMP TABLE participations (
+    id integer PRIMARY KEY,
+    player_id integer NOT NULL REFERENCES players(id),
+    raid_id integer NOT NULL REFERENCES raids(id),
+    role text NOT NULL, confirmation_status text NOT NULL,
+    UNIQUE (player_id, raid_id)
+);
+INSERT INTO players VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;);
+INSERT INTO raids VALUES
+    (10, &#x27;2026-11-21 18:00&#x27;), (11, &#x27;2026-11-22 18:00&#x27;), (12, &#x27;2026-11-23 18:00&#x27;);
+INSERT INTO participations VALUES
+    (1, 1, 10, &#x27;лекарь&#x27;, &#x27;подтверждено&#x27;),
+    (2, 1, 11, &#x27;танк&#x27;, &#x27;ожидает&#x27;),
+    (3, 2, 10, &#x27;танк&#x27;, &#x27;подтверждено&#x27;);
+-- Лис в двух рейдах с разными ролями. У пустого рейда 12 поля участия NULL.
+SELECT r.id AS raid, r.starts_at, p.nickname, x.role, x.confirmation_status
+FROM raids r
+LEFT JOIN participations x ON x.raid_id = r.id
+LEFT JOIN players p ON p.id = x.player_id
+ORDER BY r.id, p.id;
+-- Число участников: 10 → 2, 11 → 1, 12 → 0.
+SELECT r.id, count(x.id) AS participants
+FROM raids r LEFT JOIN participations x ON x.raid_id = r.id
+GROUP BY r.id ORDER BY r.id;
+</code></pre></details>
 <p>13. <code>users(id, nickname)</code>, <code>skins(id, name, rarity)</code>, <code>user_skins(id, user_id, skin_id, quantity, first_received_at)</code>.</p><figure class="answer-schema"><figcaption>Коллекции скинов</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     users {
         bigint id PK
@@ -887,6 +1038,36 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
 <tr><td>3</td><td>1</td><td>21</td><td>2</td><td>2026-11-12</td></tr>
 </table></div>
 <p>Пользователь 3 существует без строк владения. Название и редкость скина общие; количество и дата первого получения относятся к паре. Не вводить одну дату для всех отдельных копий: по условию хранится именно первое получение типа. Пара пользователь–скин не повторяется.</p>
+
+<details class="card quiz-sql"><summary>SQL · задание 13: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-13.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
+-- Временные таблицы доступны до закрытия соединения.
+-- Повторный запуск пересоздаёт только временные учебные таблицы.
+DROP TABLE IF EXISTS pg_temp.user_skins, pg_temp.skins, pg_temp.users CASCADE;
+
+CREATE TEMP TABLE users (id integer PRIMARY KEY, nickname text NOT NULL);
+CREATE TEMP TABLE skins (id integer PRIMARY KEY, name text NOT NULL, rarity text NOT NULL);
+CREATE TEMP TABLE user_skins (
+    id integer PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES users(id),
+    skin_id integer NOT NULL REFERENCES skins(id),
+    quantity integer NOT NULL CHECK (quantity &gt; 0),
+    first_received_at date NOT NULL,
+    UNIQUE (user_id, skin_id)
+);
+INSERT INTO users VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;), (3, &#x27;Кот&#x27;);
+INSERT INTO skins VALUES (20, &#x27;Ледяной&#x27;, &#x27;редкий&#x27;), (21, &#x27;Огненный&#x27;, &#x27;обычный&#x27;);
+INSERT INTO user_skins VALUES
+    (1, 1, 20, 3, &#x27;2026-10-01&#x27;),
+    (2, 2, 20, 1, &#x27;2026-11-10&#x27;),
+    (3, 1, 21, 2, &#x27;2026-11-12&#x27;);
+-- Один тип скина у двух пользователей: разные количество и дата.
+-- У Кота коллекция пуста, поля владения NULL.
+SELECT u.nickname, s.name, s.rarity, x.quantity, x.first_received_at
+FROM users u
+LEFT JOIN user_skins x ON x.user_id = u.id
+LEFT JOIN skins s ON s.id = x.skin_id
+ORDER BY u.id, s.id;
+</code></pre></details>
 <h3>Индивидуальный финал</h3>
 <p>14. <strong>1:N:</strong> каждый пользователь закреплён за одним чатом, в чате много пользователей; <code>users.chat_id</code>. <strong>M:N:</strong> пользователь входит в разные групповые чаты, в каждом много пользователей. Таблицы: <code>users(id, nickname)</code>, <code>chats(id, name)</code>, <code>chat_members(id, user_id, chat_id, joined_at)</code>. Дата вступления относится к участию. Пример пар: (1,10), (1,11), (2,10). Пользователь или чат может существовать без участия.</p><figure class="answer-schema"><figcaption>Вариант: один чат на пользователя</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     chats {
@@ -918,13 +1099,59 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
     chats ||--o{ chat_members : &quot;участие&quot;
 </pre></details></figure>
 <p>Проверить: правило в обе стороны; пример, подтверждающий правило; дата в связке. Если ученик предложил историю вступлений, признать модель допустимой, но напомнить, что финал просит только одно текущее участие на пару.</p>
+
+<details class="card quiz-sql"><summary>SQL · задание 14: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-14.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
+-- Временные таблицы доступны до закрытия соединения.
+-- Повторный запуск пересоздаёт только временные учебные таблицы.
+DROP TABLE IF EXISTS pg_temp.users_one_chat, pg_temp.chat_members, pg_temp.users, pg_temp.chats CASCADE;
+
+-- ВАРИАНТ 1:N: у каждого пользователя один чат.
+CREATE TEMP TABLE chats (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TEMP TABLE users (
+    id integer PRIMARY KEY, nickname text NOT NULL,
+    chat_id integer NOT NULL REFERENCES chats(id)
+);
+INSERT INTO chats VALUES (10, &#x27;Общий&#x27;), (11, &#x27;Игры&#x27;), (12, &#x27;Новый чат&#x27;);
+INSERT INTO users VALUES (1, &#x27;Лис&#x27;, 10), (2, &#x27;Сова&#x27;, 10);
+SELECT u.nickname, c.name FROM users u JOIN chats c ON c.id = u.chat_id ORDER BY u.id;
+
+-- ВАРИАНТ M:N: отдельный набор данных для групповых чатов.
+-- Старую таблицу оставляем для сравнения двух моделей.
+ALTER TABLE users RENAME TO users_one_chat;
+CREATE TEMP TABLE users (id integer PRIMARY KEY, nickname text NOT NULL);
+CREATE TEMP TABLE chat_members (
+    id integer PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES users(id),
+    chat_id integer NOT NULL REFERENCES chats(id),
+    joined_at timestamp NOT NULL,
+    UNIQUE (user_id, chat_id)
+);
+INSERT INTO users VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;), (3, &#x27;Кот&#x27;);
+INSERT INTO chat_members VALUES
+    (1, 1, 10, &#x27;2026-11-20 12:00&#x27;),
+    (2, 1, 11, &#x27;2026-11-21 15:00&#x27;),
+    (3, 2, 10, &#x27;2026-11-20 13:00&#x27;);
+-- Три участия; дата относится к конкретной паре пользователь–чат.
+SELECT u.nickname, c.name, m.joined_at
+FROM chat_members m
+JOIN users u ON u.id = m.user_id
+JOIN chats c ON c.id = m.chat_id
+ORDER BY u.id, c.id;
+-- Пользователь без чатов: Кот.
+SELECT u.nickname FROM users u
+LEFT JOIN chat_members m ON m.user_id = u.id WHERE m.id IS NULL;
+-- Чат без участников: Новый чат.
+SELECT c.name FROM chats c
+LEFT JOIN chat_members m ON m.chat_id = c.id WHERE m.id IS NULL;
+</code></pre></details>
 </details></section>
 
 </div>
 </main>
-<script src="quiz.js?v=20261121101056"></script>
-<script src="engine.js?v=20261121101056"></script>
-<script src="teacher.js?v=20261121101056"></script>
+<script src="quiz.js?v=20261121102937"></script>
+<script src="engine.js?v=20261121102937"></script>
+<script src="teacher.js?v=20261121102937"></script>
 <script type="module" src="answer-diagrams.js"></script>
+<script src="answer-sql.js"></script>
 </body>
 </html>
