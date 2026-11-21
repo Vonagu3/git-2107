@@ -5,15 +5,15 @@ DROP TABLE IF EXISTS pg_temp.user_skins, pg_temp.skin_transfers, pg_temp.set_ski
 
 CREATE TEMP TABLE users (id integer PRIMARY KEY, nickname text NOT NULL);
 CREATE TEMP TABLE skin_types (id integer PRIMARY KEY, name text NOT NULL, rarity text NOT NULL);
-CREATE TEMP TABLE skin_copies (
-    id integer PRIMARY KEY,
-    skin_type_id integer NOT NULL REFERENCES skin_types(id),
-    owner_id integer NOT NULL REFERENCES users(id), created_at timestamp NOT NULL
-);
 CREATE TEMP TABLE skin_sets (id integer PRIMARY KEY, name text NOT NULL);
 CREATE TEMP TABLE set_skins (
     id integer PRIMARY KEY, set_id integer NOT NULL REFERENCES skin_sets(id),
     skin_type_id integer NOT NULL REFERENCES skin_types(id), UNIQUE (set_id, skin_type_id)
+);
+CREATE TEMP TABLE skin_copies (
+    id integer PRIMARY KEY,
+    set_skin_id integer NOT NULL REFERENCES set_skins(id),
+    owner_id integer NOT NULL REFERENCES users(id), created_at timestamp NOT NULL
 );
 CREATE TEMP TABLE skin_transfers (
     id integer PRIMARY KEY, copy_id integer NOT NULL REFERENCES skin_copies(id),
@@ -24,12 +24,13 @@ CREATE TEMP TABLE skin_transfers (
 INSERT INTO users VALUES (1, 'Лис'), (2, 'Сова'), (3, 'Кот');
 INSERT INTO skin_types VALUES
     (20, 'Ледяной', 'редкий'), (21, 'Снежный', 'обычный'),
-    (22, 'Звёздный', 'редкий'), (23, 'Песочный', 'обычный');
-INSERT INTO skin_copies VALUES
-    (100, 20, 1, '2026-11-01 12:00'), (101, 20, 1, '2026-11-02 12:00'),
-    (102, 20, 2, '2026-11-03 12:00');
+    (22, 'Звёздный', 'редкий');
 INSERT INTO skin_sets VALUES (10, 'Зима'), (11, 'Сияние');
 INSERT INTO set_skins VALUES (1, 10, 20), (2, 10, 21), (3, 11, 20), (4, 11, 22);
+-- set_skin_id 1 — Ледяной из Зимы; 3 — Ледяной из Сияния.
+INSERT INTO skin_copies VALUES
+    (100, 1, 1, '2026-11-01 12:00'), (101, 1, 1, '2026-11-02 12:00'),
+    (102, 1, 2, '2026-11-03 12:00'), (103, 3, 1, '2026-11-04 12:00');
 -- Передача и возврат копии 100; начальное получение не записываем.
 -- Для этих данных отправитель совпадает с владельцем перед каждой передачей.
 BEGIN;
@@ -40,11 +41,11 @@ BEGIN;
 INSERT INTO skin_transfers VALUES (2, 100, 2, 1, '2026-11-21 12:00');
 UPDATE skin_copies SET owner_id = 1 WHERE id = 100;
 COMMIT;
--- Копии: Лис — 2, Сова — 1, Кот — 0.
+-- Копии: Лис — 3, Сова — 1, Кот — 0.
 SELECT u.nickname, count(c.id) AS copies
 FROM users u LEFT JOIN skin_copies c ON c.owner_id = u.id
 GROUP BY u.id, u.nickname ORDER BY u.id;
--- M:N: Ледяной входит в два набора; Песочный вне наборов.
+-- M:N: Ледяной входит в два набора; в каждом наборе два типа.
 SELECT t.name AS skin, s.name AS set_name
 FROM skin_types t LEFT JOIN set_skins x ON x.skin_type_id = t.id
 LEFT JOIN skin_sets s ON s.id = x.set_id ORDER BY t.id, s.id;
@@ -52,6 +53,18 @@ LEFT JOIN skin_sets s ON s.id = x.set_id ORDER BY t.id, s.id;
 SELECT x.copy_id, s.nickname AS sender, r.nickname AS recipient, x.transferred_at
 FROM skin_transfers x JOIN users s ON s.id = x.sender_id
 JOIN users r ON r.id = x.recipient_id ORDER BY x.transferred_at, x.id;
--- Копия 100 вернулась к Лису; её номер, тип и дата создания прежние.
-SELECT c.*, u.nickname AS owner FROM skin_copies c
+-- Копия 100 вернулась к Лису; её номер, тип, набор и дата создания прежние.
+SELECT c.id, t.name AS skin, s.name AS set_name, u.nickname AS owner, c.created_at
+FROM skin_copies c
+JOIN set_skins x ON x.id = c.set_skin_id
+JOIN skin_types t ON t.id = x.skin_type_id
+JOIN skin_sets s ON s.id = x.set_id
 JOIN users u ON u.id = c.owner_id ORDER BY c.id;
+-- Количество копий по типу и набору: Ледяной/Зима — 3,
+-- Ледяной/Сияние — 1, Снежный/Зима и Звёздный/Сияние — 0.
+SELECT t.name AS skin, s.name AS set_name, count(c.id) AS copies
+FROM set_skins x
+JOIN skin_types t ON t.id = x.skin_type_id
+JOIN skin_sets s ON s.id = x.set_id
+LEFT JOIN skin_copies c ON c.set_skin_id = x.id
+GROUP BY x.id, t.name, s.name ORDER BY x.id;

@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261121105911">
+<link rel="stylesheet" href="quiz.css?v=20261121112144">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -1050,7 +1050,7 @@ SELECT order_id, sum(quantity * purchase_price) AS total
 FROM order_items GROUP BY order_id ORDER BY order_id;
 </code></pre></details>
 <h3>Самостоятельная практика — ответы</h3>
-<p>13. <strong>Коллекция, наборы и передача скинов.</strong> Шесть таблиц: users, skin_types, skin_copies, skin_sets, set_skins, skin_transfers. users → skin_copies и skin_types → skin_copies — 1:N. skin_types ↔ skin_sets — M:N через set_skins. В skin_transfers поля sender_id и recipient_id ссылаются на одну users, но обозначают разные роли; copy_id ссылается на экземпляр. Строка set_skins — включение типа в набор, строка skin_transfers — отдельное событие. Количество копий вычисляют; редкость хранится у типа, владелец — у экземпляра. Передача меняет владельца и добавляет событие, но не меняет тип, номер или дату создания копии. FK не проверяет, что отправитель — текущий владелец: это отдельное правило приложения. Обновление владельца и запись истории выполняют вместе.</p><p><code>users(id, nickname); skin_types(id, name, rarity); skin_copies(id, skin_type_id, owner_id, created_at); skin_sets(id, name); set_skins(id, set_id, skin_type_id); skin_transfers(id, copy_id, sender_id, recipient_id, transferred_at).</code></p>
+<p>13. <strong>Коллекция, наборы и передача скинов.</strong> Шесть таблиц: users, skin_types, skin_copies, skin_sets, set_skins, skin_transfers. users → skin_copies и set_skins → skin_copies — 1:N. skin_types ↔ skin_sets — M:N через set_skins. В skin_transfers поля sender_id и recipient_id ссылаются на одну users, но обозначают разные роли; copy_id ссылается на экземпляр. Строка set_skins — конкретный тип скина в конкретном наборе, строка skin_transfers — отдельное событие. Копия ссылается на set_skins через set_skin_id: по этой записи определяются и тип, и набор. Отдельный skin_type_id в skin_copies не нужен, иначе тип можно записать противоречиво. Количество копий вычисляют; редкость хранится у типа, владелец — у экземпляра. Передача меняет владельца и добавляет событие, но не меняет её принадлежность к набору, тип, номер или дату создания. FK не проверяет, что отправитель — текущий владелец: это отдельное правило приложения. Обновление владельца и запись истории выполняют вместе.</p><p><code>users(id, nickname); skin_types(id, name, rarity); skin_copies(id, set_skin_id, owner_id, created_at); skin_sets(id, name); set_skins(id, set_id, skin_type_id); skin_transfers(id, copy_id, sender_id, recipient_id, transferred_at).</code></p>
 <figure class="answer-schema"><figcaption>Коллекция, наборы и передача скинов</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     users {
         integer id PK
@@ -1063,7 +1063,7 @@ FROM order_items GROUP BY order_id ORDER BY order_id;
     }
     skin_copies {
         integer id PK
-        integer skin_type_id FK
+        integer set_skin_id FK
         integer owner_id FK
         timestamp created_at
     }
@@ -1084,7 +1084,7 @@ FROM order_items GROUP BY order_id ORDER BY order_id;
         timestamp transferred_at
     }
     users ||--o{ skin_copies : &quot;владеет&quot;
-    skin_types ||--o{ skin_copies : &quot;имеет экземпляры&quot;
+    set_skins ||--o{ skin_copies : &quot;имеет экземпляры&quot;
     skin_sets ||--o{ set_skins : &quot;содержит&quot;
     skin_types ||--o{ set_skins : &quot;входит в набор&quot;
     skin_copies ||--o{ skin_transfers : &quot;история&quot;
@@ -1098,15 +1098,15 @@ DROP TABLE IF EXISTS pg_temp.user_skins, pg_temp.skin_transfers, pg_temp.set_ski
 
 CREATE TEMP TABLE users (id integer PRIMARY KEY, nickname text NOT NULL);
 CREATE TEMP TABLE skin_types (id integer PRIMARY KEY, name text NOT NULL, rarity text NOT NULL);
-CREATE TEMP TABLE skin_copies (
-    id integer PRIMARY KEY,
-    skin_type_id integer NOT NULL REFERENCES skin_types(id),
-    owner_id integer NOT NULL REFERENCES users(id), created_at timestamp NOT NULL
-);
 CREATE TEMP TABLE skin_sets (id integer PRIMARY KEY, name text NOT NULL);
 CREATE TEMP TABLE set_skins (
     id integer PRIMARY KEY, set_id integer NOT NULL REFERENCES skin_sets(id),
     skin_type_id integer NOT NULL REFERENCES skin_types(id), UNIQUE (set_id, skin_type_id)
+);
+CREATE TEMP TABLE skin_copies (
+    id integer PRIMARY KEY,
+    set_skin_id integer NOT NULL REFERENCES set_skins(id),
+    owner_id integer NOT NULL REFERENCES users(id), created_at timestamp NOT NULL
 );
 CREATE TEMP TABLE skin_transfers (
     id integer PRIMARY KEY, copy_id integer NOT NULL REFERENCES skin_copies(id),
@@ -1117,12 +1117,13 @@ CREATE TEMP TABLE skin_transfers (
 INSERT INTO users VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;), (3, &#x27;Кот&#x27;);
 INSERT INTO skin_types VALUES
     (20, &#x27;Ледяной&#x27;, &#x27;редкий&#x27;), (21, &#x27;Снежный&#x27;, &#x27;обычный&#x27;),
-    (22, &#x27;Звёздный&#x27;, &#x27;редкий&#x27;), (23, &#x27;Песочный&#x27;, &#x27;обычный&#x27;);
-INSERT INTO skin_copies VALUES
-    (100, 20, 1, &#x27;2026-11-01 12:00&#x27;), (101, 20, 1, &#x27;2026-11-02 12:00&#x27;),
-    (102, 20, 2, &#x27;2026-11-03 12:00&#x27;);
+    (22, &#x27;Звёздный&#x27;, &#x27;редкий&#x27;);
 INSERT INTO skin_sets VALUES (10, &#x27;Зима&#x27;), (11, &#x27;Сияние&#x27;);
 INSERT INTO set_skins VALUES (1, 10, 20), (2, 10, 21), (3, 11, 20), (4, 11, 22);
+-- set_skin_id 1 — Ледяной из Зимы; 3 — Ледяной из Сияния.
+INSERT INTO skin_copies VALUES
+    (100, 1, 1, &#x27;2026-11-01 12:00&#x27;), (101, 1, 1, &#x27;2026-11-02 12:00&#x27;),
+    (102, 1, 2, &#x27;2026-11-03 12:00&#x27;), (103, 3, 1, &#x27;2026-11-04 12:00&#x27;);
 -- Передача и возврат копии 100; начальное получение не записываем.
 -- Для этих данных отправитель совпадает с владельцем перед каждой передачей.
 BEGIN;
@@ -1133,11 +1134,11 @@ BEGIN;
 INSERT INTO skin_transfers VALUES (2, 100, 2, 1, &#x27;2026-11-21 12:00&#x27;);
 UPDATE skin_copies SET owner_id = 1 WHERE id = 100;
 COMMIT;
--- Копии: Лис — 2, Сова — 1, Кот — 0.
+-- Копии: Лис — 3, Сова — 1, Кот — 0.
 SELECT u.nickname, count(c.id) AS copies
 FROM users u LEFT JOIN skin_copies c ON c.owner_id = u.id
 GROUP BY u.id, u.nickname ORDER BY u.id;
--- M:N: Ледяной входит в два набора; Песочный вне наборов.
+-- M:N: Ледяной входит в два набора; в каждом наборе два типа.
 SELECT t.name AS skin, s.name AS set_name
 FROM skin_types t LEFT JOIN set_skins x ON x.skin_type_id = t.id
 LEFT JOIN skin_sets s ON s.id = x.set_id ORDER BY t.id, s.id;
@@ -1145,9 +1146,21 @@ LEFT JOIN skin_sets s ON s.id = x.set_id ORDER BY t.id, s.id;
 SELECT x.copy_id, s.nickname AS sender, r.nickname AS recipient, x.transferred_at
 FROM skin_transfers x JOIN users s ON s.id = x.sender_id
 JOIN users r ON r.id = x.recipient_id ORDER BY x.transferred_at, x.id;
--- Копия 100 вернулась к Лису; её номер, тип и дата создания прежние.
-SELECT c.*, u.nickname AS owner FROM skin_copies c
+-- Копия 100 вернулась к Лису; её номер, тип, набор и дата создания прежние.
+SELECT c.id, t.name AS skin, s.name AS set_name, u.nickname AS owner, c.created_at
+FROM skin_copies c
+JOIN set_skins x ON x.id = c.set_skin_id
+JOIN skin_types t ON t.id = x.skin_type_id
+JOIN skin_sets s ON s.id = x.set_id
 JOIN users u ON u.id = c.owner_id ORDER BY c.id;
+-- Количество копий по типу и набору: Ледяной/Зима — 3,
+-- Ледяной/Сияние — 1, Снежный/Зима и Звёздный/Сияние — 0.
+SELECT t.name AS skin, s.name AS set_name, count(c.id) AS copies
+FROM set_skins x
+JOIN skin_types t ON t.id = x.skin_type_id
+JOIN skin_sets s ON s.id = x.set_id
+LEFT JOIN skin_copies c ON c.set_skin_id = x.id
+GROUP BY x.id, t.name, s.name ORDER BY x.id;
 </code></pre></details>
 <p>14. <strong>Групповые чаты и приглашения.</strong> Четыре таблицы: users, chats, chat_members, invitations. users ↔ chats — M:N через chat_members; joined_at и role относятся к участию, пара user_id–chat_id уникальна. В invitations sender_id и recipient_id ссылаются на users в разных ролях, chat_id — на chats; каждая из этих связей 1:N. Строка invitations — отдельная попытка приглашения, поэтому пара отправитель–получатель–чат может повторяться. У приглашения и участия независимые даты. Принятие приглашения и добавление участия выполняются вместе. В примере membership отправителя проверяет приложение: одних FK на users и chats для этого недостаточно. Составной FK на пару участник–чат — допустимое усложнение, но не обязательный ответ.</p><p><code>users(id, nickname); chats(id, name); chat_members(id, user_id, chat_id, joined_at, role); invitations(id, sender_id, recipient_id, chat_id, sent_at, status).</code></p>
 <figure class="answer-schema"><figcaption>Групповые чаты и приглашения</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
@@ -1244,9 +1257,9 @@ ON m.user_id = i.sender_id AND m.chat_id = i.chat_id WHERE m.id IS NULL;
 
 </div>
 </main>
-<script src="quiz.js?v=20261121105911"></script>
-<script src="engine.js?v=20261121105911"></script>
-<script src="teacher.js?v=20261121105911"></script>
+<script src="quiz.js?v=20261121112144"></script>
+<script src="engine.js?v=20261121112144"></script>
+<script src="teacher.js?v=20261121112144"></script>
 <script type="module" src="answer-diagrams.js"></script>
 <script src="answer-sql.js"></script>
 </body>
