@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261121102937">
+<link rel="stylesheet" href="quiz.css?v=20261121105138">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -952,64 +952,102 @@ ORDER BY m.sent_at, m.id;
 -- Три сообщения; Кот пока ни с кем не переписывался.
 </code></pre></details>
 <h3>Раунд 4 — эталонные модели</h3>
-<p>12. <code>players(id, nickname)</code>, <code>raids(id, starts_at)</code>, <code>participations(id, player_id, raid_id, role, confirmation_status)</code>.</p><figure class="answer-schema"><figcaption>Состав рейдов</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
-    players {
+<p>12. <code>customers(id, name)</code>, <code>orders(id, customer_id, ordered_at, delivery_address)</code>, <code>products(id, name, current_price)</code>, <code>order_items(id, order_id, product_id, quantity, purchase_price)</code>. Покупатель → заказы — 1:N; заказы ↔ товары — M:N через <code>order_items</code>. Количество и цена покупки относятся к позиции заказа, текущая цена — к товару. Пара заказ–товар не повторяется.</p><figure class="answer-schema"><figcaption>Покупатели, заказы и товары: 1:N и M:N</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    customers {
         bigint id PK
-        text nickname
+        text name
     }
-    raids {
+    orders {
         bigint id PK
-        text starts_at
+        bigint customer_id FK
+        timestamp ordered_at
+        text delivery_address
     }
-    participations {
+    products {
         bigint id PK
-        bigint player_id FK
-        bigint raid_id FK
-        text role
-        text confirmation_status
+        text name
+        numeric current_price
     }
-    players ||--o{ participations : &quot;участвует&quot;
-    raids ||--o{ participations : &quot;состав&quot;
+    order_items {
+        bigint id PK
+        bigint order_id FK
+        bigint product_id FK
+        integer quantity
+        numeric purchase_price
+    }
+    customers ||--o{ orders : &quot;оформляет&quot;
+    orders ||--|{ order_items : &quot;содержит&quot;
+    products ||--o{ order_items : &quot;входит в&quot;
 </pre></details></figure>
 <div class="tablewrap"><table>
-<tr><td>id участия</td><td>player_id</td><td>raid_id</td><td>role</td><td>confirmation_status</td></tr>
-<tr><td>1</td><td>1</td><td>10</td><td>лекарь</td><td>подтверждено</td></tr>
-<tr><td>2</td><td>1</td><td>11</td><td>танк</td><td>ожидает</td></tr>
-<tr><td>3</td><td>2</td><td>10</td><td>танк</td><td>подтверждено</td></tr>
+<tr><td>id позиции</td><td>order_id</td><td>product_id</td><td>quantity</td><td>purchase_price</td></tr>
+<tr><td>1</td><td>10</td><td>20</td><td>2</td><td>100.00</td></tr>
+<tr><td>2</td><td>10</td><td>21</td><td>1</td><td>50.00</td></tr>
+<tr><td>3</td><td>11</td><td>20</td><td>1</td><td>120.00</td></tr>
 </table></div>
-<p>Рейд 12 существует в <code>raids</code>, строк участия у него нет. Роль и статус не относятся к игроку вообще: они зависят от конкретного рейда. Пара игрок–рейд не повторяется.</p>
-
+<p>Заказы 10 и 11 принадлежат покупателю 1. Их суммы — 250.00 и 120.00. После изменения текущей цены товара 20 со 120.00 до 150.00 суммы заказов остаются прежними: считаем их по purchase_price. Адрес доставки храним в orders как адрес конкретного заказа; изменение адреса в профиле покупателя не должно менять старые заказы.</p>
 <details class="card quiz-sql"><summary>SQL · задание 12: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-12.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
 -- Временные таблицы доступны до закрытия соединения.
 -- Повторный запуск пересоздаёт только временные учебные таблицы.
-DROP TABLE IF EXISTS pg_temp.participations, pg_temp.raids, pg_temp.players CASCADE;
+DROP TABLE IF EXISTS pg_temp.order_items, pg_temp.orders,
+    pg_temp.products, pg_temp.customers CASCADE;
 
-CREATE TEMP TABLE players (id integer PRIMARY KEY, nickname text NOT NULL);
-CREATE TEMP TABLE raids (id integer PRIMARY KEY, starts_at timestamp NOT NULL);
-CREATE TEMP TABLE participations (
+CREATE TEMP TABLE customers (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TEMP TABLE orders (
     id integer PRIMARY KEY,
-    player_id integer NOT NULL REFERENCES players(id),
-    raid_id integer NOT NULL REFERENCES raids(id),
-    role text NOT NULL, confirmation_status text NOT NULL,
-    UNIQUE (player_id, raid_id)
+    customer_id integer NOT NULL REFERENCES customers(id),
+    ordered_at timestamp NOT NULL,
+    delivery_address text NOT NULL
 );
-INSERT INTO players VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;);
-INSERT INTO raids VALUES
-    (10, &#x27;2026-11-21 18:00&#x27;), (11, &#x27;2026-11-22 18:00&#x27;), (12, &#x27;2026-11-23 18:00&#x27;);
-INSERT INTO participations VALUES
-    (1, 1, 10, &#x27;лекарь&#x27;, &#x27;подтверждено&#x27;),
-    (2, 1, 11, &#x27;танк&#x27;, &#x27;ожидает&#x27;),
-    (3, 2, 10, &#x27;танк&#x27;, &#x27;подтверждено&#x27;);
--- Лис в двух рейдах с разными ролями. У пустого рейда 12 поля участия NULL.
-SELECT r.id AS raid, r.starts_at, p.nickname, x.role, x.confirmation_status
-FROM raids r
-LEFT JOIN participations x ON x.raid_id = r.id
-LEFT JOIN players p ON p.id = x.player_id
-ORDER BY r.id, p.id;
--- Число участников: 10 → 2, 11 → 1, 12 → 0.
-SELECT r.id, count(x.id) AS participants
-FROM raids r LEFT JOIN participations x ON x.raid_id = r.id
-GROUP BY r.id ORDER BY r.id;
+CREATE TEMP TABLE products (
+    id integer PRIMARY KEY, name text NOT NULL,
+    current_price numeric(10, 2) NOT NULL CHECK (current_price &gt;= 0)
+);
+CREATE TEMP TABLE order_items (
+    id integer PRIMARY KEY,
+    order_id integer NOT NULL REFERENCES orders(id),
+    product_id integer NOT NULL REFERENCES products(id),
+    quantity integer NOT NULL CHECK (quantity &gt; 0),
+    purchase_price numeric(10, 2) NOT NULL CHECK (purchase_price &gt;= 0),
+    UNIQUE (order_id, product_id)
+);
+INSERT INTO customers VALUES (1, &#x27;Анна&#x27;), (2, &#x27;Борис&#x27;);
+INSERT INTO orders VALUES
+    (10, 1, &#x27;2026-11-20 12:00&#x27;, &#x27;ул. Лесная, 1&#x27;),
+    (11, 1, &#x27;2026-11-21 15:00&#x27;, &#x27;ул. Садовая, 5&#x27;);
+INSERT INTO products VALUES
+    (20, &#x27;Блокнот&#x27;, 120.00), (21, &#x27;Ручка&#x27;, 50.00), (22, &#x27;Пенал&#x27;, 300.00);
+INSERT INTO order_items VALUES
+    (1, 10, 20, 2, 100.00),
+    (2, 10, 21, 1, 50.00),
+    (3, 11, 20, 1, 120.00);
+
+-- 1:N: у Анны два заказа с разными адресами; у Бориса заказов нет.
+SELECT c.name, o.id AS order_id, o.ordered_at, o.delivery_address
+FROM customers c LEFT JOIN orders o ON o.customer_id = c.id
+ORDER BY c.id, o.id;
+
+-- M:N: в заказе 10 два товара; блокнот есть в обоих заказах.
+SELECT o.id AS order_id, p.name, x.quantity, x.purchase_price,
+       x.quantity * x.purchase_price AS line_total
+FROM orders o
+JOIN order_items x ON x.order_id = o.id
+JOIN products p ON p.id = x.product_id
+ORDER BY o.id, p.id;
+
+-- До изменения каталога: заказ 10 = 250.00, заказ 11 = 120.00.
+SELECT order_id, sum(quantity * purchase_price) AS total
+FROM order_items GROUP BY order_id ORDER BY order_id;
+
+-- Новая цена каталога не меняет уже оформленные покупки.
+UPDATE products SET current_price = 150.00 WHERE id = 20;
+SELECT p.name, p.current_price, x.order_id, x.purchase_price
+FROM products p JOIN order_items x ON x.product_id = p.id
+WHERE p.id = 20 ORDER BY x.order_id;
+
+-- После изменения: те же суммы 250.00 и 120.00.
+SELECT order_id, sum(quantity * purchase_price) AS total
+FROM order_items GROUP BY order_id ORDER BY order_id;
 </code></pre></details>
 <p>13. <code>users(id, nickname)</code>, <code>skins(id, name, rarity)</code>, <code>user_skins(id, user_id, skin_id, quantity, first_received_at)</code>.</p><figure class="answer-schema"><figcaption>Коллекции скинов</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     users {
@@ -1148,9 +1186,9 @@ LEFT JOIN chat_members m ON m.chat_id = c.id WHERE m.id IS NULL;
 
 </div>
 </main>
-<script src="quiz.js?v=20261121102937"></script>
-<script src="engine.js?v=20261121102937"></script>
-<script src="teacher.js?v=20261121102937"></script>
+<script src="quiz.js?v=20261121105138"></script>
+<script src="engine.js?v=20261121105138"></script>
+<script src="teacher.js?v=20261121105138"></script>
 <script type="module" src="answer-diagrams.js"></script>
 <script src="answer-sql.js"></script>
 </body>
