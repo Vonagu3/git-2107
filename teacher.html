@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261121105138">
+<link rel="stylesheet" href="quiz.css?v=20261121105911">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -548,14 +548,14 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
 <tr><td>30–55</td><td>Раунд 2: четыре неоднозначных вопроса; предложить по два контекста</td></tr>
 <tr><td>55–60</td><td>Перерыв</td></tr>
 <tr><td>60–85</td><td>Раунд 3: три изменения требований, схемы до и после</td></tr>
-<tr><td>85–110</td><td>Раунд 4: две задачи, затем обмен схемами и проверка примерами</td></tr>
-<tr><td>110–120</td><td>Индивидуальный финал (6 минут), обсуждение (4 минуты)</td></tr>
+<tr><td>85–110</td><td>Раунд 4: покупатели, заказы и товары; обмен схемами и проверка примерами</td></tr>
+<tr><td>110–120</td><td>Самостоятельная практика: выбрать кейс 13 или 14, начать схему; завершить после занятия</td></tr>
 </table></div>
 <h3>На что смотреть</h3>
 <p>Не путать «у объекта сейчас одна строка» и «правила разрешают только одну». Для многих ко многим просить пример минимум с двумя объектами с каждой стороны. Отдельно спрашивать, допустимо ли отсутствие связи: это не превращает один ко многим в другой тип.</p>
-<p>В раунде 3 история передач — отдельные события, а повтор трека — отдельные вхождения. Не сводить все изменения требований к добавлению одинаковой связки.</p>
+<p>В раунде 3 история передач — отдельные события; у личного сообщения отправитель и получатель ссылаются на одну таблицу в разных ролях. Не сводить все изменения требований к добавлению одинаковой связки.</p>
 <h3>Итог</h3>
-<p>В индивидуальном финале проверить три умения: объяснить обе стороны связи; назвать условия и привести данные; поместить дату вступления в связку. Если ошибается большинство — следующий урок начать с новых коротких задач по этим ошибкам. Если большинство справилось — реализовать одну из схем в PostgreSQL и проверить запросами.</p>
+<p>В самостоятельной практике проверить сочетание 1:N и M:N в одной модели, разные роли ссылок на одну таблицу и место свойств участия или события. Каждый начинает с одного кейса; второй — дополнительная практика. Проверить схемы по указанным примерам. SQL руководителя использовать для разбора после сдачи схем.</p>
 <h2>Карточки для показа</h2><p><a href="./#sql5" target="_blank" rel="noopener">Открыть квиз учеников</a>. Показывайте вопросы по одному; продолжения раскрывайте после исходного ответа.</p>
 <details id="l15-answers"><summary>Ответы и разбор — не показывать ученикам</summary>
 <h2>Занятие 15 — ответы (ученикам не отправлять)</h2>
@@ -1049,146 +1049,204 @@ WHERE p.id = 20 ORDER BY x.order_id;
 SELECT order_id, sum(quantity * purchase_price) AS total
 FROM order_items GROUP BY order_id ORDER BY order_id;
 </code></pre></details>
-<p>13. <code>users(id, nickname)</code>, <code>skins(id, name, rarity)</code>, <code>user_skins(id, user_id, skin_id, quantity, first_received_at)</code>.</p><figure class="answer-schema"><figcaption>Коллекции скинов</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+<h3>Самостоятельная практика — ответы</h3>
+<p>13. <strong>Коллекция, наборы и передача скинов.</strong> Шесть таблиц: users, skin_types, skin_copies, skin_sets, set_skins, skin_transfers. users → skin_copies и skin_types → skin_copies — 1:N. skin_types ↔ skin_sets — M:N через set_skins. В skin_transfers поля sender_id и recipient_id ссылаются на одну users, но обозначают разные роли; copy_id ссылается на экземпляр. Строка set_skins — включение типа в набор, строка skin_transfers — отдельное событие. Количество копий вычисляют; редкость хранится у типа, владелец — у экземпляра. Передача меняет владельца и добавляет событие, но не меняет тип, номер или дату создания копии. FK не проверяет, что отправитель — текущий владелец: это отдельное правило приложения. Обновление владельца и запись истории выполняют вместе.</p><p><code>users(id, nickname); skin_types(id, name, rarity); skin_copies(id, skin_type_id, owner_id, created_at); skin_sets(id, name); set_skins(id, set_id, skin_type_id); skin_transfers(id, copy_id, sender_id, recipient_id, transferred_at).</code></p>
+<figure class="answer-schema"><figcaption>Коллекция, наборы и передача скинов</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     users {
-        bigint id PK
+        integer id PK
         text nickname
     }
-    skins {
-        bigint id PK
+    skin_types {
+        integer id PK
         text name
         text rarity
     }
-    user_skins {
-        bigint id PK
-        bigint user_id FK
-        bigint skin_id FK
-        bigint quantity
-        text first_received_at
+    skin_copies {
+        integer id PK
+        integer skin_type_id FK
+        integer owner_id FK
+        timestamp created_at
     }
-    users ||--o{ user_skins : &quot;коллекция&quot;
-    skins ||--o{ user_skins : &quot;владения&quot;
+    skin_sets {
+        integer id PK
+        text name
+    }
+    set_skins {
+        integer id PK
+        integer set_id FK
+        integer skin_type_id FK
+    }
+    skin_transfers {
+        integer id PK
+        integer copy_id FK
+        integer sender_id FK
+        integer recipient_id FK
+        timestamp transferred_at
+    }
+    users ||--o{ skin_copies : &quot;владеет&quot;
+    skin_types ||--o{ skin_copies : &quot;имеет экземпляры&quot;
+    skin_sets ||--o{ set_skins : &quot;содержит&quot;
+    skin_types ||--o{ set_skins : &quot;входит в набор&quot;
+    skin_copies ||--o{ skin_transfers : &quot;история&quot;
+    users ||--o{ skin_transfers : &quot;отправляет&quot;
+    users ||--o{ skin_transfers : &quot;получает&quot;
 </pre></details></figure>
-<div class="tablewrap"><table>
-<tr><td>id владения</td><td>user_id</td><td>skin_id</td><td>quantity</td><td>first_received_at</td></tr>
-<tr><td>1</td><td>1</td><td>20</td><td>3</td><td>2026-10-01</td></tr>
-<tr><td>2</td><td>2</td><td>20</td><td>1</td><td>2026-11-10</td></tr>
-<tr><td>3</td><td>1</td><td>21</td><td>2</td><td>2026-11-12</td></tr>
-</table></div>
-<p>Пользователь 3 существует без строк владения. Название и редкость скина общие; количество и дата первого получения относятся к паре. Не вводить одну дату для всех отдельных копий: по условию хранится именно первое получение типа. Пара пользователь–скин не повторяется.</p>
-
 <details class="card quiz-sql"><summary>SQL · задание 13: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-13.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
 -- Временные таблицы доступны до закрытия соединения.
--- Повторный запуск пересоздаёт только временные учебные таблицы.
-DROP TABLE IF EXISTS pg_temp.user_skins, pg_temp.skins, pg_temp.users CASCADE;
+-- Повторный запуск сбрасывает временные учебные данные.
+DROP TABLE IF EXISTS pg_temp.user_skins, pg_temp.skin_transfers, pg_temp.set_skins, pg_temp.skin_sets, pg_temp.skin_copies, pg_temp.skin_types, pg_temp.users CASCADE;
 
 CREATE TEMP TABLE users (id integer PRIMARY KEY, nickname text NOT NULL);
-CREATE TEMP TABLE skins (id integer PRIMARY KEY, name text NOT NULL, rarity text NOT NULL);
-CREATE TEMP TABLE user_skins (
+CREATE TEMP TABLE skin_types (id integer PRIMARY KEY, name text NOT NULL, rarity text NOT NULL);
+CREATE TEMP TABLE skin_copies (
     id integer PRIMARY KEY,
-    user_id integer NOT NULL REFERENCES users(id),
-    skin_id integer NOT NULL REFERENCES skins(id),
-    quantity integer NOT NULL CHECK (quantity &gt; 0),
-    first_received_at date NOT NULL,
-    UNIQUE (user_id, skin_id)
+    skin_type_id integer NOT NULL REFERENCES skin_types(id),
+    owner_id integer NOT NULL REFERENCES users(id), created_at timestamp NOT NULL
+);
+CREATE TEMP TABLE skin_sets (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TEMP TABLE set_skins (
+    id integer PRIMARY KEY, set_id integer NOT NULL REFERENCES skin_sets(id),
+    skin_type_id integer NOT NULL REFERENCES skin_types(id), UNIQUE (set_id, skin_type_id)
+);
+CREATE TEMP TABLE skin_transfers (
+    id integer PRIMARY KEY, copy_id integer NOT NULL REFERENCES skin_copies(id),
+    sender_id integer NOT NULL REFERENCES users(id),
+    recipient_id integer NOT NULL REFERENCES users(id), transferred_at timestamp NOT NULL,
+    CHECK (sender_id &lt;&gt; recipient_id)
 );
 INSERT INTO users VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;), (3, &#x27;Кот&#x27;);
-INSERT INTO skins VALUES (20, &#x27;Ледяной&#x27;, &#x27;редкий&#x27;), (21, &#x27;Огненный&#x27;, &#x27;обычный&#x27;);
-INSERT INTO user_skins VALUES
-    (1, 1, 20, 3, &#x27;2026-10-01&#x27;),
-    (2, 2, 20, 1, &#x27;2026-11-10&#x27;),
-    (3, 1, 21, 2, &#x27;2026-11-12&#x27;);
--- Один тип скина у двух пользователей: разные количество и дата.
--- У Кота коллекция пуста, поля владения NULL.
-SELECT u.nickname, s.name, s.rarity, x.quantity, x.first_received_at
-FROM users u
-LEFT JOIN user_skins x ON x.user_id = u.id
-LEFT JOIN skins s ON s.id = x.skin_id
-ORDER BY u.id, s.id;
+INSERT INTO skin_types VALUES
+    (20, &#x27;Ледяной&#x27;, &#x27;редкий&#x27;), (21, &#x27;Снежный&#x27;, &#x27;обычный&#x27;),
+    (22, &#x27;Звёздный&#x27;, &#x27;редкий&#x27;), (23, &#x27;Песочный&#x27;, &#x27;обычный&#x27;);
+INSERT INTO skin_copies VALUES
+    (100, 20, 1, &#x27;2026-11-01 12:00&#x27;), (101, 20, 1, &#x27;2026-11-02 12:00&#x27;),
+    (102, 20, 2, &#x27;2026-11-03 12:00&#x27;);
+INSERT INTO skin_sets VALUES (10, &#x27;Зима&#x27;), (11, &#x27;Сияние&#x27;);
+INSERT INTO set_skins VALUES (1, 10, 20), (2, 10, 21), (3, 11, 20), (4, 11, 22);
+-- Передача и возврат копии 100; начальное получение не записываем.
+-- Для этих данных отправитель совпадает с владельцем перед каждой передачей.
+BEGIN;
+INSERT INTO skin_transfers VALUES (1, 100, 1, 2, &#x27;2026-11-20 12:00&#x27;);
+UPDATE skin_copies SET owner_id = 2 WHERE id = 100;
+COMMIT;
+BEGIN;
+INSERT INTO skin_transfers VALUES (2, 100, 2, 1, &#x27;2026-11-21 12:00&#x27;);
+UPDATE skin_copies SET owner_id = 1 WHERE id = 100;
+COMMIT;
+-- Копии: Лис — 2, Сова — 1, Кот — 0.
+SELECT u.nickname, count(c.id) AS copies
+FROM users u LEFT JOIN skin_copies c ON c.owner_id = u.id
+GROUP BY u.id, u.nickname ORDER BY u.id;
+-- M:N: Ледяной входит в два набора; Песочный вне наборов.
+SELECT t.name AS skin, s.name AS set_name
+FROM skin_types t LEFT JOIN set_skins x ON x.skin_type_id = t.id
+LEFT JOIN skin_sets s ON s.id = x.set_id ORDER BY t.id, s.id;
+-- Одна users присоединяется дважды: отправитель и получатель.
+SELECT x.copy_id, s.nickname AS sender, r.nickname AS recipient, x.transferred_at
+FROM skin_transfers x JOIN users s ON s.id = x.sender_id
+JOIN users r ON r.id = x.recipient_id ORDER BY x.transferred_at, x.id;
+-- Копия 100 вернулась к Лису; её номер, тип и дата создания прежние.
+SELECT c.*, u.nickname AS owner FROM skin_copies c
+JOIN users u ON u.id = c.owner_id ORDER BY c.id;
 </code></pre></details>
-<h3>Индивидуальный финал</h3>
-<p>14. <strong>1:N:</strong> каждый пользователь закреплён за одним чатом, в чате много пользователей; <code>users.chat_id</code>. <strong>M:N:</strong> пользователь входит в разные групповые чаты, в каждом много пользователей. Таблицы: <code>users(id, nickname)</code>, <code>chats(id, name)</code>, <code>chat_members(id, user_id, chat_id, joined_at)</code>. Дата вступления относится к участию. Пример пар: (1,10), (1,11), (2,10). Пользователь или чат может существовать без участия.</p><figure class="answer-schema"><figcaption>Вариант: один чат на пользователя</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
-    chats {
-        bigint id PK
-        text name
-    }
+<p>14. <strong>Групповые чаты и приглашения.</strong> Четыре таблицы: users, chats, chat_members, invitations. users ↔ chats — M:N через chat_members; joined_at и role относятся к участию, пара user_id–chat_id уникальна. В invitations sender_id и recipient_id ссылаются на users в разных ролях, chat_id — на chats; каждая из этих связей 1:N. Строка invitations — отдельная попытка приглашения, поэтому пара отправитель–получатель–чат может повторяться. У приглашения и участия независимые даты. Принятие приглашения и добавление участия выполняются вместе. В примере membership отправителя проверяет приложение: одних FK на users и chats для этого недостаточно. Составной FK на пару участник–чат — допустимое усложнение, но не обязательный ответ.</p><p><code>users(id, nickname); chats(id, name); chat_members(id, user_id, chat_id, joined_at, role); invitations(id, sender_id, recipient_id, chat_id, sent_at, status).</code></p>
+<figure class="answer-schema"><figcaption>Групповые чаты и приглашения</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     users {
-        bigint id PK
-        bigint chat_id FK
+        integer id PK
         text nickname
     }
-    chats ||--o{ users : &quot;содержит&quot;
-</pre></details></figure><figure class="answer-schema"><figcaption>Вариант: групповые чаты</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
-    users {
-        bigint id PK
-        text name
-    }
     chats {
-        bigint id PK
+        integer id PK
         text name
     }
     chat_members {
-        bigint id PK
-        bigint user_id FK
-        bigint chat_id FK
-        text joined_at
+        integer id PK
+        integer user_id FK
+        integer chat_id FK
+        timestamp joined_at
+        text role
     }
-    users ||--o{ chat_members : &quot;участие&quot;
-    chats ||--o{ chat_members : &quot;участие&quot;
+    invitations {
+        integer id PK
+        integer sender_id FK
+        integer recipient_id FK
+        integer chat_id FK
+        timestamp sent_at
+        text status
+    }
+    users ||--o{ chat_members : &quot;участвует&quot;
+    chats ||--o{ chat_members : &quot;содержит участников&quot;
+    users ||--o{ invitations : &quot;приглашает&quot;
+    users ||--o{ invitations : &quot;получает приглашение&quot;
+    chats ||--o{ invitations : &quot;приглашение в чат&quot;
 </pre></details></figure>
-<p>Проверить: правило в обе стороны; пример, подтверждающий правило; дата в связке. Если ученик предложил историю вступлений, признать модель допустимой, но напомнить, что финал просит только одно текущее участие на пару.</p>
-
 <details class="card quiz-sql"><summary>SQL · задание 14: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-14.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
 -- Временные таблицы доступны до закрытия соединения.
--- Повторный запуск пересоздаёт только временные учебные таблицы.
-DROP TABLE IF EXISTS pg_temp.users_one_chat, pg_temp.chat_members, pg_temp.users, pg_temp.chats CASCADE;
+-- Повторный запуск сбрасывает временные учебные данные.
+DROP TABLE IF EXISTS pg_temp.users_one_chat, pg_temp.invitations, pg_temp.chat_members, pg_temp.chats, pg_temp.users CASCADE;
 
--- ВАРИАНТ 1:N: у каждого пользователя один чат.
-CREATE TEMP TABLE chats (id integer PRIMARY KEY, name text NOT NULL);
-CREATE TEMP TABLE users (
-    id integer PRIMARY KEY, nickname text NOT NULL,
-    chat_id integer NOT NULL REFERENCES chats(id)
-);
-INSERT INTO chats VALUES (10, &#x27;Общий&#x27;), (11, &#x27;Игры&#x27;), (12, &#x27;Новый чат&#x27;);
-INSERT INTO users VALUES (1, &#x27;Лис&#x27;, 10), (2, &#x27;Сова&#x27;, 10);
-SELECT u.nickname, c.name FROM users u JOIN chats c ON c.id = u.chat_id ORDER BY u.id;
-
--- ВАРИАНТ M:N: отдельный набор данных для групповых чатов.
--- Старую таблицу оставляем для сравнения двух моделей.
-ALTER TABLE users RENAME TO users_one_chat;
 CREATE TEMP TABLE users (id integer PRIMARY KEY, nickname text NOT NULL);
+CREATE TEMP TABLE chats (id integer PRIMARY KEY, name text NOT NULL);
 CREATE TEMP TABLE chat_members (
-    id integer PRIMARY KEY,
-    user_id integer NOT NULL REFERENCES users(id),
-    chat_id integer NOT NULL REFERENCES chats(id),
-    joined_at timestamp NOT NULL,
-    UNIQUE (user_id, chat_id)
+    id integer PRIMARY KEY, user_id integer NOT NULL REFERENCES users(id),
+    chat_id integer NOT NULL REFERENCES chats(id), joined_at timestamp NOT NULL,
+    role text NOT NULL, UNIQUE (user_id, chat_id)
 );
-INSERT INTO users VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;), (3, &#x27;Кот&#x27;);
+CREATE TEMP TABLE invitations (
+    id integer PRIMARY KEY, sender_id integer NOT NULL REFERENCES users(id),
+    recipient_id integer NOT NULL REFERENCES users(id),
+    chat_id integer NOT NULL REFERENCES chats(id), sent_at timestamp NOT NULL,
+    status text NOT NULL CHECK (status IN (&#x27;ожидает&#x27;, &#x27;принято&#x27;, &#x27;отклонено&#x27;)),
+    CHECK (sender_id &lt;&gt; recipient_id)
+);
+INSERT INTO users VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;), (3, &#x27;Кот&#x27;), (4, &#x27;Волк&#x27;);
+INSERT INTO chats VALUES (10, &#x27;Общий&#x27;), (11, &#x27;Игры&#x27;), (12, &#x27;Новый чат&#x27;);
 INSERT INTO chat_members VALUES
-    (1, 1, 10, &#x27;2026-11-20 12:00&#x27;),
-    (2, 1, 11, &#x27;2026-11-21 15:00&#x27;),
-    (3, 2, 10, &#x27;2026-11-20 13:00&#x27;);
--- Три участия; дата относится к конкретной паре пользователь–чат.
-SELECT u.nickname, c.name, m.joined_at
-FROM chat_members m
-JOIN users u ON u.id = m.user_id
-JOIN chats c ON c.id = m.chat_id
-ORDER BY u.id, c.id;
--- Пользователь без чатов: Кот.
-SELECT u.nickname FROM users u
-LEFT JOIN chat_members m ON m.user_id = u.id WHERE m.id IS NULL;
--- Чат без участников: Новый чат.
-SELECT c.name FROM chats c
-LEFT JOIN chat_members m ON m.chat_id = c.id WHERE m.id IS NULL;
+    (1, 1, 10, &#x27;2026-11-01 12:00&#x27;, &#x27;администратор&#x27;),
+    (2, 2, 11, &#x27;2026-11-01 13:00&#x27;, &#x27;администратор&#x27;);
+-- Отказ, повторное приглашение и встречное приглашение в другой чат.
+-- Все отправители уже состоят в соответствующих чатах.
+INSERT INTO invitations VALUES
+    (1, 1, 2, 10, &#x27;2026-11-20 12:00&#x27;, &#x27;отклонено&#x27;),
+    (2, 1, 2, 10, &#x27;2026-11-21 12:00&#x27;, &#x27;ожидает&#x27;),
+    (3, 2, 1, 11, &#x27;2026-11-21 13:00&#x27;, &#x27;ожидает&#x27;),
+    (4, 1, 3, 10, &#x27;2026-11-21 14:00&#x27;, &#x27;ожидает&#x27;);
+BEGIN;
+UPDATE invitations SET status = &#x27;принято&#x27; WHERE id = 2;
+INSERT INTO chat_members VALUES (3, 2, 10, &#x27;2026-11-21 12:05&#x27;, &#x27;участник&#x27;);
+COMMIT;
+BEGIN;
+UPDATE invitations SET status = &#x27;принято&#x27; WHERE id = 3;
+INSERT INTO chat_members VALUES (4, 1, 11, &#x27;2026-11-21 13:10&#x27;, &#x27;участник&#x27;);
+COMMIT;
+-- Четыре участия: у Лиса и Совы по два чата и разные роли.
+SELECT u.nickname, c.name, m.role, m.joined_at
+FROM chat_members m JOIN users u ON u.id = m.user_id
+JOIN chats c ON c.id = m.chat_id ORDER BY u.id, c.id;
+-- Четыре события, включая отказ и повтор той же пары в тот же чат.
+SELECT s.nickname AS sender, r.nickname AS recipient, c.name,
+       i.sent_at, i.status
+FROM invitations i JOIN users s ON s.id = i.sender_id
+JOIN users r ON r.id = i.recipient_id JOIN chats c ON c.id = i.chat_id
+ORDER BY i.id;
+-- Кот получил приглашение, но ещё не вступил. Волк без приглашений и участия.
+SELECT u.nickname FROM users u LEFT JOIN chat_members m ON m.user_id = u.id
+WHERE m.id IS NULL ORDER BY u.id;
+-- Новый чат пуст: количество участников 2, 2, 0.
+SELECT c.name, count(m.id) AS members FROM chats c
+LEFT JOIN chat_members m ON m.chat_id = c.id
+GROUP BY c.id, c.name ORDER BY c.id;
+-- Проверка правила отправителя: результат должен быть пустым.
+SELECT i.id FROM invitations i LEFT JOIN chat_members m
+ON m.user_id = i.sender_id AND m.chat_id = i.chat_id WHERE m.id IS NULL;
 </code></pre></details>
 </details></section>
 
 </div>
 </main>
-<script src="quiz.js?v=20261121105138"></script>
-<script src="engine.js?v=20261121105138"></script>
-<script src="teacher.js?v=20261121105138"></script>
+<script src="quiz.js?v=20261121105911"></script>
+<script src="engine.js?v=20261121105911"></script>
+<script src="teacher.js?v=20261121105911"></script>
 <script type="module" src="answer-diagrams.js"></script>
 <script src="answer-sql.js"></script>
 </body>
