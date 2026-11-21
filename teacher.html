@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261121112144">
+<link rel="stylesheet" href="quiz.css?v=20261121113444">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -1091,7 +1091,7 @@ FROM order_items GROUP BY order_id ORDER BY order_id;
     users ||--o{ skin_transfers : &quot;отправляет&quot;
     users ||--o{ skin_transfers : &quot;получает&quot;
 </pre></details></figure>
-<details class="card quiz-sql"><summary>SQL · задание 13: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-13.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
+<details class="card quiz-sql"><summary>SQL · задание 13: временные таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-13.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
 -- Временные таблицы доступны до закрытия соединения.
 -- Повторный запуск сбрасывает временные учебные данные.
 DROP TABLE IF EXISTS pg_temp.user_skins, pg_temp.skin_transfers, pg_temp.set_skins, pg_temp.skin_sets, pg_temp.skin_copies, pg_temp.skin_types, pg_temp.users CASCADE;
@@ -1160,6 +1160,82 @@ FROM set_skins x
 JOIN skin_types t ON t.id = x.skin_type_id
 JOIN skin_sets s ON s.id = x.set_id
 LEFT JOIN skin_copies c ON c.set_skin_id = x.id
+GROUP BY x.id, t.name, s.name ORDER BY x.id;
+</code></pre></details>
+<details class="card quiz-sql"><summary>SQL · задание 13: постоянные таблицы и тестовые данные</summary><p>PostgreSQL. Таблицы создаются в схеме <code>public</code> и сохраняются после закрытия соединения. Все обращения содержат <code>public.</code>, поэтому одноимённые временные таблицы не мешают.</p><p><strong>Повторный запуск удалит эти шесть таблиц и все их данные.</strong> Запускайте в учебной базе. Если другие таблицы зависят от них, PostgreSQL остановит удаление.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-13-permanent.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Постоянные таблицы сохраняются после закрытия соединения.
+-- ВНИМАНИЕ: повторный запуск удаляет эти шесть таблиц и их данные.
+-- public. отличает их от одноимённых временных таблиц.
+DROP TABLE IF EXISTS public.skin_transfers;
+DROP TABLE IF EXISTS public.skin_copies;
+DROP TABLE IF EXISTS public.set_skins;
+DROP TABLE IF EXISTS public.skin_sets;
+DROP TABLE IF EXISTS public.skin_types;
+DROP TABLE IF EXISTS public.users;
+
+CREATE TABLE public.users (id integer PRIMARY KEY, nickname text NOT NULL);
+CREATE TABLE public.skin_types (id integer PRIMARY KEY, name text NOT NULL, rarity text NOT NULL);
+CREATE TABLE public.skin_sets (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TABLE public.set_skins (
+    id integer PRIMARY KEY, set_id integer NOT NULL REFERENCES public.skin_sets(id),
+    skin_type_id integer NOT NULL REFERENCES public.skin_types(id), UNIQUE (set_id, skin_type_id)
+);
+CREATE TABLE public.skin_copies (
+    id integer PRIMARY KEY,
+    set_skin_id integer NOT NULL REFERENCES public.set_skins(id),
+    owner_id integer NOT NULL REFERENCES public.users(id), created_at timestamp NOT NULL
+);
+CREATE TABLE public.skin_transfers (
+    id integer PRIMARY KEY, copy_id integer NOT NULL REFERENCES public.skin_copies(id),
+    sender_id integer NOT NULL REFERENCES public.users(id),
+    recipient_id integer NOT NULL REFERENCES public.users(id), transferred_at timestamp NOT NULL,
+    CHECK (sender_id &lt;&gt; recipient_id)
+);
+INSERT INTO public.users VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;), (3, &#x27;Кот&#x27;);
+INSERT INTO public.skin_types VALUES
+    (20, &#x27;Ледяной&#x27;, &#x27;редкий&#x27;), (21, &#x27;Снежный&#x27;, &#x27;обычный&#x27;),
+    (22, &#x27;Звёздный&#x27;, &#x27;редкий&#x27;);
+INSERT INTO public.skin_sets VALUES (10, &#x27;Зима&#x27;), (11, &#x27;Сияние&#x27;);
+INSERT INTO public.set_skins VALUES (1, 10, 20), (2, 10, 21), (3, 11, 20), (4, 11, 22);
+-- set_skin_id 1 — Ледяной из Зимы; 3 — Ледяной из Сияния.
+INSERT INTO public.skin_copies VALUES
+    (100, 1, 1, &#x27;2026-11-01 12:00&#x27;), (101, 1, 1, &#x27;2026-11-02 12:00&#x27;),
+    (102, 1, 2, &#x27;2026-11-03 12:00&#x27;), (103, 3, 1, &#x27;2026-11-04 12:00&#x27;);
+-- Передача и возврат копии 100; начальное получение не записываем.
+-- Для этих данных отправитель совпадает с владельцем перед каждой передачей.
+BEGIN;
+INSERT INTO public.skin_transfers VALUES (1, 100, 1, 2, &#x27;2026-11-20 12:00&#x27;);
+UPDATE public.skin_copies SET owner_id = 2 WHERE id = 100;
+COMMIT;
+BEGIN;
+INSERT INTO public.skin_transfers VALUES (2, 100, 2, 1, &#x27;2026-11-21 12:00&#x27;);
+UPDATE public.skin_copies SET owner_id = 1 WHERE id = 100;
+COMMIT;
+-- Копии: Лис — 3, Сова — 1, Кот — 0.
+SELECT u.nickname, count(c.id) AS copies
+FROM public.users u LEFT JOIN public.skin_copies c ON c.owner_id = u.id
+GROUP BY u.id, u.nickname ORDER BY u.id;
+-- M:N: Ледяной входит в два набора; в каждом наборе два типа.
+SELECT t.name AS skin, s.name AS set_name
+FROM public.skin_types t LEFT JOIN public.set_skins x ON x.skin_type_id = t.id
+LEFT JOIN public.skin_sets s ON s.id = x.set_id ORDER BY t.id, s.id;
+-- Одна users присоединяется дважды: отправитель и получатель.
+SELECT x.copy_id, s.nickname AS sender, r.nickname AS recipient, x.transferred_at
+FROM public.skin_transfers x JOIN public.users s ON s.id = x.sender_id
+JOIN public.users r ON r.id = x.recipient_id ORDER BY x.transferred_at, x.id;
+-- Копия 100 вернулась к Лису; её номер, тип, набор и дата создания прежние.
+SELECT c.id, t.name AS skin, s.name AS set_name, u.nickname AS owner, c.created_at
+FROM public.skin_copies c
+JOIN public.set_skins x ON x.id = c.set_skin_id
+JOIN public.skin_types t ON t.id = x.skin_type_id
+JOIN public.skin_sets s ON s.id = x.set_id
+JOIN public.users u ON u.id = c.owner_id ORDER BY c.id;
+-- Количество копий по типу и набору: Ледяной/Зима — 3,
+-- Ледяной/Сияние — 1, Снежный/Зима и Звёздный/Сияние — 0.
+SELECT t.name AS skin, s.name AS set_name, count(c.id) AS copies
+FROM public.set_skins x
+JOIN public.skin_types t ON t.id = x.skin_type_id
+JOIN public.skin_sets s ON s.id = x.set_id
+LEFT JOIN public.skin_copies c ON c.set_skin_id = x.id
 GROUP BY x.id, t.name, s.name ORDER BY x.id;
 </code></pre></details>
 <p>14. <strong>Групповые чаты и приглашения.</strong> Четыре таблицы: users, chats, chat_members, invitations. users ↔ chats — M:N через chat_members; joined_at и role относятся к участию, пара user_id–chat_id уникальна. В invitations sender_id и recipient_id ссылаются на users в разных ролях, chat_id — на chats; каждая из этих связей 1:N. Строка invitations — отдельная попытка приглашения, поэтому пара отправитель–получатель–чат может повторяться. У приглашения и участия независимые даты. Принятие приглашения и добавление участия выполняются вместе. В примере membership отправителя проверяет приложение: одних FK на users и chats для этого недостаточно. Составной FK на пару участник–чат — допустимое усложнение, но не обязательный ответ.</p><p><code>users(id, nickname); chats(id, name); chat_members(id, user_id, chat_id, joined_at, role); invitations(id, sender_id, recipient_id, chat_id, sent_at, status).</code></p>
@@ -1257,9 +1333,9 @@ ON m.user_id = i.sender_id AND m.chat_id = i.chat_id WHERE m.id IS NULL;
 
 </div>
 </main>
-<script src="quiz.js?v=20261121112144"></script>
-<script src="engine.js?v=20261121112144"></script>
-<script src="teacher.js?v=20261121112144"></script>
+<script src="quiz.js?v=20261121113444"></script>
+<script src="engine.js?v=20261121113444"></script>
+<script src="teacher.js?v=20261121113444"></script>
 <script type="module" src="answer-diagrams.js"></script>
 <script src="answer-sql.js"></script>
 </body>
