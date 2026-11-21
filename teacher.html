@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261117192032">
+<link rel="stylesheet" href="quiz.css?v=20261121100357">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -748,32 +748,32 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
 </pre></details></figure>
 <p>Во всех случаях просить примеры, которые различают модели. Не требовать именно перечисленных сюжетов.</p>
 <h3>Раунд 3 — схемы до и после</h3>
-<p>9. До: <code>hosts(id, name)</code>, <code>streams(id, host_id)</code>. После: <code>hosts</code>, <code>streams</code>, <code>stream_hosts(id, stream_id, host_id)</code>. Убрать единственный <code>host_id</code> из трансляции. Пары (эфир 1, ведущий 1), (эфир 1, ведущий 2), (эфир 2, ведущий 1) демонстрируют M:N.</p><figure class="answer-schema"><figcaption>До: один ведущий</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
-    hosts {
+<p>9. До: <code>arenas(id, name)</code>, <code>tournaments(id, arena_id)</code> — арена → турниры, 1:N. После: <code>arenas</code>, <code>tournaments</code>, <code>tournament_arenas(id, tournament_id, arena_id)</code> — M:N. Перенести существующие пары в связку и убрать <code>arena_id</code> из турнира. Пары (турнир 1, арена 1), (турнир 1, арена 2), (турнир 2, арена 1) демонстрируют M:N. Пара турнир–арена не повторяется.</p><figure class="answer-schema"><figcaption>До: одна арена</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    arenas {
         bigint id PK
         text name
     }
-    streams {
+    tournaments {
         bigint id PK
-        bigint host_id FK
+        bigint arena_id FK
     }
-    hosts ||--o{ streams : &quot;содержит&quot;
-</pre></details></figure><figure class="answer-schema"><figcaption>После: совместные эфиры</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
-    hosts {
-        bigint id PK
-        text name
-    }
-    streams {
+    arenas ||--o{ tournaments : &quot;содержит&quot;
+</pre></details></figure><figure class="answer-schema"><figcaption>После: несколько арен</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    arenas {
         bigint id PK
         text name
     }
-    stream_hosts {
+    tournaments {
         bigint id PK
-        bigint host_id FK
-        bigint stream_id FK
+        text name
     }
-    hosts ||--o{ stream_hosts : &quot;участие&quot;
-    streams ||--o{ stream_hosts : &quot;участие&quot;
+    tournament_arenas {
+        bigint id PK
+        bigint arena_id FK
+        bigint tournament_id FK
+    }
+    arenas ||--o{ tournament_arenas : &quot;участие&quot;
+    tournaments ||--o{ tournament_arenas : &quot;участие&quot;
 </pre></details></figure>
 <p>10. До: <code>players</code>, <code>items(id, owner_id)</code> — каждый предмет здесь отдельный экземпляр. После добавить <code>transfers(id, item_id, sender_id, recipient_id, transferred_at)</code>. Отправитель и получатель ссылаются на игроков. Одна строка — событие передачи: предмет 10, игрок 1 → 2, затем тот же предмет 2 → 1. Простая связка «игрок — предмет» без времени и направления историю не описывает. Для квиза допустимо оставить текущего владельца и историю отдельно; при передаче они должны согласованно обновляться. SQL-механизм обновления не разбираем.</p><figure class="answer-schema"><figcaption>До: текущий владелец</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     players {
@@ -930,9 +930,9 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
 
 </div>
 </main>
-<script src="quiz.js?v=20261117192032"></script>
-<script src="engine.js?v=20261117192032"></script>
-<script src="teacher.js?v=20261117192032"></script>
+<script src="quiz.js?v=20261121100357"></script>
+<script src="engine.js?v=20261121100357"></script>
+<script src="teacher.js?v=20261121100357"></script>
 <script type="module" src="answer-diagrams.js"></script>
 </body>
 </html>
