@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261121100357">
+<link rel="stylesheet" href="quiz.css?v=20261121101056">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -806,41 +806,33 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
     players ||--o{ transfers : &quot;отправитель&quot;
     players ||--o{ transfers : &quot;получатель&quot;
 </pre></details></figure>
-<p>11. До: <code>playlist_tracks(id, playlist_id, track_id, position)</code>; пара плейлист–трек не повторяется. После: те же поля, но пара может повторяться, каждая строка — отдельное вхождение со своим <code>id</code>. Пример: (id 1, плейлист 5, трек 8, позиция 1), (id 2, плейлист 5, трек 9, позиция 2), (id 3, плейлист 5, трек 8, позиция 3). Позиции внутри плейлиста различаются. Связь остаётся M:N; меняются правила повторов. Если ученики назовут <code>unique</code>, обсудить устно, синтаксис не требуется.</p><figure class="answer-schema"><figcaption>До: один трек один раз</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
-    playlists {
+<p>11. До: <code>users(id, nickname)</code>, <code>messages(id, author_id, text, sent_at)</code> — пользователь → сообщения, 1:N. После: <code>users(id, nickname)</code>, <code>messages(id, sender_id, recipient_id, text, sent_at)</code>. Поле автора становится <code>sender_id</code>, добавляется <code>recipient_id</code>. Оба внешних ключа ссылаются на <code>users.id</code>, но обозначают разные роли. На схеме две связи 1:N: пользователь отправляет много сообщений и получает много сообщений; у каждого сообщения ровно один отправитель и ровно один получатель. Отдельные таблицы отправителей и получателей не нужны. Пример: (id 1, отправитель 7, получатель 9, «Привет!»), (id 2, отправитель 9, получатель 7, «Привет!»), (id 3, отправитель 7, получатель 9, «Как дела?»). Одна строка — отдельное сообщение, поэтому пара отправитель–получатель может повторяться. Получателя старых публичных сообщений нельзя определить автоматически: для них нужно отдельное правило переноса или архивирования.</p><figure class="answer-schema"><figcaption>До: автор сообщения</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    users {
         bigint id PK
-        text name
+        text nickname
     }
-    tracks {
+    messages {
         bigint id PK
-        text name
+        bigint author_id FK
+        text text
+        datetime sent_at
     }
-    playlist_tracks {
+    users ||--o{ messages : &quot;пишет&quot;
+</pre></details></figure><figure class="answer-schema"><figcaption>После: отправитель и получатель</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
+    users {
         bigint id PK
-        bigint playlist_id FK
-        bigint track_id FK
-        bigint position
+        text nickname
     }
-    playlists ||--o{ playlist_tracks : &quot;участие&quot;
-    tracks ||--o{ playlist_tracks : &quot;участие&quot;
-</pre></details><p>До: уникальна пара playlist_id + track_id. После: повторы пары разрешены; отдельный id у каждого вхождения. В обоих вариантах позиция уникальна внутри плейлиста.</p></figure><figure class="answer-schema"><figcaption>После: повторные вхождения</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
-    playlists {
+    messages {
         bigint id PK
-        text name
+        bigint sender_id FK
+        bigint recipient_id FK
+        text text
+        datetime sent_at
     }
-    tracks {
-        bigint id PK
-        text name
-    }
-    playlist_tracks {
-        bigint id PK
-        bigint playlist_id FK
-        bigint track_id FK
-        bigint position
-    }
-    playlists ||--o{ playlist_tracks : &quot;участие&quot;
-    tracks ||--o{ playlist_tracks : &quot;участие&quot;
-</pre></details><p>До: уникальна пара playlist_id + track_id. После: повторы пары разрешены; отдельный id у каждого вхождения. В обоих вариантах позиция уникальна внутри плейлиста.</p></figure>
+    users ||--o{ messages : &quot;отправляет&quot;
+    users ||--o{ messages : &quot;получает&quot;
+</pre></details></figure>
 <h3>Раунд 4 — эталонные модели</h3>
 <p>12. <code>players(id, nickname)</code>, <code>raids(id, starts_at)</code>, <code>participations(id, player_id, raid_id, role, confirmation_status)</code>.</p><figure class="answer-schema"><figcaption>Состав рейдов</figcaption><div class="mermaid-output"></div><details><summary>Код Mermaid</summary><pre class="mermaid-source">erDiagram
     players {
@@ -930,9 +922,9 @@ insert into pitomcy (klichka, vid, vozrast, hozyain) values
 
 </div>
 </main>
-<script src="quiz.js?v=20261121100357"></script>
-<script src="engine.js?v=20261121100357"></script>
-<script src="teacher.js?v=20261121100357"></script>
+<script src="quiz.js?v=20261121101056"></script>
+<script src="engine.js?v=20261121101056"></script>
+<script src="teacher.js?v=20261121101056"></script>
 <script type="module" src="answer-diagrams.js"></script>
 </body>
 </html>
