@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261124171155">
+<link rel="stylesheet" href="quiz.css?v=20261124182908">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -206,6 +206,17 @@ pre.cmd .sn { color: #c9a7ff; } pre.cmd .sc { color: var(--term-muted); } pre.cm
   .cols2 { grid-template-columns: 1fr; }
   h1 { font-size: 22px; }
 }
+
+#tab-sql6 { max-width: 1040px; margin: 0 auto; font-size: 16px; }
+#tab-sql6 [id] { scroll-margin-top: 160px; }
+#tab-sql6 .lesson-links { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 14px 0; }
+#tab-sql6 .student-task { margin: 14px 0; }
+#tab-sql6 .student-task > h3 { margin-top: 0; }
+#tab-sql6 .student-task > :last-child { margin-bottom: 0; }
+#tab-sql6 .quiz-sql { margin: 14px 0; }
+#tab-sql6 pre code { background: none; padding: 0; border-radius: 0; }
+#tab-sql6 .level2 { margin-top: 28px; }
+@media (max-width: 760px) { #tab-sql6 [id] { scroll-margin-top: 300px; } }
 </style>
 </head>
 <body>
@@ -221,6 +232,7 @@ pre.cmd .sn { color: #c9a7ff; } pre.cmd .sc { color: var(--term-muted); } pre.cm
       <button data-tab="sql3">Связи</button>
       <button data-tab="sql4">Типы связей</button>
       <button data-tab="sql5">Квиз: связи</button>
+      <button data-tab="sql6">Правила базы</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -2823,11 +2835,146 @@ group by pitomcy.klichka;
 <p>Проверка: Один пользователь состоит в двух чатах с разными ролями. В каждом из этих чатов несколько участников. Один пользователь приглашает другого в первый чат, а тот приглашает его во второй. Есть отказ и повторное приглашение той же пары в тот же чат. Есть пользователь без участия и пустой чат. После принятия приглашения появляется участие с собственной датой вступления.</p>
 <p>Дополнительные вопросы: Почему дата приглашения и дата вступления — разные поля? Можно ли по наличию приглашения считать пользователя участником? Где проверять, что отправитель приглашения состоит в нужном чате?</p>
 </section>
+
+<section class="tab" id="tab-sql6">
+<section id="sql6-content" class="level1">
+<h1>Занятие 16 — правила базы чатов</h1>
+<div class="lesson-links"><a href="#sql6-queries">Запросы</a><a href="#sql6-experiments">Опыты</a><a href="#sql6-cheat">Шпаргалка</a><a href="#sql6-changes">Новые правила</a><a href="#sql6-homework">Домашка</a></div>
+<div class="note-box"><a class="btn" href="files/chat-rules-start.sql" download>Скачать стартовую базу чатов</a><p>Запускайте скрипт по команде преподавателя. Он пересоздаёт четыре таблицы и их данные. Если база чатов уже подготовлена, продолжайте работать с ней.</p></div>
+<p>Работаем с <code>public.users</code>, <code>public.chats</code>, <code>public.chat_members</code>, <code>public.invitations</code>. Стартовый SQL запускаем вместе по команде преподавателя. После добавления новых правил его повторно не запускаем.</p>
+<p>SQL сохраняйте в <code>chat_rules.sql</code>. Перед каждой проверкой напишите ожидаемый результат комментарием. Выполняйте отдельные выделенные команды: среди них есть намеренно ошибочные. В командах <code>insert</code> перечисляйте столбцы, а для опытов используйте указанные свободные <code>id</code>.</p>
+<section id="sql6-queries" class="level2">
+<h2>Практика 1 — запросы</h2>
+<article class="card student-task" id="sql6-p1"><h3>П1. Участники</h3><p>Выведите название чата, ник участника и его роль. Одна строка результата — одно участие. Упорядочьте по <code>id</code> чата и <code>id</code> пользователя.</p></article>
+<article class="card student-task" id="sql6-p2"><h3>П2. Численность</h3><p>Для каждого чата выведите название и количество участников. Пустой чат тоже должен быть в результате, с числом 0. Упорядочьте по <code>id</code> чата.</p></article>
+<article class="card student-task" id="sql6-p3"><h3>П3. Кто ещё не вступил</h3><p>Найдите пользователей без участия в чатах. Упорядочьте по <code>id</code> пользователя.</p></article>
+<article class="card student-task" id="sql6-p4"><h3>П4. Ожидающие приглашения</h3><p>Выведите ник отправителя, ник получателя и название чата для приглашений со статусом «ожидает». Пользовательская таблица одна, роли две.</p></article>
+</section>
+<section id="sql6-experiments" class="level2">
+<h2>Практика 2 — что разрешит база?</h2>
+<p>Перед каждым опытом запишите прогноз: выполнится ли команда и какое правило она проверяет. Запускайте по одной команде; после ошибки читайте её текст. Не меняйте исходные правила ради успешного выполнения.</p>
+<section id="sql6-o1" class="level3 card student-task">
+<h3>О1. Повтор участия</h3>
+<p>Лис уже состоит в «Общем». Номер новой записи отличается от существующих.</p>
+<div class="quiz-sql"><button type="button" class="btn" data-copy-sql>Скопировать SQL</button><pre class="cmd"><code>insert into public.chat_members (id, user_id, chat_id, joined_at, role)
+values (9001, 1, 10, &#39;2026-11-24 12:00&#39;, &#39;участник&#39;);</code></pre></div>
+</section>
+<section id="sql6-o2" class="level3 card student-task">
+<h3>О2. Приглашение самому себе</h3>
+<div class="quiz-sql"><button type="button" class="btn" data-copy-sql>Скопировать SQL</button><pre class="cmd"><code>insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
+values (9002, 1, 1, 10, &#39;2026-11-24 12:00&#39;, &#39;ожидает&#39;);</code></pre></div>
+</section>
+<section id="sql6-o3" class="level3 card student-task">
+<h3>О3. Несуществующий получатель</h3>
+<p>Пользователя с <code>id = 999</code> нет.</p>
+<div class="quiz-sql"><button type="button" class="btn" data-copy-sql>Скопировать SQL</button><pre class="cmd"><code>insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
+values (9003, 1, 999, 10, &#39;2026-11-24 12:00&#39;, &#39;ожидает&#39;);</code></pre></div>
+</section>
+<section id="sql6-o4" class="level3 card student-task">
+<h3>О4. Неизвестный статус</h3>
+<div class="quiz-sql"><button type="button" class="btn" data-copy-sql>Скопировать SQL</button><pre class="cmd"><code>insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
+values (9004, 1, 4, 10, &#39;2026-11-24 12:00&#39;, &#39;передумал&#39;);</code></pre></div>
+</section>
+<section id="sql6-o5" class="level3 card student-task">
+<h3>О5. Ник не указан</h3>
+<div class="quiz-sql"><button type="button" class="btn" data-copy-sql>Скопировать SQL</button><pre class="cmd"><code>insert into public.users (id, nickname) values (9005, null);</code></pre></div>
+</section>
+<section id="sql6-o6" class="level3 card student-task">
+<h3>О6. Ник — пустая строка</h3>
+<p>Этот опыт выполняем вместе после перерыва, до добавления нового ограничения на ник.</p>
+<div class="quiz-sql"><button type="button" class="btn" data-copy-sql>Скопировать SQL</button><pre class="cmd"><code>insert into public.users (id, nickname) values (9006, &#39;&#39;);
+select id, nickname, nickname is null as is_null
+from public.users where id = 9006;
+delete from public.users where id = 9006;</code></pre></div>
+<p>Сравните с О5. Что означает результат <code>is_null</code>? Почему <code>not null</code> недостаточно для запрета пустой строки?</p>
+</section>
+</section>
+<section id="sql6-cheat" class="level2">
+<h2>Шпаргалка для практики 3</h2>
+<p>Это шаблоны: замените имена и условия перед выполнением.</p>
+<pre class="cmd sql-template"><code>alter table public.имя_таблицы
+add constraint имя_ограничения check (условие);
+
+alter table public.имя_таблицы
+alter column имя_столбца set default значение;
+
+alter table public.имя_таблицы
+add column имя_столбца тип;</code></pre>
+<p><code>update</code> меняет значения в строках. <code>alter table</code> меняет структуру таблицы и её правила. Команды добавления столбца и ограничений выполняйте один раз; для повторной проверки используйте <code>insert</code>, <code>update</code> и <code>select</code>.</p>
+</section>
+<section id="sql6-changes" class="level2">
+<h2>Практика 3 — новые требования</h2>
+<p>Сохраняйте существующие строки. Для каждого задания нужны изменение схемы и проверки. После успешных пробных вставок удаляйте только добавленные вами строки.</p>
+<section id="sql6-i1" class="level3 card student-task">
+<h3>И1. Допустимые роли</h3>
+<p>В <code>chat_members.role</code> разрешены только «администратор» и «участник». Назовите ограничение <code>chat_members_role_check</code>.</p>
+<ul>
+<li>Попробуйте изменить роль участия <code>id = 4</code> на «администратор», проверьте результат и верните «участник».</li>
+<li>Попробуйте изменить её на «главный». Объясните результат.</li>
+</ul>
+</section>
+<section id="sql6-i2" class="level3 card student-task">
+<h3>И2. Непустой ник</h3>
+<p>Ник <code>''</code> запрещён. Назовите новое ограничение <code>users_nickname_not_empty</code>. Существующий запрет <code>null</code> сохраните.</p>
+<ul>
+<li>Снова попробуйте вставить пользователя с <code>id = 9006</code> и ником <code>''</code>.</li>
+<li>Проверьте <code>null</code>.</li>
+<li>Добавьте пользователя с этим номером и ником «Рысь», затем удалите его.</li>
+</ul>
+<p>Строки из одних пробелов — отдельное возможное требование; сегодня проверяем именно пустую строку <code>''</code>.</p>
+</section>
+<section id="sql6-i3" class="level3 card student-task">
+<h3>И3. Статус по умолчанию</h3>
+<p>Если при создании приглашения столбец <code>status</code> не указан, нужно записывать «ожидает».</p>
+<ul>
+<li>Создайте приглашение <code>id = 9007</code>: Лис (<code>1</code>) приглашает Волка (<code>4</code>) в «Общий» (<code>10</code>), время <code>'2026-11-24 12:00'</code>. Не включайте <code>status</code> в список столбцов. Посмотрите результат, затем удалите пробную строку.</li>
+<li>Повторите опыт, явно передав <code>null</code> в <code>status</code>. Сработал ли <code>default</code>?</li>
+<li>Проверьте явный статус «отклонено» на приглашении <code>id = 9008</code> с теми же участниками. Посмотрите результат и удалите строку.</li>
+<li>Изменились ли статусы четырёх исходных приглашений?</li>
+</ul>
+</section>
+<section id="sql6-i4" class="level3 card student-task">
+<h3>И4. Описание чата</h3>
+<p>Добавьте в <code>chats</code> необязательный столбец <code>description</code> типа <code>text</code>.</p>
+<ul>
+<li>Посмотрите, какие значения получили три существующих чата.</li>
+<li>Для «Общего» (<code>id = 10</code>) запишите «Общение участников».</li>
+<li>Проверьте, что у остальных чатов описание осталось <code>null</code>.</li>
+</ul>
+</section>
+<section id="sql6-review" class="level3 card student-task">
+<h3>Проверка в паре</h3>
+<p>Обменяйтесь командами проверки. Выполните их на своей базе после своих изменений; повторять чужие <code>alter table</code> не нужно. Объясните соседу причину каждой ошибки и результат каждой успешной команды.</p>
+<p>В конце должно остаться 4 пользователя, 3 чата, 4 участия, 4 приглашения. Роль участия <code>id = 4</code> — «участник». Статусы исходных приглашений сохранены; описание заполнено только у «Общего».</p>
+</section>
+</section>
+<section id="sql6-bonus" class="level2">
+<h2>Бонус Б1 — старые данные нарушают новое правило</h2>
+<p>Для <code>chats.name</code> решили запретить <code>''</code>.</p>
+<ol type="1">
+<li>До добавления правила создайте пробный чат <code>id = 9009</code> с пустым названием.</li>
+<li>Попробуйте добавить ограничение <code>chats_name_not_empty</code>. Что произойдёт?</li>
+<li>Исправьте название пробного чата на «Проверка», затем снова добавьте ограничение.</li>
+<li>Удалите пробный чат. Объясните, почему одинаковая команда добавления ограничения дала разные результаты.</li>
+</ol>
+</section>
+<section id="sql6-homework" class="level2">
+<h2>Домашка к занятию 17 — модераторы</h2>
+<p>Продолжайте базу после И1–И4. Если что-то не закончено, сначала доделайте практику.</p>
+<article class="card student-task" id="sql6-d1"><h3>Д1. Новое правило</h3><p>Теперь разрешены три роли: «администратор», «участник» и «модератор». Измените ограничение <code>chat_members_role_check</code>, сохранив все участия. Таблицу пересоздавать нельзя. Подсказка: ограничение можно удалить по имени через <code>drop constraint</code> и добавить новое с тем же именем.</p></article>
+<article class="card student-task" id="sql6-d2"><h3>Д2. Назначение</h3><p>Сделайте Сову модератором «Общего»: это участие <code>id = 3</code>, пользователь <code>2</code>, чат <code>10</code>. Её роль в «Играх» должна сохраниться.</p></article>
+<article class="card student-task" id="sql6-d3"><h3>Д3. Список</h3><p>Выведите название чата, ник и роль для всех администраторов и модераторов. Упорядочьте по <code>id</code> чата и <code>id</code> пользователя.</p></article>
+<article class="card student-task" id="sql6-d4"><h3>Д4. Проверка</h3><p>Покажите, что роль «главный» всё ещё запрещена. Объясните, почему поле <code>role</code> находится в <code>chat_members</code>, а не в <code>users</code>.</p></article>
+<p>Сдать <code>chat_rules.sql</code> с изменениями, проверками и комментариями об ожидаемых результатах; результат Д3 и одну ошибку для запрещённой роли. Команды с ожидаемыми ошибками пометьте и запускайте отдельно. Не включайте стартовый скрипт с удалением таблиц.</p>
+</section>
+</section>
+
+</section>
 </main>
 
-<script src="live.js?v=20261124171155"></script>
-<script src="quiz.js?v=20261124171155"></script>
-<script src="engine.js?v=20261124171155"></script>
+<script src="live.js?v=20261124182908"></script>
+<script src="quiz.js?v=20261124182908"></script>
+<script src="engine.js?v=20261124182908"></script>
 <script>
 (function () {
   "use strict";
@@ -2855,7 +3002,7 @@ group by pitomcy.klichka;
   // ---------- подсветка SQL во вкладке «Базы данных» ----------
   const SQL_KW = new Set(("select from where and or not in between like ilike is null order by desc asc limit insert into values " +
     "update set delete drop table if exists create primary key generated always as identity bigint text int boolean date " +
-    "default check true false distinct alter enable row level security current_date group having year join on references add column left").split(" "));
+    "default check true false distinct alter enable row level security current_date group having year join on references add column left constraint unique").split(" "));
   const SQL_FN = new Set(["count", "sum", "avg", "min", "max", "round", "extract"]);
   function sqlHtml(src) {
     return src.replace(/(--[^\n]*)|('[^'\n]*')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]+)\b|([^-'\dA-Za-z_]+|.)/g, (m, c, str, n, w) => {
@@ -2866,7 +3013,7 @@ group by pitomcy.klichka;
       return esc(m);
     });
   }
-  document.querySelectorAll("#tab-sql pre.cmd, #tab-sql2 pre.cmd, #tab-sql3 pre.cmd, #tab-sql4 pre.cmd:not(.mm), #tab-sql .cheat td:first-child").forEach((e) => (e.innerHTML = sqlHtml(e.textContent)));
+  document.querySelectorAll("#tab-sql pre.cmd, #tab-sql2 pre.cmd, #tab-sql3 pre.cmd, #tab-sql4 pre.cmd:not(.mm), #tab-sql6 pre.cmd:not(.sql-template) code, #tab-sql .cheat td:first-child").forEach((e) => (e.innerHTML = sqlHtml(e.textContent)));
 
   // ---------- вкладки ----------
   function showTab(t) {
@@ -2879,7 +3026,7 @@ group by pitomcy.klichka;
   const hashTab = location.hash.replace("#", "");
   // #proj и другие якоря внутри вкладки: открыть эту вкладку и прокрутить к разделу
   const hashSec = hashTab && document.getElementById(hashTab)?.closest(".tab");
-  showTab(["live", "lesson", "excel", "sql", "sql2", "sql3", "sql4", "sql5", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
+  showTab(["live", "lesson", "excel", "sql", "sql2", "sql3", "sql4", "sql5", "sql6", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
     : hashSec ? hashSec.id.replace("tab-", "") : store.get("tab", "train"));
   if (hashSec) document.getElementById(hashTab).scrollIntoView();
 
@@ -3465,5 +3612,6 @@ group by pitomcy.klichka;
 
 })();
 </script>
+<script src="answer-sql.js"></script>
 </body>
 </html>
