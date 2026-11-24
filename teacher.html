@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261124195057">
+<link rel="stylesheet" href="quiz.css?v=20261124205506">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -152,6 +152,29 @@ table.probs td:first-child { width: 40%; }
 #tab-l16 .discussion-questions > li { margin: 16px 0; }
 #tab-l16 .lesson-anchor { display: block; scroll-margin-top: 16px; }
 #tab-l16 .lesson-exercise, #tab-l16 #l16-practice { scroll-margin-top: 16px; }
+#tab-l17 { font-size: 16px; }
+#tab-l17 h2, #tab-l17 h3, #tab-l17 h4, #tab-l17 details { scroll-margin-top: 16px; }
+#tab-l17 > details { margin-top: 16px; }
+#tab-l17 summary { cursor: pointer; font-weight: 600; }
+#tab-l17 .quiz-sql { margin: 14px 0 20px; }
+#tab-l17 pre { padding: 12px; background: var(--chip); border-radius: 8px; }
+#tab-l17 pre code { background: none; padding: 0; }
+#tab-l17 .wrap { margin: 12px 0; }
+
+#tab-l17 .lesson-exercise { margin: 16px 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+#tab-l17 .lesson-exercise > h3, #tab-l17 .lesson-exercise > h4 { margin-top: 0; }
+#tab-l17 .lesson-answer { margin: 12px 0; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; background: var(--bg); }
+#tab-l17 .lesson-answer > summary { color: var(--accent); }
+#tab-l17 .lesson-answer[open] > summary { margin-bottom: 14px; }
+#tab-l17 .lesson-answer > :last-child { margin-bottom: 0; }
+#tab-l17 .discussion-questions > li { margin: 16px 0; }
+#tab-l17 .lesson-anchor { display: block; scroll-margin-top: 16px; }
+#tab-l17 .lesson-exercise, #tab-l17 #l17-practice { scroll-margin-top: 16px; }
+
+#tab-l17 { overflow-wrap: anywhere; }
+#tab-l17 .lesson-stage { min-width: 0; }
+#tab-l17 .wrap table { min-width: 520px; }
+#tab-l17 .lesson-stage > .lesson-answer { margin: 16px 0; }
 </style>
 </head>
 <body>
@@ -184,6 +207,7 @@ table.probs td:first-child { width: 40%; }
     <button data-tab="l14">Занятие 14 · типы связей</button>
     <button data-tab="l15">Занятие 15 · квиз по связям</button>
     <button data-tab="l16">Занятие 16 · правила базы</button>
+    <button data-tab="l17">Занятие 17 · API и Supabase</button>
   </nav>
 
   <section class="tab" id="tab-pupils">
@@ -1762,11 +1786,758 @@ delete from public.chats where id = 9009;
 
 </section>
 
+<section class="tab" id="tab-l17">
+<h2 id="l17-plan">Занятие 17 — основы API на примере Supabase</h2>
+<nav class="links" aria-label="Материалы занятия 17">
+<a href="#l17-plan">План занятия</a><a href="#l17-setup">Подготовка Supabase</a><a href="#l17-first">Первый запрос</a><a href="#l17-practice">Чтение</a><a href="#l17-changes">Изменения</a><a href="#l17-errors">Ошибки</a><a href="#l17-homework">Домашка</a>
+</nav>
+<div class="links">
+<a href="files/lesson17/Практика.md" download>Практика ученикам</a>
+<a href="files/lesson17/supabase_setup.sql" download>Стартовый SQL</a>
+<a href="files/lesson17/Урок_17.postman_collection.json" download>Коллекция Postman</a>
+<a href="files/lesson17/Урок_17.postman_environment.json" download>Окружение Postman</a>
+</div>
+<p>120 минут, включая перерыв 5 минут. Каждый отправляет HTTP-запросы в Postman к своей учебной базе; проверка результатов — в парах. Программирование не требуется.</p>
+<p>Главная идея: раньше мы работали с базой через SQL, теперь обращаемся к её данным из другого приложения через API.</p>
+<p>Задания и раскрывающиеся ответы расположены ниже по ходу занятия. Ученикам выдаём практику и пустое окружение; ответы и коллекция решений предназначены преподавателю. Ученики собирают запросы сами, готовые решения открываем после попытки.</p>
+<section class="lesson-stage">
+<h3 id="l17-heading-2">Откуда продолжаем</h3>
+<p>На занятии 16 работали с <code>users</code>, <code>chats</code>, <code>chat_members</code>, <code>invitations</code>: ограничениями и <code>alter table</code>. Домашка добавляла роль «модератор» и назначала её Сове в «Общем». Сегодня используем отдельную учебную копию этой модели с уже выполненной домашкой. Существующие базы прошлого урока сохраняем.</p>
+<p>В API сначала читаем знакомые таблицы, затем создаём одного нового пользователя. Авторизацию пользователей, SDK, соединения таблиц через API и написание сервера оставляем на следующие занятия. RLS объясняем как правила доступа, настройку выполняет преподаватель заранее.</p>
+</section>
+<section class="lesson-stage">
+<h3 id="l17-heading-3">Результат занятия</h3>
+<p>Ученик умеет:</p>
+<ul>
+<li>Объяснить, что такое API, клиент, сервер, запрос и ответ.</li>
+<li>Найти в запросе метод, URL, параметры, заголовки и тело.</li>
+<li>Прочитать простой JSON, статус ответа и сообщение об ошибке.</li>
+<li>Получить, создать, изменить и удалить запись через API Supabase.</li>
+<li>Объяснить, почему ограничения базы действуют и при обращении через API.</li>
+</ul>
+</section>
+<section class="lesson-stage">
+<h3 id="l17-heading-4">Подготовить до урока</h3>
+<ol>
+<li>Пройти <a href="#l17-setup">инструкцию подготовки</a>: отдельные проекты, стартовый SQL, доступ через Data API, проверка с ученическим ключом.</li>
+<li>Установить и открыть Postman Desktop на ученических компьютерах. Проверить сеть и импорт <a download="" href="files/lesson17/Урок_17.postman_environment.json">шаблона окружения</a>.</li>
+<li>Подготовить собственный демонстрационный проект. В каждом проекте должны быть 4 пользователя, 3 чата, 4 участия и 4 приглашения.</li>
+<li>Прогнать коллекцию преподавателя на демонстрационном проекте по порядку. Проверить, что после опытов пользователь <code>100</code> удалён, а исходные строки сохранены.</li>
+<li>Раздать «Практику». На случай проблем с сетью использовать примеры ответов из «Ответов»; самостоятельную отправку запросов тогда перенести в домашку.</li>
+</ol>
+<details class="lesson-answer" id="l17-setup"><summary>Подготовка Supabase и Postman до занятия</summary>
+<h3 id="l17-heading-5">Подготовка Supabase и Postman к уроку 17</h3>
+<p>Инструкция преподавателю. Подготовьте один демонстрационный проект и отдельный учебный проект каждому ученику заранее. Если проектов на всех не хватает, организуйте работу в парах: одна пара использует один проект и выполняет один цикл запросов за одним компьютером. Одновременная работа всего класса с одинаковыми <code>id</code> в одной базе приведёт к конфликтам.</p>
+<h4 id="l17-heading-6">Учебная база</h4>
+<ol>
+<li>Создайте отдельный учебный проект Supabase. Не используйте проект с реальными пользователями или данными. На уроке разрешена работа без входа в аккаунт приложения.</li>
+<li>В SQL Editor выполните целиком <a download="" href="files/lesson17/supabase_setup.sql">supabase_setup.sql</a>. Скрипт создаёт четыре таблицы, ограничения, вымышленные строки, права и политики RLS в одной транзакции. Если любое из четырёх имён уже занято, он остановится без изменения данных. Не удаляйте старые таблицы ради запуска: выберите пустой проект. При ручной работе в сессии с прерванной транзакцией сначала выполните <code>rollback;</code>.</li>
+<li>Проверьте итог: <code>users</code> — 4, <code>chats</code> — 3, <code>chat_members</code> — 4, <code>invitations</code> — 4. В <code>chat_members.id=3</code> роль «модератор»; в <code>chats.id=10</code> описание «Общение участников».</li>
+<li>В настройках проекта проверьте, что Data API включён, а схема <code>public</code> доступна через него. SQL-скрипт не переключает настройки сервиса.</li>
+<li>Скопируйте Project URL и publishable key из настроек API проекта. Нужен ключ вида <code>sb_publishable_…</code>, не secret key и не <code>service_role</code>. Используем только заголовок <code>apikey</code>; Authorization в Postman — No Auth.</li>
+</ol>
+<p>Скрипт подготавливает состояние после занятия 16 и домашки про модераторов. Он не зависит от исполнения предыдущих SQL-файлов и не меняет базы прошлых занятий.</p>
+<p><code>public.users</code> — учебная таблица, не таблица <code>auth.users</code> сервиса Supabase Auth. Никаких аккаунтов через неё мы не создаём.</p>
+<h4 id="l17-heading-7">Доступ в этом упражнении</h4>
+<div class="wrap"><table>
+<thead>
+<tr>
+<th>Таблица</th>
+<th>Чтение через API</th>
+<th>Создание, изменение, удаление через API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>users</code></td>
+<td>Разрешено</td>
+<td>Разрешено</td>
+</tr>
+<tr>
+<td><code>chats</code></td>
+<td>Разрешено</td>
+<td>Запрещено</td>
+</tr>
+<tr>
+<td><code>chat_members</code></td>
+<td>Разрешено</td>
+<td>Запрещено</td>
+</tr>
+<tr>
+<td><code>invitations</code></td>
+<td>Разрешено</td>
+<td>Запрещено</td>
+</tr>
+</tbody>
+</table></div>
+<p>RLS включён на всех четырёх таблицах. Права и политики заданы для роли <code>anon</code>: так обращается учебный клиент с publishable key без пользовательской сессии. Права на таблицу разрешают операцию, а политика RLS определяет доступные строки. SQL Editor обычно работает с более широкими правами, поэтому успешный SQL ещё не проверяет доступ ученика через API.</p>
+<p>Открытые политики <code>users</code> позволяют любому обладателю клиентского ключа этого проекта менять все учебные строки. Это условие изолированного упражнения, не модель доступа для реального приложения. После проверки домашки выключите Data API у выделенного учебного проекта, если он больше не нужен для практики. <a href="https://supabase.com/docs/guides/database/postgres/row-level-security">RLS в Supabase</a>.</p>
+<h4 id="l17-heading-8">Postman преподавателя</h4>
+<ol>
+<li>Используйте Postman Desktop, чтобы не тратить занятие на настройку браузерного агента. Проверьте отправку запросов на ученических компьютерах до урока.</li>
+<li>Импортируйте <a download="" href="files/lesson17/Урок_17.postman_environment.json">окружение</a> и <a download="" href="files/lesson17/Урок_17.postman_collection.json">коллекцию решений</a>.</li>
+<li>В окружении заполните <code>base_url</code> адресом проекта без завершающего <code>/</code>, а <code>publishable_key</code> — клиентским ключом. Выберите окружение активным. В поставленных файлах значения пустые.</li>
+<li>Откройте первый запрос и отправьте его вручную. Должны вернуться четыре пользователя со статусом <code>200</code>.</li>
+<li>На своём демонстрационном проекте выполните запросы коллекции по порядку. Раздел «Изменения» создаёт пользователя <code>100</code>, переименовывает и удаляет его. Раздел «Ошибки» содержит намеренно неудачные запросы; неверный ключ задан только у одного запроса, окружение не изменяется.</li>
+<li>В конце выполните «К1. Исходные пользователи»: должны остаться только Лис, Сова, Кот и Волк с номерами <code>1–4</code>. Повтор полного цикла возможен после завершённого удаления <code>100</code>. Если предыдущий запуск оборвался, сначала проверьте наличие <code>100</code> и завершите его удаление отдельным запросом И5.</li>
+</ol>
+<p>Коллекция содержит сохранённые примеры ответов для разбора без сети. Это учебные примеры ожидаемого поведения, не записи обращения к конкретному облачному проекту. Для полной предпроверки используйте Runner с одной итерацией: проверки статусов, тел и ошибок должны пройти. Скрипты проверок только читают ответы, не отправляют дополнительных запросов и не меняют переменные.</p>
+<p>Ученикам выдайте «Практику» и пустой шаблон окружения. Готовую коллекцию решений используйте после самостоятельной попытки. Не публикуйте экспорт окружения с заполненными ключами вместе с отчётами учеников.</p>
+<h4 id="l17-heading-9">Если запрос не работает</h4>
+<div class="wrap"><table>
+<thead>
+<tr>
+<th>Симптом</th>
+<th>Что проверить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>В URL осталось <code>{{base_url}}</code></td>
+<td>Выбрано ли окружение и заполнено ли значение</td>
+</tr>
+<tr>
+<td>Нет HTTP-ответа, ошибка соединения</td>
+<td>Доступность сети и проекта; правильность URL</td>
+</tr>
+<tr>
+<td><code>401</code> или сообщение о неверном ключе</td>
+<td>Заголовок <code>apikey</code>, соответствие ключа проекту, отсутствие лишнего Authorization</td>
+</tr>
+<tr>
+<td>Таблица не найдена</td>
+<td>Data API включён, <code>public</code> доступна, скрипт выполнен успешно; после создания таблиц повторить запрос через несколько секунд</td>
+</tr>
+<tr>
+<td><code>200</code> и <code>[]</code>, хотя строка видна в SQL Editor</td>
+<td>Фильтр и проект, права роли <code>anon</code>, SELECT-политика RLS</td>
+</tr>
+<tr>
+<td><code>400</code> с <code>23514</code> при пустом нике</td>
+<td>Ожидаемая ошибка CHECK, не проблема подключения</td>
+</tr>
+<tr>
+<td><code>409</code> с <code>23505</code> при создании <code>100</code></td>
+<td>Запись уже существует; выяснить, на каком шаге остановились</td>
+</tr>
+<tr>
+<td>Изменение успешно, но тело пустое</td>
+<td>Заголовок <code>Prefer: return=representation</code>; проверить результат отдельным GET</td>
+</tr>
+</tbody>
+</table></div>
+<p>Не исправляйте доступ заменой клиентского ключа на административный или отключением RLS. Сверьте настройки с SQL-скриптом. Если сеть недоступна, используйте примеры ответов в коллекции и <a href="#l17-answers">ответах</a>; отправку запросов ученики выполнят позже.</p>
+<h4 id="l17-heading-10">Проверка материалов</h4>
+<p>Локально проверено на PostgreSQL 15 и PostgREST 13.0.7: запуск SQL, отказ при повторном запуске без потери данных, включение RLS, 19 запросов коллекции от роли <code>anon</code>, запрет изменения трёх таблиц для чтения, ошибки NULL и некорректного JSON, сохранность исходных данных. Облачный шлюз Supabase и опыт О3 с неверным ключом в эту проверку не входят; их проверьте на учебном проекте перед занятием.</p>
+<h4 id="l17-heading-11">Документация</h4>
+<ul>
+<li><a href="https://supabase.com/docs/guides/api">Data API</a> — REST API над базой PostgreSQL.</li>
+<li><a href="https://supabase.com/docs/guides/getting-started/api-keys">Ключи проекта</a> — назначение publishable и secret keys; ключ приложения отличается от пользовательской сессии.</li>
+<li><a href="https://supabase.com/docs/guides/database/postgres/row-level-security">RLS</a> — политики доступа к строкам.</li>
+<li><a href="https://docs.postgrest.org/en/stable/references/api/preferences.html#return-representation">Prefer в PostgREST</a> — возврат изменённых строк.</li>
+<li><a href="https://docs.postgrest.org/en/stable/references/errors.html">Ошибки PostgREST</a> — соответствие ошибок PostgreSQL HTTP-статусам.</li>
+</ul><details class="lesson-answer" id="l17-sql"><summary>Стартовый SQL целиком</summary>
+<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Урок 17. Только для отдельного учебного проекта Supabase с вымышленными данными.
+-- Создаёт состояние после урока 16 и домашки про модераторов.
+-- Не удаляет и не переиспользует существующие одноимённые таблицы.
+-- Запускать целиком в SQL Editor один раз. При конфликте вся транзакция откатится.
+begin;
+
+do $$
+begin
+  if to_regclass(&#x27;public.users&#x27;) is not null
+     or to_regclass(&#x27;public.chats&#x27;) is not null
+     or to_regclass(&#x27;public.chat_members&#x27;) is not null
+     or to_regclass(&#x27;public.invitations&#x27;) is not null then
+    raise exception &#x27;Таблицы урока уже существуют. Используйте отдельный пустой учебный проект; данные не изменены.&#x27;;
+  end if;
+end $$;
+
+create table public.users (
+  id integer primary key,
+  nickname text not null,
+  constraint users_nickname_not_empty check (nickname &lt;&gt; &#x27;&#x27;)
+);
+
+create table public.chats (
+  id integer primary key,
+  name text not null,
+  description text
+);
+
+create table public.chat_members (
+  id integer primary key,
+  user_id integer not null references public.users(id),
+  chat_id integer not null references public.chats(id),
+  joined_at timestamp not null,
+  role text not null,
+  unique (user_id, chat_id),
+  constraint chat_members_role_check
+    check (role in (&#x27;администратор&#x27;, &#x27;участник&#x27;, &#x27;модератор&#x27;))
+);
+
+create table public.invitations (
+  id integer primary key,
+  sender_id integer not null references public.users(id),
+  recipient_id integer not null references public.users(id),
+  chat_id integer not null references public.chats(id),
+  sent_at timestamp not null,
+  status text not null default &#x27;ожидает&#x27;
+    check (status in (&#x27;ожидает&#x27;, &#x27;принято&#x27;, &#x27;отклонено&#x27;)),
+  check (sender_id &lt;&gt; recipient_id)
+);
+
+insert into public.users (id, nickname) values
+  (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;), (3, &#x27;Кот&#x27;), (4, &#x27;Волк&#x27;);
+insert into public.chats (id, name, description) values
+  (10, &#x27;Общий&#x27;, &#x27;Общение участников&#x27;), (11, &#x27;Игры&#x27;, null), (12, &#x27;Новый чат&#x27;, null);
+insert into public.chat_members (id, user_id, chat_id, joined_at, role) values
+  (1, 1, 10, &#x27;2026-11-01 12:00&#x27;, &#x27;администратор&#x27;),
+  (2, 2, 11, &#x27;2026-11-01 13:00&#x27;, &#x27;администратор&#x27;),
+  (3, 2, 10, &#x27;2026-11-21 12:05&#x27;, &#x27;модератор&#x27;),
+  (4, 1, 11, &#x27;2026-11-21 13:10&#x27;, &#x27;участник&#x27;);
+insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status) values
+  (1, 1, 2, 10, &#x27;2026-11-20 12:00&#x27;, &#x27;отклонено&#x27;),
+  (2, 1, 2, 10, &#x27;2026-11-21 12:00&#x27;, &#x27;принято&#x27;),
+  (3, 2, 1, 11, &#x27;2026-11-21 13:00&#x27;, &#x27;принято&#x27;),
+  (4, 1, 3, 10, &#x27;2026-11-21 14:00&#x27;, &#x27;ожидает&#x27;);
+
+alter table public.users enable row level security;
+alter table public.chats enable row level security;
+alter table public.chat_members enable row level security;
+alter table public.invitations enable row level security;
+
+-- Права относятся только к четырём новым учебным таблицам.
+revoke all on table public.users, public.chats, public.chat_members, public.invitations
+  from public, anon, authenticated;
+grant usage on schema public to anon;
+grant select on table public.users, public.chats, public.chat_members, public.invitations to anon;
+grant insert, update, delete on table public.users to anon;
+
+-- Открытые политики нужны только для этого изолированного упражнения.
+-- Любой обладатель publishable key проекта сможет менять учебных users.
+create policy lesson17_users_select on public.users for select to anon using (true);
+create policy lesson17_users_insert on public.users for insert to anon with check (true);
+create policy lesson17_users_update on public.users for update to anon using (true) with check (true);
+create policy lesson17_users_delete on public.users for delete to anon using (true);
+create policy lesson17_chats_select on public.chats for select to anon using (true);
+create policy lesson17_members_select on public.chat_members for select to anon using (true);
+create policy lesson17_invitations_select on public.invitations for select to anon using (true);
+
+notify pgrst, &#x27;reload schema&#x27;;
+commit;
+
+select &#x27;users&#x27; as table_name, count(*) as rows from public.users
+union all select &#x27;chats&#x27;, count(*) from public.chats
+union all select &#x27;chat_members&#x27;, count(*) from public.chat_members
+union all select &#x27;invitations&#x27;, count(*) from public.invitations;
+</code></pre></div>
+</details>
+
+</details>
+
+</section>
+<section class="lesson-stage">
+<h3 id="l17-heading-12">Ход — 120 минут</h3>
+<div class="wrap"><table>
+<thead>
+<tr>
+<th>Время</th>
+<th>Работа</th>
+<th>Что должно получиться</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0–10</td>
+<td>Домашка и постановка задачи</td>
+<td>Роль относится к участию; зачем приложению API</td>
+</tr>
+<tr>
+<td>10–25</td>
+<td>API, клиент и сервер</td>
+<td>Ученик объясняет путь запроса и ответа</td>
+</tr>
+<tr>
+<td>25–40</td>
+<td>HTTP и JSON на одном примере</td>
+<td>Ученик различает части запроса и ответа</td>
+</tr>
+<tr>
+<td>40–55</td>
+<td>Первый запрос вместе</td>
+<td>Все получают пользователей и фильтруют по <code>id</code></td>
+</tr>
+<tr>
+<td>55–60</td>
+<td>Перерыв</td>
+<td></td>
+</tr>
+<tr>
+<td>60–75</td>
+<td>Три самостоятельных запроса</td>
+<td>Выбор полей и фильтрация без SQL</td>
+</tr>
+<tr>
+<td>75–95</td>
+<td>Создание, изменение, удаление</td>
+<td>Полный цикл с проверкой после каждого изменения</td>
+</tr>
+<tr>
+<td>95–110</td>
+<td>Ошибки и доступ</td>
+<td>Отличаем нарушение ограничения, неверный ключ и пустой результат</td>
+</tr>
+<tr>
+<td>110–120</td>
+<td>Выходное задание и домашка</td>
+<td>Самостоятельный запрос и объяснение ответа</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="lesson-stage">
+<h3 id="l17-heading-13">0–10 — связь с прошлым уроком</h3>
+<p>За 5 минут разобрать домашку: у Совы роль «модератор» в «Общем», «администратор» в «Играх». Почему роль лежит в <code>chat_members</code>, а не в <code>users</code>? Почему роль «главный» по-прежнему запрещена?</p>
+<p>Поставить задачу: «В приложении открыли список чатов. Пользователь SQL не пишет. Как приложение получает данные?» Собрать предположения; в конце урока вернуться к ним.</p>
+<details class="lesson-answer" id="l17-answers"><summary>Ответ на домашку про модераторов</summary>
+<p>Ограничение ролей теперь допускает «администратор», «участник», «модератор». В «Общем» Лис — администратор, Сова — модератор. В «Играх» Сова — администратор, Лис — участник. Роль зависит от конкретного участия, поэтому лежит в <code>chat_members</code>.</p>
+<p>Для перехода от состояния урока 16 нужно удалить ограничение <code>chat_members_role_check</code>, создать его с расширенным набором ролей и изменить участие <code>id=3</code>. Роль «главный» запрещена по-прежнему. В новом стартовом скрипте эти изменения уже включены; на уроке 17 повторять ALTER TABLE не нужно.</p>
+</details>
+
+</section>
+<section class="lesson-stage">
+<h3 id="l17-heading-14">10–25 — что такое API</h3>
+<p>API — согласованный способ, которым одна программа обращается к возможностям другой. HTTP API — один из видов API. API не обязательно связан с базой: можно запросить прогноз погоды или отправить сообщение.</p>
+<p>На доске нарисовать:</p>
+<pre class="mermaid-source"><code class="language-text">Postman (клиент) → HTTP-запрос → API Supabase → PostgreSQL
+Postman (клиент) ← HTTP-ответ  ← API Supabase ← результат
+</code></pre>
+<p>Клиент инициирует обращение; сервер принимает его и обрабатывает по правилам. На нашем уроке Postman выполняет роль приложения. Supabase предоставляет PostgreSQL и готовый API к данным; мы не пишем сервер с нуля. <a href="https://supabase.com/docs/guides/api">Документация Data API</a>.</p>
+<p>Вопросы классу: «Кто здесь клиент? Где хранятся строки? Что вернётся, если записи нет? Может ли приложение запросить любые данные без разрешения?»</p>
+</section>
+<section class="lesson-stage">
+<h3 id="l17-heading-15">25–40 — устройство HTTP</h3>
+<p>Разобрать пример из ученического листа: <code>GET /rest/v1/users?select=id,nickname&amp;id=eq.1</code>.</p>
+<ul>
+<li>Метод говорит, какую операцию просит выполнить клиент.</li>
+<li>URL содержит адрес сервера, путь к ресурсу и параметры после <code>?</code>.</li>
+<li>Заголовки передают дополнительную информацию: ключ приложения, формат тела.</li>
+<li>Тело передаёт данные, например нового пользователя. В наших <code>GET</code> тела нет.</li>
+<li>Ответ содержит статус, заголовки и, когда предусмотрено, тело.</li>
+</ul>
+<p>Показать JSON с одним объектом внутри массива. Разобрать <code>{}</code>, <code>[]</code>, двойные кавычки, строку, число и <code>null</code>. Отличить число <code>1</code> от строки <code>"1"</code>; показать, почему лишняя запятая делает JSON некорректным.</p>
+<p>Сопоставить <code>GET</code> с чтением, <code>POST</code> с созданием, <code>PATCH</code> с изменением полей, <code>DELETE</code> с удалением. Это операции сегодняшнего REST API, а не правило для любого API. <code>eq.</code> и <code>select</code> — синтаксис Supabase/PostgREST, не язык HTTP и не SQL.</p>
+<article class="lesson-exercise"><h4>Шпаргалка ученика</h4>
+<div class="wrap"><table>
+<thead>
+<tr>
+<th>Часть запроса</th>
+<th>Пример</th>
+<th>Назначение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Метод</td>
+<td><code>GET</code></td>
+<td>Что хотим сделать</td>
+</tr>
+<tr>
+<td>Адрес сервера</td>
+<td><code>{{base_url}}</code></td>
+<td>К какому проекту обращаемся</td>
+</tr>
+<tr>
+<td>Путь</td>
+<td><code>/rest/v1/users</code></td>
+<td>С каким ресурсом работаем</td>
+</tr>
+<tr>
+<td>Параметры</td>
+<td><code>select=id,nickname&amp;id=eq.1</code></td>
+<td>Какие поля и строки нужны</td>
+</tr>
+<tr>
+<td>Заголовок</td>
+<td><code>apikey: {{publishable_key}}</code></td>
+<td>Ключ приложения</td>
+</tr>
+<tr>
+<td>Тело</td>
+<td><code>{"id":100,"nickname":"Рысь"}</code></td>
+<td>Данные для создания записи</td>
+</tr>
+</tbody>
+</table></div>
+<p>Параметры можно вводить во вкладке Params отдельными строками. Postman сам добавит <code>?</code> и <code>&amp;</code> в URL. Не дублируйте один параметр одновременно вручную и через Params.</p>
+<div class="wrap"><table>
+<thead>
+<tr>
+<th>Задача в нашем API</th>
+<th>Метод</th>
+<th>Аналог в SQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Получить данные</td>
+<td><code>GET</code></td>
+<td><code>SELECT</code></td>
+</tr>
+<tr>
+<td>Создать строку</td>
+<td><code>POST</code></td>
+<td><code>INSERT</code></td>
+</tr>
+<tr>
+<td>Изменить поля</td>
+<td><code>PATCH</code></td>
+<td><code>UPDATE</code></td>
+</tr>
+<tr>
+<td>Удалить строку</td>
+<td><code>DELETE</code></td>
+<td><code>DELETE</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>select=id,nickname</code> выбирает столбцы. <code>id=eq.1</code> означает «id равен 1». <code>order=id.asc</code> сортирует по возрастанию <code>id</code>. Это правила API Supabase/PostgREST; у других API параметры могут называться иначе.</p>
+<p>JSON передаёт данные. Объект записывается в <code>{}</code>, массив — в <code>[]</code>. Имена полей и строки заключаются в двойные кавычки, числа — без кавычек. <code>null</code> означает отсутствие значения. После последнего поля запятую не ставят.</p>
+</article>
+
+</section>
+<section class="lesson-stage" id="l17-first">
+<h3 id="l17-heading-16">40–55 — первый запрос вместе</h3>
+<p>По разделу «Настройка Postman» в практике создать окружение и запрос. Сначала получить всех пользователей, затем выбрать <code>id,nickname</code>, затем оставить пользователя <code>1</code>.</p>
+<p>Каждый показывает статус, тело ответа и место, где задан фильтр. Спросить: «Почему результат — массив, хотя найден один пользователь?» Запрос возвращает список подходящих строк; он может содержать одну строку или быть пустым.</p>
+<p>Если у ученика ошибка доступа, проверить URL и <code>apikey</code>; не подменять ключ на административный. Не задерживать весь класс: предложить временно работать в паре за одним компьютером.</p>
+<article class="lesson-exercise"><h4>Настройка Postman</h4>
+<p>Сегодня Postman будет нашим приложением: отправит запросы в Supabase и покажет ответы. Работаем со знакомыми пользователями и чатами в отдельной учебной базе. SQL для выполнения заданий не нужен.</p>
+<p><code>users</code> здесь — наша учебная таблица. Создание строки с ником не регистрирует аккаунт Supabase и не позволяет войти в приложение: вход пользователей будем разбирать отдельно.</p>
+<p>Перед отправкой каждого запроса запишите прогноз. После отправки сохраните метод, путь с параметрами, тело запроса, статус и результат. Ключ в отчёт не включайте.</p>
+<ol>
+<li>Откройте Postman Desktop. Импортируйте выданный <a download="" href="files/lesson17/Урок_17.postman_environment.json">шаблон окружения</a> через Import.</li>
+<li>В Environments откройте «Урок 17 — мой учебный проект». Заполните <code>base_url</code> адресом проекта вида <code>https://ВАШ-ПРОЕКТ.supabase.co</code> без <code>/</code> в конце, а <code>publishable_key</code> — выданным преподавателем ключом. Выберите это окружение активным.</li>
+<li>Создайте коллекцию «Мои запросы — урок 17», а в ней HTTP-запрос. Для Authorization выберите No Auth: на уроке ключ передаётся отдельным заголовком.</li>
+<li>Выберите метод <code>GET</code>, введите <code>{{base_url}}/rest/v1/users</code>.</li>
+<li>На вкладке Headers добавьте строку: Key — <code>apikey</code>, Value — <code>{{publishable_key}}</code>. Не вставляйте ключ в URL или тело.</li>
+<li>Нажмите Send. Найдите статус ответа и тело. Если переменные не подставились, проверьте выбранное окружение и сохранённые значения.</li>
+</ol>
+<p>Сохраняйте запросы в коллекцию. При создании следующего запроса можно дублировать предыдущий, но проверяйте метод, адрес, Headers и Body. Для <code>GET</code> и <code>DELETE</code> выбирайте Body → none.</p>
+</article>
+
+<article class="lesson-exercise"><h4>Первый запрос вместе</h4>
+<ol>
+<li>Получите всех пользователей: <code>GET {{base_url}}/rest/v1/users</code>.</li>
+<li>Во вкладке Params добавьте <code>select</code> со значением <code>id,nickname</code> и <code>order</code> со значением <code>id.asc</code>.</li>
+<li>Добавьте параметр <code>id</code> со значением <code>eq.1</code>.</li>
+<li>Найдите в ответе массив, объект, число и строку. Сколько строк осталось? Где в запросе это задано?</li>
+</ol>
+<p>У ответа есть статус, заголовки и тело. Например, <code>200 OK</code> сообщает об успехе, а JSON в теле содержит результат. Статус — не поле внутри JSON.</p>
+</article>
+
+<details class="lesson-answer"><summary>Ожидаемые запросы и ответы</summary>
+<pre class="mermaid-source"><code class="language-http">GET {{base_url}}/rest/v1/users?select=id,nickname&amp;id=eq.1
+apikey: {{publishable_key}}
+</code></pre>
+<p>Статус <code>200 OK</code>, тело:</p>
+<pre class="mermaid-source"><code class="language-json">[{"id":1,"nickname":"Лис"}]
+</code></pre>
+<p>Это список из одного объекта. При снятии фильтра и добавлении <code>order=id.asc</code>:</p>
+<pre class="mermaid-source"><code class="language-json">[
+  {"id":1,"nickname":"Лис"},
+  {"id":2,"nickname":"Сова"},
+  {"id":3,"nickname":"Кот"},
+  {"id":4,"nickname":"Волк"}
+]
+</code></pre>
+<p>Без явной сортировки порядок строк не гарантирован. Пробелы и порядок полей JSON не меняют смысл ответа.</p>
+</details>
+
+</section>
+<section class="lesson-stage" id="l17-reading">
+<h3 id="l17-heading-17">60–75 — самостоятельное чтение</h3>
+<p>Задания П1–П3 из практики: все чаты, один чат, участия в чате <code>10</code>. До отправки ученик записывает ожидаемое число строк, после — объясняет фильтр соседу.</p>
+<p>На сверке П3 обратить внимание: вернулись номера пользователей и роли, а не ники. API возвращает запрошенные поля; связи сами по себе не подставляют имена.</p>
+<article class="lesson-exercise" id="l17-practice"><h4>П1–П3. Получаем данные</h4>
+<p>В каждом запросе сохраняйте заголовок <code>apikey</code>. В П1–П3 добавьте сортировку по <code>id</code>, чтобы удобнее сверять ответы.</p>
+<p><strong>П1. Все чаты.</strong> Получите <code>id</code> и <code>name</code> всех чатов. Сколько строк ожидаете?</p>
+<p><strong>П2. Один чат.</strong> Получите те же поля только для чата <code>10</code>. Как изменились параметры?</p>
+<p><strong>П3. Участники чата.</strong> Обратитесь к <code>chat_members</code>. Получите <code>user_id,role</code> только для чата <code>10</code>. Не перепутайте номер участия <code>id</code> и номер чата <code>chat_id</code>. Почему в ответе нет ников?</p>
+</article>
+
+<details class="lesson-answer"><summary>Решения П1–П3 и ответы JSON</summary>
+<h5 id="l17-heading-18">П1. Все чаты</h5>
+<p><code>GET /rest/v1/chats?select=id,name&amp;order=id.asc</code> → <code>200</code>:</p>
+<pre class="mermaid-source"><code class="language-json">[
+  {"id":10,"name":"Общий"},
+  {"id":11,"name":"Игры"},
+  {"id":12,"name":"Новый чат"}
+]
+</code></pre>
+<h5 id="l17-heading-19">П2. Один чат</h5>
+<p><code>GET /rest/v1/chats?select=id,name&amp;id=eq.10&amp;order=id.asc</code> → <code>200</code>:</p>
+<pre class="mermaid-source"><code class="language-json">[{"id":10,"name":"Общий"}]
+</code></pre>
+<h5 id="l17-heading-20">П3. Участники чата</h5>
+<p><code>GET /rest/v1/chat_members?select=user_id,role&amp;chat_id=eq.10&amp;order=id.asc</code> → <code>200</code>:</p>
+<pre class="mermaid-source"><code class="language-json">[
+  {"user_id":1,"role":"администратор"},
+  {"user_id":2,"role":"модератор"}
+]
+</code></pre>
+<p>Фильтр относится к <code>chat_id</code>, а не к <code>id</code> участия. Ники хранятся в другой таблице и не были запрошены. Связи через FK не означают автоматическое включение всех связанных полей в ответ.</p>
+</details>
+
+</section>
+<section class="lesson-stage" id="l17-changes">
+<h3 id="l17-heading-21">75–95 — полный цикл изменения</h3>
+<p>Создать пользователя <code>100</code> с ником «Рысь», прочитать его, изменить ник на «Барс», прочитать снова, удалить и подтвердить отсутствие. Первую вставку показать вместе, остальные шаги ученики выполняют по заданиям И2–И6.</p>
+<p>На запросах с JSON добавить <code>Content-Type: application/json</code>, на изменениях — <code>Prefer: return=representation</code>, чтобы видеть изменённые строки. Без этой настройки успешный ответ может быть без тела. <a href="https://docs.postgrest.org/en/stable/references/api/preferences.html#return-representation">Возврат данных в PostgREST</a>.</p>
+<p>Перед <code>PATCH</code> и <code>DELETE</code> попросить показать фильтр <code>id=eq.100</code>. Обсудить аналогию с <code>where</code>: без фильтра запрос может затронуть все доступные строки. Проверка результата через <code>GET</code> обязательна.</p>
+<article class="lesson-exercise"><h4>И1–И6. Полный цикл работы с пользователем</h4>
+<p>Используем нового пользователя с <code>id=100</code>. В этой базе <code>id</code> нужно задавать явно. После каждого изменения проверяйте состояние отдельным <code>GET</code>.</p>
+<p>Для запросов с телом откройте Body → raw → JSON. Проверьте заголовок <code>Content-Type: application/json</code>. На <code>POST</code>, <code>PATCH</code> и <code>DELETE</code> добавьте <code>Prefer: return=representation</code>, чтобы сервер вернул затронутые строки. Заголовок <code>apikey</code> нужен во всех запросах.</p>
+<h5 id="l17-heading-22">И1. Создать пользователя вместе</h5>
+<p>Метод: <code>POST</code>. URL: <code>{{base_url}}/rest/v1/users</code>. Уберите параметры от предыдущих запросов.</p>
+<pre class="mermaid-source"><code class="language-json">{"id": 100, "nickname": "Рысь"}
+</code></pre>
+<p>Отправьте один раз. Сохраните статус и тело ответа. Что произойдёт, если повторить тот же запрос?</p>
+<h5 id="l17-heading-23">И2. Проверить создание</h5>
+<p>Составьте <code>GET</code>, который вернёт <code>id,nickname</code> только пользователя <code>100</code>. Тело запроса не требуется.</p>
+<h5 id="l17-heading-24">И3. Изменить ник</h5>
+<p>Метод: <code>PATCH</code>. Ресурс: <code>users</code>. Добавьте фильтр по <code>id=100</code>. В теле передайте только поле <code>nickname</code> со значением «Барс».</p>
+<p>Перед Send покажите соседу фильтр. Какие строки мог бы затронуть запрос без него?</p>
+<h5 id="l17-heading-25">И4. Проверить изменение</h5>
+<p>Повторите запрос И2. Убедитесь, что номер пользователя остался прежним, а ник изменился.</p>
+<h5 id="l17-heading-26">И5. Удалить пользователя</h5>
+<p>Метод: <code>DELETE</code>. Ресурс: <code>users</code>. Оставьте фильтр по пользователю <code>100</code>. Body → none. Сохраните ответ: это данные удалённой строки, а не доказательство, что она осталась в базе.</p>
+<h5 id="l17-heading-27">И6. Проверить удаление</h5>
+<p>Повторите запрос И2. Какой статус и какое тело вернулись? Успешно ли выполнен запрос?</p>
+</article>
+
+<details class="lesson-answer"><summary>Запросы, статусы и результаты И1–И6</summary>
+<p>На <code>POST</code> и <code>PATCH</code> добавляем <code>Content-Type: application/json</code>. На <code>POST</code>, <code>PATCH</code>, <code>DELETE</code> — <code>Prefer: return=representation</code>. На всех запросах сохраняем <code>apikey</code>.</p>
+<div class="wrap"><table>
+<thead>
+<tr>
+<th>Шаг</th>
+<th>Метод и путь</th>
+<th>Тело запроса</th>
+<th>Статус</th>
+<th>Тело ответа</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>И1</td>
+<td><code>POST /rest/v1/users</code></td>
+<td><code>{"id":100,"nickname":"Рысь"}</code></td>
+<td><code>201 Created</code></td>
+<td><code>[{"id":100,"nickname":"Рысь"}]</code></td>
+</tr>
+<tr>
+<td>И2</td>
+<td><code>GET /rest/v1/users?select=id,nickname&amp;id=eq.100</code></td>
+<td>Нет</td>
+<td><code>200 OK</code></td>
+<td><code>[{"id":100,"nickname":"Рысь"}]</code></td>
+</tr>
+<tr>
+<td>И3</td>
+<td><code>PATCH /rest/v1/users?id=eq.100</code></td>
+<td><code>{"nickname":"Барс"}</code></td>
+<td><code>200 OK</code></td>
+<td><code>[{"id":100,"nickname":"Барс"}]</code></td>
+</tr>
+<tr>
+<td>И4</td>
+<td>Повтор И2</td>
+<td>Нет</td>
+<td><code>200 OK</code></td>
+<td><code>[{"id":100,"nickname":"Барс"}]</code></td>
+</tr>
+<tr>
+<td>И5</td>
+<td><code>DELETE /rest/v1/users?id=eq.100</code></td>
+<td>Нет</td>
+<td><code>200 OK</code></td>
+<td><code>[{"id":100,"nickname":"Барс"}]</code></td>
+</tr>
+<tr>
+<td>И6</td>
+<td>Повтор И2</td>
+<td>Нет</td>
+<td><code>200 OK</code></td>
+<td><code>[]</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Повтор И1 после успешного создания даст конфликт первичного ключа. Повтор <code>GET</code> данные не меняет. После удаления повторный <code>DELETE</code> с тем же фильтром не найдёт строку; с нашим заголовком вернёт <code>200</code> и <code>[]</code>. Это не означает, что удаление не работает.</p>
+<p>Без <code>Prefer: return=representation</code> по умолчанию тело изменения не возвращается: для <code>POST</code> обычно <code>201</code>, для <code>PATCH</code> и <code>DELETE</code> — <code>204</code>. Поэтому отсутствие JSON само по себе не означает ошибку. <a href="https://docs.postgrest.org/en/stable/references/api/preferences.html#return-representation">Возврат представления в PostgREST</a>.</p>
+<p>Без фильтра <code>PATCH</code> или <code>DELETE</code> может затронуть все доступные строки таблицы. На наших данных удаление исходных пользователей ещё может встретить внешние ключи, но полагаться на это нельзя. Для демонстрации не отправляем массовые изменения: достаточно сопоставления с SQL без <code>where</code>.</p>
+</details>
+
+</section>
+<section class="lesson-stage" id="l17-errors">
+<h3 id="l17-heading-28">95–110 — ошибки и доступ</h3>
+<p>Опыты О1–О4: существующий <code>id</code>, пустой ник, неверный ключ, отсутствующий пользователь. Меняем только одно условие за раз. Для ошибки читаем статус и сообщение; затем объясняем, на каком этапе остановилась операция.</p>
+<p>Обобщить: <code>2xx</code> — успех, <code>4xx</code> — проблема запроса или доступа, <code>5xx</code> — сбой на стороне сервера. <code>200</code> с <code>[]</code> — успешный запрос без видимых совпадений, а не обязательно поломка API.</p>
+<p>Ключ приложения не обозначает вошедшего пользователя и не даёт автоматически все права. RLS ограничивает доступ к строкам. На уроке правила заранее настроены для вымышленных данных; пользователи приложения ещё не входят в аккаунты. Публичный клиентский ключ не заменяет правила доступа. <a href="https://supabase.com/docs/guides/getting-started/api-keys">Ключи Supabase</a>.</p>
+<article class="lesson-exercise"><h4>О1–О4. Объясняем ошибки</h4>
+<p>Меняйте одно условие за раз. Не исправляйте ограничения базы ради успешного запроса. После неудачной вставки убедитесь через <code>GET</code>, что исходные данные не изменились.</p>
+<p><strong>О1. Повтор номера.</strong> Отправьте <code>POST</code> в <code>users</code> с телом <code>{"id":1,"nickname":"Дубликат"}</code>. Найдите статус, <code>code</code> и <code>message</code>. Какое правило сработало? Проверьте, что у пользователя <code>1</code> сохранился ник «Лис».</p>
+<p><strong>О2. Пустой ник.</strong> Отправьте <code>POST</code> с телом <code>{"id":102,"nickname":""}</code>. Почему новый <code>id</code> не помогает? Убедитесь, что пользователь <code>102</code> не появился.</p>
+<p><strong>О3. Неверный ключ.</strong> Дублируйте рабочий <code>GET</code>. Только в копии замените значение заголовка <code>apikey</code> на <code>invalid-key-for-lesson</code>. Саму переменную окружения не меняйте. Отправьте копию, затем повторите исходный запрос. Чем ошибка доступа отличается от ошибки ограничения?</p>
+<p><strong>О4. Нет подходящей строки.</strong> С правильным ключом запросите пользователя <code>999</code>. Сравните статус и тело с О3. Пустой список и отказ в доступе — один и тот же результат?</p>
+<p>Классы статусов: <code>2xx</code> — успех, <code>4xx</code> — проблема запроса или доступа, <code>5xx</code> — сбой на стороне сервера. Не угадывайте причину только по первой цифре: читайте сообщение.</p>
+</article>
+
+<details class="lesson-answer"><summary>Причины ошибок и ожидаемые ответы</summary>
+<h5 id="l17-heading-29">О1. Повтор первичного ключа</h5>
+<p><code>POST /rest/v1/users</code> с <code>{"id":1,"nickname":"Дубликат"}</code> → <code>409 Conflict</code>, <code>code</code> равен <code>23505</code>.</p>
+<p>Пример тела:</p>
+<pre class="mermaid-source"><code class="language-json">{
+  "code":"23505",
+  "details":"Key (id)=(1) already exists.",
+  "hint":null,
+  "message":"duplicate key value violates unique constraint \"users_pkey\""
+}
+</code></pre>
+<p>Запись не заменяется: мы отправили обычное создание, а не обновление или upsert. Проверка <code>GET</code> по <code>id=1</code> возвращает «Лис».</p>
+<h5 id="l17-heading-30">О2. Пустой ник</h5>
+<p><code>POST /rest/v1/users</code> с <code>{"id":102,"nickname":""}</code> → <code>400 Bad Request</code>, <code>code</code> равен <code>23514</code>. Сообщение называет <code>users_nickname_not_empty</code>. Новый номер не отменяет проверку содержимого ника. После ошибки <code>GET</code> по <code>id=102</code> возвращает <code>[]</code>.</p>
+<p>HTTP-статус <code>400</code> и PostgreSQL-код <code>23514</code> — разные уровни описания ошибки: статус показывает класс ответа, код уточняет нарушение CHECK. Формулировка <code>details</code> может различаться; важны причина и имя ограничения. <a href="https://docs.postgrest.org/en/stable/references/errors.html">Соответствие ошибок и HTTP-статусов</a>.</p>
+<h5 id="l17-heading-31">О3. Неверный ключ</h5>
+<p><code>GET /rest/v1/users?select=id,nickname&amp;id=eq.1</code>, заголовок <code>apikey: invalid-key-for-lesson</code> → ожидается <code>401 Unauthorized</code> и сообщение о неверном API-ключе. Ответ шлюза может иметь другую структуру, чем ошибка PostgreSQL, например только поле <code>message</code>.</p>
+<p>Запрос не получает доступ к таблице. После возвращения к исходному запросу с правильным ключом снова получаем <code>200</code> и Лиса. Не требовать дословного английского сообщения: это не ошибка ограничения и в нём не обязан быть PostgreSQL-код.</p>
+<h5 id="l17-heading-32">О4. Нет совпадений</h5>
+<p><code>GET /rest/v1/users?select=id,nickname&amp;id=eq.999</code> с правильным ключом → <code>200 OK</code>, тело <code>[]</code>.</p>
+<p>Ресурс <code>users</code> существует, запрос допустим, подходящих видимых строк нет. Это отличается от ошибки в адресе ресурса и от отказа из-за неверного ключа. При других политиках RLS пустой массив также может означать, что строки клиенту не видны; по одному <code>[]</code> нельзя доказать отсутствие строки во всей базе.</p>
+</details>
+
+</section>
+<section class="lesson-stage" id="l17-final">
+<h3 id="l17-heading-33">110–120 — итог и домашка</h3>
+<p>Самостоятельно получить участия пользователя <code>1</code>, вывести <code>chat_id,role</code>. Попросить объяснить метод, ресурс, фильтр и ответ. Ответ — две строки.</p>
+<p>Устно: чем API отличается от базы; где передать фильтр, а где данные для создания; почему <code>PRIMARY KEY</code> действует через API; что значит пустой массив; почему ключ не заменяет права.</p>
+<p>Домашка описана в практике: цикл работы с пользователем <code>101</code>, отчёт о запросах и одна намеренная ошибка. Критерий успеха — ученик составляет запрос и объясняет ответ, после удаления подтверждает отсутствие записи.</p>
+<p>Если группа отстаёт, сократить самостоятельное чтение до П1 и П3. Сохранить цикл изменения и разбор ошибок. Не тратить практику на установку инструментов или подробный синтаксис RLS.</p>
+<article class="lesson-exercise"><h4>Выходное задание</h4>
+<p>Без образца получите участия пользователя <code>1</code>: выведите <code>chat_id,role</code>, отсортируйте по <code>id</code> участия. Объясните метод, ресурс, фильтр и ответ.</p>
+<p>Завершив практику, проверьте: пользователей снова 4, пользователь <code>100</code> отсутствует, у пользователя <code>1</code> ник «Лис». Остальные таблицы на этом уроке только читаем.</p>
+</article>
+
+<details class="lesson-answer"><summary>Решение выходного задания</summary>
+<p><code>GET /rest/v1/chat_members?select=chat_id,role&amp;user_id=eq.1&amp;order=id.asc</code> → <code>200</code>:</p>
+<pre class="mermaid-source"><code class="language-json">[
+  {"chat_id":10,"role":"администратор"},
+  {"chat_id":11,"role":"участник"}
+]
+</code></pre>
+<p>Засчитываем, если ученик верно выбрал <code>chat_members</code>, фильтрует по <code>user_id</code>, получает две строки и объясняет результат. Порядок параметров в URL значения не имеет.</p>
+</details>
+
+<details class="lesson-answer"><summary>Ответы на итоговые вопросы</summary>
+<ol>
+<li><strong>API и база.</strong> База хранит данные и проверяет их правила. API предоставляет операции, через которые программа может обратиться к данным или другим возможностям сервиса.</li>
+<li><strong>Фильтр и новые данные.</strong> В сегодняшнем API фильтр находится в параметрах URL; данные создания — в JSON-теле <code>POST</code>.</li>
+<li><strong>Пустой массив.</strong> Запрос мог выполниться успешно, но не найти доступных совпадений. Сначала смотрим статус, затем тело и условия запроса.</li>
+<li><strong>Ограничения.</strong> Запись через API в итоге обрабатывает PostgreSQL, поэтому PK, FK, NOT NULL и CHECK сохраняют силу.</li>
+<li><strong>Ключ и права.</strong> Publishable key относится к приложению, а не к конкретному вошедшему человеку. Права и RLS определяют, какие операции и строки доступны. Для входа пользователя потребовалась бы отдельная авторизация. <a href="https://supabase.com/docs/guides/getting-started/api-keys">Ключи Supabase</a>.</li>
+</ol>
+</details>
+
+<article class="lesson-exercise" id="l17-homework"><h4>Домашка к занятию 18</h4>
+<p>В своём учебном проекте создайте пользователя <code>101</code> с ником «Ёж», получите его через API, измените ник на «Енот», проверьте, удалите и подтвердите отсутствие. Добавьте один опыт с намеренной ошибкой: повторный <code>id</code> или пустой ник с новым номером <code>103</code>.</p>
+<p>Сдайте таблицу в текстовом документе:</p>
+<div class="wrap"><table>
+<thead>
+<tr>
+<th>Шаг</th>
+<th>Метод</th>
+<th>Путь и параметры</th>
+<th>Тело запроса или «нет»</th>
+<th>HTTP-статус</th>
+<th>Результат и объяснение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Создание</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Проверка</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Изменение</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Проверка</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Удаление</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Проверка</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Ошибка</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>Вместо адреса проекта достаточно пути <code>/rest/v1/...</code>. Ключи и окружение с заполненными значениями не отправляйте. Объясните своими словами: почему приложение может работать с базой, хотя вы не написали ни одной SQL-команды?</p>
+</article>
+
+<details class="lesson-answer"><summary>Как проверить домашку</summary>
+<p>Для пользователя <code>101</code> ожидаются: <code>201</code> и «Ёж», <code>200</code> и «Ёж», <code>200</code> и «Енот», повторное чтение «Енот», <code>200</code> с удалённой строкой, <code>200</code> с <code>[]</code>. В запросах изменения и удаления должен быть фильтр <code>id=eq.101</code>.</p>
+<p>Намеренная ошибка: дубликат исходного <code>id</code> → <code>409</code> / <code>23505</code>; пустой ник с новым <code>id=103</code> → <code>400</code> / <code>23514</code>. Ошибка не должна менять исходные строки. Ученик объясняет причину своими словами и не включает ключ в отчёт.</p>
+</details>
+
+</section>
+</section>
+
 </div>
 </main>
-<script src="quiz.js?v=20261124195057"></script>
-<script src="engine.js?v=20261124195057"></script>
-<script src="teacher.js?v=20261124195057"></script>
+<script src="quiz.js?v=20261124205506"></script>
+<script src="engine.js?v=20261124205506"></script>
+<script src="teacher.js?v=20261124205506"></script>
 <script type="module" src="answer-diagrams.js"></script>
 <script src="answer-sql.js"></script>
 </body>

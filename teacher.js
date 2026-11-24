@@ -296,7 +296,7 @@
   }
 
   // ---------- вкладки: общая «Ученики и опрос» + по одной на каждое занятие ----------
-  const TABS = ["pupils", "l8", "l11", "l12", "l13", "l14", "l15", "l16"];
+  const TABS = ["pupils", "l8", "l11", "l12", "l13", "l14", "l15", "l16", "l17"];
   function showTab(t) {
     if (!TABS.includes(t)) t = TABS[TABS.length - 1];
     document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
@@ -312,17 +312,17 @@
     showTab(TABS.includes(h) ? h : sec ? sec.id.replace("tab-", "") : saved || TABS[TABS.length - 1]);
   }
 
-  function openLesson16Details(id) {
+  function openLessonDetails(id) {
     const target = document.getElementById(id);
-    if (!target || !target.closest("#tab-l16")) return;
+    if (!target || !target.closest("#tab-l16, #tab-l17")) return;
     for (let node = target; node; node = node.parentElement) {
       if (node.tagName === "DETAILS") node.open = true;
     }
   }
-  document.querySelectorAll('#tab-l16 a[href^="#"]').forEach((link) => {
-    link.addEventListener("click", () => openLesson16Details(link.hash.slice(1)));
+  document.querySelectorAll('#tab-l16 a[href^="#"], #tab-l17 a[href^="#"]').forEach((link) => {
+    link.addEventListener("click", () => openLessonDetails(link.hash.slice(1)));
   });
-  openLesson16Details(location.hash.slice(1));
+  openLessonDetails(location.hash.slice(1));
 
   // ---------- чек-листы подготовки (git_teacher_kv, ключ prep<номер занятия>) ----------
   const PREP8 = [

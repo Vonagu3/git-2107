@@ -1,0 +1,2146 @@
+{
+  "info": {
+    "name": "Урок 17 — API Supabase — решения преподавателя",
+    "description": "20 запросов: демонстрация, чтение, цикл изменения, ошибки и итог. Только для отдельного учебного проекта после supabase_setup.sql. Выберите окружение с base_url и publishable_key. Выполняйте по порядку, одну итерацию. Примеры ответов учебные; ключей в файле нет.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "item": [
+    {
+      "name": "01 — Первый запрос вместе",
+      "item": [
+        {
+          "name": "Д1. Все пользователи",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Четыре исходных пользователя\", function () { const rows = pm.response.json(); rows.sort(function (a, b) { return a.id - b.id; }); pm.expect(rows).to.deep.equal([{\"id\": 1, \"nickname\": \"Лис\"}, {\"id\": 2, \"nickname\": \"Сова\"}, {\"id\": 3, \"nickname\": \"Кот\"}, {\"id\": 4, \"nickname\": \"Волк\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"nickname\": \"Лис\"\n  },\n  {\n    \"id\": 2,\n    \"nickname\": \"Сова\"\n  },\n  {\n    \"id\": 3,\n    \"nickname\": \"Кот\"\n  },\n  {\n    \"id\": 4,\n    \"nickname\": \"Волк\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Д2. Выбор полей и сортировка",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?select=id,nickname&order=id.asc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,nickname"
+                },
+                {
+                  "key": "order",
+                  "value": "id.asc"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 1, \"nickname\": \"Лис\"}, {\"id\": 2, \"nickname\": \"Сова\"}, {\"id\": 3, \"nickname\": \"Кот\"}, {\"id\": 4, \"nickname\": \"Волк\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?select=id,nickname&order=id.asc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,nickname"
+                    },
+                    {
+                      "key": "order",
+                      "value": "id.asc"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"nickname\": \"Лис\"\n  },\n  {\n    \"id\": 2,\n    \"nickname\": \"Сова\"\n  },\n  {\n    \"id\": 3,\n    \"nickname\": \"Кот\"\n  },\n  {\n    \"id\": 4,\n    \"nickname\": \"Волк\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Д3. Пользователь 1",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,nickname"
+                },
+                {
+                  "key": "id",
+                  "value": "eq.1"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 1, \"nickname\": \"Лис\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,nickname"
+                    },
+                    {
+                      "key": "id",
+                      "value": "eq.1"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"nickname\": \"Лис\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 — Самостоятельное чтение",
+      "item": [
+        {
+          "name": "П1. Все чаты",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/chats?select=id,name&order=id.asc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "chats"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,name"
+                },
+                {
+                  "key": "order",
+                  "value": "id.asc"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 10, \"name\": \"Общий\"}, {\"id\": 11, \"name\": \"Игры\"}, {\"id\": 12, \"name\": \"Новый чат\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/chats?select=id,name&order=id.asc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "chats"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,name"
+                    },
+                    {
+                      "key": "order",
+                      "value": "id.asc"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 10,\n    \"name\": \"Общий\"\n  },\n  {\n    \"id\": 11,\n    \"name\": \"Игры\"\n  },\n  {\n    \"id\": 12,\n    \"name\": \"Новый чат\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "П2. Чат 10",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/chats?select=id,name&id=eq.10&order=id.asc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "chats"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,name"
+                },
+                {
+                  "key": "id",
+                  "value": "eq.10"
+                },
+                {
+                  "key": "order",
+                  "value": "id.asc"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 10, \"name\": \"Общий\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/chats?select=id,name&id=eq.10&order=id.asc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "chats"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,name"
+                    },
+                    {
+                      "key": "id",
+                      "value": "eq.10"
+                    },
+                    {
+                      "key": "order",
+                      "value": "id.asc"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 10,\n    \"name\": \"Общий\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "П3. Участники чата 10",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/chat_members?select=user_id,role&chat_id=eq.10&order=id.asc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "chat_members"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "user_id,role"
+                },
+                {
+                  "key": "chat_id",
+                  "value": "eq.10"
+                },
+                {
+                  "key": "order",
+                  "value": "id.asc"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"user_id\": 1, \"role\": \"администратор\"}, {\"user_id\": 2, \"role\": \"модератор\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/chat_members?select=user_id,role&chat_id=eq.10&order=id.asc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "chat_members"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "user_id,role"
+                    },
+                    {
+                      "key": "chat_id",
+                      "value": "eq.10"
+                    },
+                    {
+                      "key": "order",
+                      "value": "id.asc"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"user_id\": 1,\n    \"role\": \"администратор\"\n  },\n  {\n    \"user_id\": 2,\n    \"role\": \"модератор\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 — Изменения",
+      "item": [
+        {
+          "name": "И1. Создать Рысь",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Prefer",
+                "value": "return=representation",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 100,\n  \"nickname\": \"Рысь\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 100, \"nickname\": \"Рысь\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 201 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Prefer",
+                    "value": "return=representation",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 100,\n  \"nickname\": \"Рысь\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 100,\n    \"nickname\": \"Рысь\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "И2. Проверить создание",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.100",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,nickname"
+                },
+                {
+                  "key": "id",
+                  "value": "eq.100"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 100, \"nickname\": \"Рысь\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.100",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,nickname"
+                    },
+                    {
+                      "key": "id",
+                      "value": "eq.100"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 100,\n    \"nickname\": \"Рысь\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "И3. Изменить ник",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Prefer",
+                "value": "return=representation",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?id=eq.100",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "eq.100"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickname\": \"Барс\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 100, \"nickname\": \"Барс\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Prefer",
+                    "value": "return=representation",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?id=eq.100",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "id",
+                      "value": "eq.100"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nickname\": \"Барс\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 100,\n    \"nickname\": \"Барс\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "И4. Проверить изменение",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.100",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,nickname"
+                },
+                {
+                  "key": "id",
+                  "value": "eq.100"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 100, \"nickname\": \"Барс\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.100",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,nickname"
+                    },
+                    {
+                      "key": "id",
+                      "value": "eq.100"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 100,\n    \"nickname\": \"Барс\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "И5. Удалить пользователя",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Prefer",
+                "value": "return=representation",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?id=eq.100",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "eq.100"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 100, \"nickname\": \"Барс\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Prefer",
+                    "value": "return=representation",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?id=eq.100",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "id",
+                      "value": "eq.100"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 100,\n    \"nickname\": \"Барс\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "И6. Проверить удаление",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.100",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,nickname"
+                },
+                {
+                  "key": "id",
+                  "value": "eq.100"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.100",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,nickname"
+                    },
+                    {
+                      "key": "id",
+                      "value": "eq.100"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 — Ошибки",
+      "item": [
+        {
+          "name": "О1. Повтор первичного ключа",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Prefer",
+                "value": "return=representation",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"nickname\": \"Дубликат\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Причина ошибки\", function () { pm.expect(pm.response.json().code).to.eql(\"23505\"); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 409 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Prefer",
+                    "value": "return=representation",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"nickname\": \"Дубликат\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": \"23505\",\n  \"details\": \"Key (id)=(1) already exists.\",\n  \"hint\": null,\n  \"message\": \"duplicate key value violates unique constraint \\\"users_pkey\\\"\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "О1. Проверить, что Лис сохранился",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,nickname"
+                },
+                {
+                  "key": "id",
+                  "value": "eq.1"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 1, \"nickname\": \"Лис\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,nickname"
+                    },
+                    {
+                      "key": "id",
+                      "value": "eq.1"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"nickname\": \"Лис\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "О2. Пустой ник",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Prefer",
+                "value": "return=representation",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 102,\n  \"nickname\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Причина ошибки\", function () { pm.expect(pm.response.json().code).to.eql(\"23514\"); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 400 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Prefer",
+                    "value": "return=representation",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 102,\n  \"nickname\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": \"23514\",\n  \"details\": \"Failing row contains (102, ).\",\n  \"hint\": null,\n  \"message\": \"new row for relation \\\"users\\\" violates check constraint \\\"users_nickname_not_empty\\\"\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "О2. Проверить отсутствие 102",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.102",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,nickname"
+                },
+                {
+                  "key": "id",
+                  "value": "eq.102"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.102",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,nickname"
+                    },
+                    {
+                      "key": "id",
+                      "value": "eq.102"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[]"
+            }
+          ]
+        },
+        {
+          "name": "О3. Неверный ключ",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "invalid-key-for-lesson",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,nickname"
+                },
+                {
+                  "key": "id",
+                  "value": "eq.1"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 401 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "invalid-key-for-lesson",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,nickname"
+                    },
+                    {
+                      "key": "id",
+                      "value": "eq.1"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Invalid API key\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "О4. Нет совпадений",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,nickname"
+                },
+                {
+                  "key": "id",
+                  "value": "eq.999"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?select=id,nickname&id=eq.999",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,nickname"
+                    },
+                    {
+                      "key": "id",
+                      "value": "eq.999"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 — Итог",
+      "item": [
+        {
+          "name": "Выходное задание. Участия пользователя 1",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/chat_members?select=chat_id,role&user_id=eq.1&order=id.asc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "chat_members"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "chat_id,role"
+                },
+                {
+                  "key": "user_id",
+                  "value": "eq.1"
+                },
+                {
+                  "key": "order",
+                  "value": "id.asc"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"chat_id\": 10, \"role\": \"администратор\"}, {\"chat_id\": 11, \"role\": \"участник\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/chat_members?select=chat_id,role&user_id=eq.1&order=id.asc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "chat_members"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "chat_id,role"
+                    },
+                    {
+                      "key": "user_id",
+                      "value": "eq.1"
+                    },
+                    {
+                      "key": "order",
+                      "value": "id.asc"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"chat_id\": 10,\n    \"role\": \"администратор\"\n  },\n  {\n    \"chat_id\": 11,\n    \"role\": \"участник\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "К1. Исходные пользователи",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{publishable_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rest/v1/users?select=id,nickname&order=id.asc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "id,nickname"
+                },
+                {
+                  "key": "order",
+                  "value": "id.asc"
+                }
+              ]
+            },
+            "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Ожидаемые строки\", function () { pm.expect(pm.response.json()).to.deep.equal([{\"id\": 1, \"nickname\": \"Лис\"}, {\"id\": 2, \"nickname\": \"Сова\"}, {\"id\": 3, \"nickname\": \"Кот\"}, {\"id\": 4, \"nickname\": \"Волк\"}]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ожидаемый ответ — 200 (учебный пример)",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "apikey",
+                    "value": "{{publishable_key}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/rest/v1/users?select=id,nickname&order=id.asc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "rest",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "select",
+                      "value": "id,nickname"
+                    },
+                    {
+                      "key": "order",
+                      "value": "id.asc"
+                    }
+                  ]
+                },
+                "description": "Выполнять по порядку урока на отдельном учебном проекте. Пример ответа показывает ожидаемый результат, а не запись облачного запроса."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"nickname\": \"Лис\"\n  },\n  {\n    \"id\": 2,\n    \"nickname\": \"Сова\"\n  },\n  {\n    \"id\": 3,\n    \"nickname\": \"Кот\"\n  },\n  {\n    \"id\": 4,\n    \"nickname\": \"Волк\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
