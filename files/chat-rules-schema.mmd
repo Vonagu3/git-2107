@@ -1,0 +1,29 @@
+erDiagram
+    users {
+        integer id PK
+        text nickname
+    }
+    chats {
+        integer id PK
+        text name
+    }
+    chat_members {
+        integer id PK
+        integer user_id FK
+        integer chat_id FK
+        timestamp joined_at
+        text role
+    }
+    invitations {
+        integer id PK
+        integer sender_id FK
+        integer recipient_id FK
+        integer chat_id FK
+        timestamp sent_at
+        text status
+    }
+    users ||--o{ chat_members : "участвует"
+    chats ||--o{ chat_members : "содержит участников"
+    users ||--o{ invitations : "приглашает"
+    users ||--o{ invitations : "получает приглашение"
+    chats ||--o{ invitations : "приглашение в чат"

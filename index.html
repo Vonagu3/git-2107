@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261124194628">
+<link rel="stylesheet" href="quiz.css?v=20261124195057">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -219,10 +219,11 @@ pre.cmd .sn { color: #c9a7ff; } pre.cmd .sc { color: var(--term-muted); } pre.cm
 #sql6-start > summary { font-weight: 600; cursor: pointer; }
 #sql6-start[open] > summary { margin-bottom: 12px; }
 @media (max-width: 760px) { #tab-sql6 [id] { scroll-margin-top: 300px; } }
-#sql5-skins-answer { margin: 18px 0; scroll-margin-top: 180px; }
-#sql5-skins-answer summary { cursor: pointer; font-weight: 600; }
-#sql5-skins-answer[open] > summary { margin-bottom: 12px; }
-#sql5-skins-answer pre { white-space: pre; }
+.mermaid-answer { margin: 18px 0; }
+.mermaid-answer summary { cursor: pointer; font-weight: 600; }
+.mermaid-answer[open] > summary { margin-bottom: 12px; }
+.mermaid-answer pre { white-space: pre; }
+#sql5-skins-answer { scroll-margin-top: 180px; }
 </style>
 </head>
 <body>
@@ -2840,7 +2841,7 @@ group by pitomcy.klichka;
 <details class="card mermaid-answer" id="sql5-skins-answer">
 <summary>Правильная схема: коллекция, наборы и передача скинов</summary>
 <p>Копия скина ссылается на <code>set_skins</code>: эта запись определяет и тип скина, и набор, к которому относится копия. Пара <code>set_id, skin_type_id</code> в <code>set_skins</code> должна быть уникальной.</p>
-<p><button type="button" class="btn" id="sql5-copy-mermaid">Скопировать Mermaid</button> <a class="btn" href="files/er-skins.svg" target="_blank" rel="noopener">Открыть схему крупнее</a> <a class="btn" href="files/quiz-relations-13.mmd" download>Скачать Mermaid</a></p>
+<p><button type="button" class="btn" id="sql5-copy-mermaid" data-copy-mermaid="sql5-skins-source">Скопировать Mermaid</button> <a class="btn" href="files/er-skins.svg" target="_blank" rel="noopener">Открыть схему крупнее</a> <a class="btn" href="files/quiz-relations-13.mmd" download>Скачать Mermaid</a></p>
 <div class="er"><img src="files/er-skins.svg" alt="ER-схема задания 13: пользователи, типы скинов, наборы, состав наборов, копии скинов и история передач" loading="lazy"></div>
 <p><code>owner_id</code> — текущий владелец копии. В истории передач <code>sender_id</code> и <code>recipient_id</code> ссылаются на одну таблицу <code>users</code> в разных ролях.</p>
 <details><summary>Код Mermaid</summary><pre class="cmd mm" id="sql5-skins-source">erDiagram
@@ -2892,7 +2893,7 @@ group by pitomcy.klichka;
 <section class="tab" id="tab-sql6">
 <section id="sql6-content" class="level1">
 <h1>Занятие 16 — правила базы чатов</h1>
-<div class="lesson-links"><a href="#sql6-start">Стартовый SQL</a><a href="#sql6-queries">Запросы</a><a href="#sql6-experiments">Опыты</a><a href="#sql6-cheat">Шпаргалка</a><a href="#sql6-changes">Новые правила</a><a href="#sql6-homework">Домашка</a></div>
+<div class="lesson-links"><a href="#sql6-start">Стартовый SQL</a><a href="#sql6-schema">Схема базы</a><a href="#sql6-queries">Запросы</a><a href="#sql6-experiments">Опыты</a><a href="#sql6-cheat">Шпаргалка</a><a href="#sql6-changes">Новые правила</a><a href="#sql6-homework">Домашка</a></div>
 <details class="card quiz-sql" id="sql6-start"><summary>Стартовый SQL: таблицы и данные</summary>
 <p>PostgreSQL. Четыре постоянные таблицы в схеме <code>public</code>: пользователи, чаты, участия и приглашения. Скопируйте весь скрипт и выполните в SQL Editor по команде преподавателя.</p>
 <p><strong>Повторный запуск пересоздаёт эти четыре таблицы и удаляет их данные.</strong> Если база чатов уже подготовлена, продолжайте работать с ней.</p>
@@ -2937,6 +2938,43 @@ UPDATE public.invitations SET status = &#x27;принято&#x27; WHERE id = 3;
 INSERT INTO public.chat_members VALUES (4, 1, 11, &#x27;2026-11-21 13:10&#x27;, &#x27;участник&#x27;);
 COMMIT;
 </code></pre>
+</details>
+<details class="card mermaid-answer" id="sql6-schema">
+<summary>Схема базы: чаты, участники и приглашения</summary>
+<p>Схема соответствует стартовому SQL. Пользователи и чаты связаны «многие ко многим» через <code>chat_members</code>. Одна строка этой таблицы — участие пользователя в конкретном чате; здесь хранятся его роль и дата вступления. Пара <code>user_id, chat_id</code> уникальна.</p>
+<p><button type="button" class="btn" data-copy-mermaid="sql6-schema-source">Скопировать Mermaid</button> <a class="btn" href="files/er-chat-rules.svg" target="_blank" rel="noopener">Открыть схему крупнее</a> <a class="btn" href="files/chat-rules-schema.mmd" download>Скачать Mermaid</a></p>
+<div class="er"><img src="files/er-chat-rules.svg" alt="ER-схема базы чатов: пользователи, чаты, участия и приглашения; отправитель и получатель ссылаются на users" loading="lazy"></div>
+<p>В <code>invitations</code> поля <code>sender_id</code> и <code>recipient_id</code> ссылаются на одну таблицу <code>users</code> в разных ролях, а <code>chat_id</code> — на чат. Приглашение хранится отдельно от участия: его наличие ещё не означает, что пользователь вступил в чат.</p>
+<details><summary>Код Mermaid</summary><pre class="cmd mm" id="sql6-schema-source">erDiagram
+    users {
+        integer id PK
+        text nickname
+    }
+    chats {
+        integer id PK
+        text name
+    }
+    chat_members {
+        integer id PK
+        integer user_id FK
+        integer chat_id FK
+        timestamp joined_at
+        text role
+    }
+    invitations {
+        integer id PK
+        integer sender_id FK
+        integer recipient_id FK
+        integer chat_id FK
+        timestamp sent_at
+        text status
+    }
+    users ||--o{ chat_members : &quot;участвует&quot;
+    chats ||--o{ chat_members : &quot;содержит участников&quot;
+    users ||--o{ invitations : &quot;приглашает&quot;
+    users ||--o{ invitations : &quot;получает приглашение&quot;
+    chats ||--o{ invitations : &quot;приглашение в чат&quot;
+</pre></details>
 </details>
 <p>Работаем с <code>public.users</code>, <code>public.chats</code>, <code>public.chat_members</code>, <code>public.invitations</code>. Стартовый SQL запускаем вместе по команде преподавателя. После добавления новых правил его повторно не запускаем.</p>
 <p>SQL сохраняйте в <code>chat_rules.sql</code>. Перед каждой проверкой напишите ожидаемый результат комментарием. Выполняйте отдельные выделенные команды: среди них есть намеренно ошибочные. В командах <code>insert</code> перечисляйте столбцы, а для опытов используйте указанные свободные <code>id</code>.</p>
@@ -3069,9 +3107,9 @@ add column имя_столбца тип;</code></pre>
 </section>
 </main>
 
-<script src="live.js?v=20261124194628"></script>
-<script src="quiz.js?v=20261124194628"></script>
-<script src="engine.js?v=20261124194628"></script>
+<script src="live.js?v=20261124195057"></script>
+<script src="quiz.js?v=20261124195057"></script>
+<script src="engine.js?v=20261124195057"></script>
 <script>
 (function () {
   "use strict";
@@ -3127,28 +3165,32 @@ add column имя_столбца тип;</code></pre>
     : hashSec ? hashSec.id.replace("tab-", "") : store.get("tab", "train"));
   if (hashSec && $(hashTab).tagName === "DETAILS") $(hashTab).open = true;
   if (hashSec) document.getElementById(hashTab).scrollIntoView();
-  document.querySelectorAll('#tab-sql6 a[href="#sql6-start"]').forEach((link) => {
-    link.addEventListener("click", () => { $("sql6-start").open = true; });
+  document.querySelectorAll('#tab-sql6 .lesson-links a').forEach((link) => {
+    link.addEventListener("click", () => {
+      const target = $(link.hash.slice(1));
+      if (target?.tagName === "DETAILS") target.open = true;
+    });
   });
 
-  // ---------- схема задания 13 ----------
-  $("sql5-copy-mermaid").onclick = async () => {
-    const button = $("sql5-copy-mermaid");
-    const source = $("sql5-skins-source");
-    try {
-      await navigator.clipboard.writeText(source.textContent);
-      button.textContent = "Скопировано ✓";
-    } catch {
-      source.closest("details").open = true;
-      const range = document.createRange();
-      range.selectNodeContents(source);
-      const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
-      button.textContent = "Нажмите Ctrl+C / Cmd+C";
-    }
-    setTimeout(() => { button.textContent = "Скопировать Mermaid"; }, 2500);
-  };
+  // ---------- схемы Mermaid ----------
+  document.querySelectorAll('[data-copy-mermaid]').forEach((button) => {
+    button.onclick = async () => {
+      const source = $(button.dataset.copyMermaid);
+      try {
+        await navigator.clipboard.writeText(source.textContent);
+        button.textContent = "Скопировано ✓";
+      } catch {
+        source.closest("details").open = true;
+        const range = document.createRange();
+        range.selectNodeContents(source);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        button.textContent = "Нажмите Ctrl+C / Cmd+C";
+      }
+      setTimeout(() => { button.textContent = "Скопировать Mermaid"; }, 2500);
+    };
+  });
 
   // ---------- приглашение ----------
   const orgUrl = S.PRAKTIKA_URL + "/invitations";
