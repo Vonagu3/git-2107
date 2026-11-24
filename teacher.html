@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261124163324">
+<link rel="stylesheet" href="quiz.css?v=20261124165346">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -142,6 +142,16 @@ table.probs td:first-child { width: 40%; }
 #tab-l16 pre { padding: 12px; background: var(--chip); border-radius: 8px; }
 #tab-l16 pre code { background: none; padding: 0; }
 #tab-l16 .wrap { margin: 12px 0; }
+
+#tab-l16 .lesson-exercise { margin: 16px 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+#tab-l16 .lesson-exercise > h3, #tab-l16 .lesson-exercise > h4 { margin-top: 0; }
+#tab-l16 .lesson-answer { margin: 12px 0; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; background: var(--bg); }
+#tab-l16 .lesson-answer > summary { color: var(--accent); }
+#tab-l16 .lesson-answer[open] > summary { margin-bottom: 14px; }
+#tab-l16 .lesson-answer > :last-child { margin-bottom: 0; }
+#tab-l16 .discussion-questions > li { margin: 16px 0; }
+#tab-l16 .lesson-anchor { display: block; scroll-margin-top: 16px; }
+#tab-l16 .lesson-exercise, #tab-l16 #l16-practice { scroll-margin-top: 16px; }
 </style>
 </head>
 <body>
@@ -1272,9 +1282,9 @@ ON m.user_id = i.sender_id AND m.chat_id = i.chat_id WHERE m.id IS NULL;
 
 <section class="tab" id="tab-l16">
 <h2 id="l16-plan">Занятие 16 — как база соблюдает правила: ограничения и ALTER TABLE</h2>
-<nav class="links" aria-label="Материалы занятия 16"><a href="#l16-plan">План занятия</a><a href="#l16-practice">Задания</a><a href="#l16-answers">Ответы и SQL</a><a href="files/quiz-relations-14.sql" download>Скачать стартовую базу</a></nav>
+<nav class="links" aria-label="Материалы занятия 16"><a href="#l16-plan">План занятия</a><a href="#l16-practice">Практика и ответы</a><a href="#l16-practice-content-17">Домашка</a><a href="files/quiz-relations-14.sql" download>Скачать стартовую базу</a></nav>
 <p>120 минут, включая перерыв 5 минут. Разбор вместе, запросы и изменения каждый выполняет в своей учебной базе; проверка результатов — в парах.</p>
-<p>Материалы: <a href="#l16-practice">Практика</a> — ученикам; <a href="#l16-answers">Ответы</a> — только преподавателю. Основа — постоянные таблицы задания 14 «Групповые чаты и приглашения»: <a href="files/quiz-relations-14.sql">стартовый SQL</a>. Условия домашки — <a href="./#sql5">квиз занятия 15</a>.</p>
+<p>Материалы: <a href="#l16-practice">Практика с ответами под каждым заданием</a>. Ответы предназначены преподавателю. Основа — постоянные таблицы задания 14 «Групповые чаты и приглашения»: <a href="files/quiz-relations-14.sql">стартовый SQL</a>. Условия домашки — <a href="./#sql5">квиз занятия 15</a>.</p>
 <h3 id="l16-plan-2">Откуда продолжаем</h3>
 <p>На занятии 15 выполнили всё, кроме задания 14. Его выдали на дом: схема с PK и FK, роли связей и примеры данных. SQL был необязателен, поэтому домашку принимаем по схеме и объяснению правил.</p>
 <p>Сегодня используем одну знакомую модель: <code>users</code>, <code>chats</code>, <code>chat_members</code>, <code>invitations</code>. После разбора схем переходим к общей SQL-базе с одинаковыми данными. Ограничения <code>not null</code>, внешние ключи и <code>check</code> ребята уже встречали; теперь связываем каждое ограничение с конкретным требованием и проверяем его опытом.</p>
@@ -1303,12 +1313,42 @@ ON m.user_id = i.sender_id AND m.chat_id = i.chat_id WHERE m.id IS NULL;
 <h3 id="l16-plan-6">0–25 — разбираем домашку</h3>
 <p><strong>0–5.</strong> Попросить пару показать свою схему. Остальные отмечают одно совпадение и одно отличие от своей.</p>
 <p><strong>5–15.</strong> Обсудить вопросы:</p>
-<ol><li>Что означает одна строка <code>chat_members</code>? Где хранятся дата вступления и роль?</li>
-<li>Почему у приглашения две ссылки на <code>users</code>, но таблица пользователей одна?</li>
-<li>Можно ли по приглашению считать человека участником? Что означает отказ?</li>
-<li>Почему пара пользователь–чат в участиях не повторяется, а одна пара людей может получить несколько приглашений в один чат?</li>
-<li>Как показать пустой чат и пользователя без участия?</li></ol>
-<p><a href="#l16-homework-q1">Подробные ответы на вопросы 1–5: объяснения, примеры и формулировки для класса</a>.</p>
+<span class="lesson-anchor" id="l16-answers-content-1"></span>
+<ol class="discussion-questions"><li><p>Что означает одна строка <code>chat_members</code>? Где хранятся дата вступления и роль?</p><details class="lesson-answer" id="l16-homework-q1"><summary>Ответ и разбор</summary>
+<p><strong>Одна строка — участие одного конкретного пользователя в одном конкретном чате.</strong> В ней <code>user_id</code> указывает на пользователя, <code>chat_id</code> — на чат, <code>joined_at</code> хранит дату и время вступления, <code>role</code> — роль именно в этом чате.</p>
+<p>Например, у Лиса две строки участия:</p>
+<ul><li>В «Общем»: пользователь <code>1</code>, чат <code>10</code>, вступил <code>2026-11-01 12:00</code>, роль «администратор».</li><li>В «Играх»: пользователь <code>1</code>, чат <code>11</code>, вступил <code>2026-11-21 13:10</code>, роль «участник».</li></ul>
+<p>Поэтому роль и дату вступления нельзя хранить одним значением в <code>users</code>: у одного человека они различаются по чатам. Одного значения в <code>chats</code> тоже недостаточно: участники одного чата могут иметь разные роли и вступать в разное время. Эти поля описывают связь пользователя с чатом и находятся в <code>chat_members</code>.</p>
+<p><strong>Фраза для класса:</strong> «Это строка про то, как Лис участвует в конкретном чате. В другом чате у него будет другое участие».</p>
+</details></li>
+<li><p>Почему у приглашения две ссылки на <code>users</code>, но таблица пользователей одна?</p><details class="lesson-answer" id="l16-homework-q2"><summary>Ответ и разбор</summary>
+<p><strong>Отправитель и получатель — два пользователя в разных ролях внутри одного приглашения.</strong> <code>sender_id</code> и <code>recipient_id</code> оба ссылаются на <code>users.id</code>, но отвечают на разные вопросы: кто отправил и кому отправил.</p>
+<p>Например, в приглашении <code>2</code> Лис (<code>sender_id = 1</code>) приглашает Сову (<code>recipient_id = 2</code>) в «Общий». В приглашении <code>3</code> роли меняются: Сова (<code>sender_id = 2</code>) приглашает Лиса (<code>recipient_id = 1</code>) в «Игры».</p>
+<p>Лис и Сова не становятся новыми людьми при смене роли. Их ники хранятся по одному разу в <code>users</code>. Отдельные таблицы отправителей и получателей дублировали бы сведения об одних людях. На диаграмме от <code>invitations</code> к <code>users</code> идут две связи с подписями ролей; в запросе одну таблицу можно присоединить дважды с разными псевдонимами.</p>
+<p><strong>Фраза для класса:</strong> «Одна таблица отвечает на вопрос “кто этот человек?”, а два внешних ключа — “кто пригласил?” и “кого пригласили?”».</p>
+</details></li>
+<li><p>Можно ли по приглашению считать человека участником? Что означает отказ?</p><details class="lesson-answer" id="l16-homework-q3"><summary>Ответ и разбор</summary>
+<p><strong>Само приглашение не подтверждает участие.</strong> Для проверки участия ищем строку с нужными <code>user_id</code> и <code>chat_id</code> в <code>chat_members</code>.</p>
+<ul><li>«Ожидает» — решение по этому приглашению ещё не принято; приглашение само по себе не добавляет человека в чат.</li><li>«Отклонено» — получатель отказался от конкретного приглашения. Его запись остаётся в истории; позже можно отправить новое.</li><li>При принятии приглашения по правилам задачи нужно изменить его статус на «принято» и добавить участие с собственной датой вступления. Это два изменения данных.</li></ul>
+<p>В исходном примере Кот получил приглашение в «Общий», но в <code>chat_members</code> его нет — он ещё не участник. Сова сначала отказалась от приглашения <code>1</code>, затем приняла приглашение <code>2</code> и вступила. Поэтому старый отказ тоже не доказывает, что человек сейчас не состоит в чате.</p>
+<p>Одна команда изменения статуса не создаёт участие автоматически: внешний ключ этого не делает. В стартовом скрипте добавление участия записано отдельной командой.</p>
+<p><strong>Фраза для класса:</strong> «Приглашение — предложение вступить. Участие — отдельный факт, который мы записываем в другой таблице».</p>
+</details></li>
+<li><p>Почему пара пользователь–чат в участиях не повторяется, а одна пара людей может получить несколько приглашений в один чат?</p><details class="lesson-answer" id="l16-homework-q4"><summary>Ответ и разбор</summary>
+<p><strong>В этой задаче <code>chat_members</code> хранит состав чатов, а <code>invitations</code> — отдельные события приглашения.</strong> По условию повторные выходы и вступления не учитываем. Для пары пользователь–чат достаточно одной строки с датой вступления и ролью. Поэтому действует <code>unique (user_id, chat_id)</code>; новый <code>id</code> участия не разрешает повтор той же пары.</p>
+<p>У приглашений другой смысл: один и тот же отправитель может снова пригласить того же получателя в тот же чат после отказа. В исходных данных:</p>
+<ul><li>Приглашение <code>1</code>: Лис приглашает Сову в «Общий» <code>2026-11-20 12:00</code>, статус «отклонено».</li><li>Приглашение <code>2</code>: Лис снова приглашает Сову в «Общий» <code>2026-11-21 12:00</code>, статус «принято».</li></ul>
+<p>Это два разных события с собственными номерами, временем и результатом. Уникальность сочетания <code>sender_id, recipient_id, chat_id</code> запретила бы законное повторное приглашение. У Совы при этом одна строка участия в «Общем».</p>
+<p><strong>Фраза для класса:</strong> «Одно участие отвечает на вопрос “состоит ли человек в чате?”, несколько приглашений — “какие попытки пригласить его происходили?”».</p>
+</details></li>
+<li><p>Как показать пустой чат и пользователя без участия?</p><details class="lesson-answer" id="l16-homework-q5"><summary>Ответ и разбор</summary>
+<p><strong>Пользователь и чат существуют в своих таблицах независимо от наличия строк участия.</strong> Для них допускается ноль связанных строк в <code>chat_members</code>.</p>
+<ul><li>Пустой чат: строка в <code>chats</code> есть, а строк с его <code>chat_id</code> в <code>chat_members</code> нет. В примере это «Новый чат», <code>id = 12</code>.</li><li>Пользователь без участия: строка в <code>users</code> есть, а строк с его <code>user_id</code> в <code>chat_members</code> нет. В примере это Кот (<code>3</code>) и Волк (<code>4</code>). У Кота есть приглашение, у Волка исходно нет и приглашений.</li></ul>
+<p>На диаграмме у пользователя и у чата может быть от нуля до многих участий. При этом каждая существующая строка участия обязательно ссылается ровно на одного пользователя и ровно на один чат. Фиктивную строку участия с <code>null</code> создавать не нужно; обязательные внешние ключи такой записи не допускают.</p>
+<p>Для запросов это повод использовать <code>left join</code>: сохраняем пользователей или чаты, даже если участия не найдены. Пустой чат получает <code>count(m.id) = 0</code>, пользователь без участия находится по <code>m.id is null</code> в результате соединения. Этот <code>null</code> появляется в результате <code>left join</code>, а не хранится как отдельное участие.</p>
+<p><strong>Фраза для класса:</strong> «Чат уже создан, но в него ещё никто не вступил. Поэтому чат есть, а записей об участниках пока нет».</p>
+</details></li>
+</ol>
 <p><strong>15–20.</strong> Проверить схемы примерами из задания: у Лиса и Совы по два чата и разные роли; отказ и повторное приглашение; Кот ещё не вступил; Волк без участия; «Новый чат» пуст. Исправить одну ошибку вместе. Полный повтор квиза не нужен.</p>
 <p><strong>20–25.</strong> Запустить подготовленный SQL, открыть четыре таблицы. Сопоставить <code>sender_id</code>, <code>recipient_id</code> и <code>chat_id</code> с конкретными строками. Транзакционные блоки стартового скрипта сегодня подробно не разбираем.</p>
 <h3 id="l16-plan-7">25–45 — практика 1: читаем данные</h3>
@@ -1343,7 +1383,10 @@ ON m.user_id = i.sender_id AND m.chat_id = i.chat_id WHERE m.id IS NULL;
 <li>Имя ограничения пригодится, когда список ролей изменится.</li>
 <li>При добавлении обычного <code>check</code> база проверяет и существующие строки. Если среди них есть нарушители, сначала нужно исправить данные.</li>
 <li><code>default</code> подставляется при пропуске столбца в <code>insert</code>; явный <code>null</code> не заменяется значением по умолчанию. Установка <code>default</code> для существующего столбца не переписывает старые строки.</li></ul>
-<p>Короткий вопрос на границу темы: «Отправитель должен состоять в чате. Доказывает ли это внешний ключ на <code>users</code>?» Нет: он подтверждает существование пользователя. Проверка членства обращается к другой таблице; обычный <code>check</code> не подходит. В текущем примере правило проверяет приложение, а преподаватель может показать диагностический запрос из стартового SQL. Реализацию этой проверки оставляем на следующее обсуждение.</p>
+<p><strong>Вопрос:</strong> отправитель должен состоять в чате. Доказывает ли это внешний ключ на <code>users</code>?</p>
+<details class="lesson-answer" id="l16-homework-q6"><summary>Ответ и разбор</summary>
+<p>Они проверяют существование отправителя, получателя и чата. Они не проверяют, что отправитель состоит именно в этом чате, и не добавляют получателя в участники при принятии приглашения. В текущем примере проверка членства отправителя относится к логике приложения.</p><p>Для проверки можно показать диагностический запрос из стартового SQL. Реализацию проверки членства оставляем на следующее обсуждение.</p>
+</details>
 <h3 id="l16-plan-10">80–110 — практика 3: меняем работающую базу</h3>
 <p><strong>80–85.</strong> Раздать четыре требования И1–И4. До выполнения ученики записывают: какая таблица меняется, какое правило добавляют, какие данные должны сохраниться.</p>
 <p><strong>85–102.</strong> Самостоятельно написать изменения:</p>
@@ -1356,10 +1399,20 @@ ON m.user_id = i.sender_id AND m.chat_id = i.chat_id WHERE m.id IS NULL;
 <p>Принимаем работу, если роль «главный» отвергается, <code>&#x27;&#x27;</code> и <code>null</code> для ника отвергаются, пропущенный статус становится «ожидает», явный <code>null</code> для статуса отвергается, описание изменено только у выбранного чата и исходные строки сохранены.</p>
 <h3 id="l16-plan-11">110–120 — итог и домашка</h3>
 <p><strong>110–115.</strong> Короткая самостоятельная запись ответов:</p>
-<ol><li>Почему новый <code>id</code> не позволяет повторить пару пользователь–чат?</li>
-<li>Чем отличаются <code>null</code> и <code>&#x27;&#x27;</code>?</li>
-<li>Что сделает <code>default</code>, если столбец пропущен? А если явно передан <code>null</code>?</li>
-<li>Как добавить новое правило, сохранив существующие строки?</li></ol>
+<span class="lesson-anchor" id="l16-answers-content-25"></span>
+<ol class="discussion-questions"><li><p>Почему новый <code>id</code> не позволяет повторить пару пользователь–чат?</p><details class="lesson-answer" id="l16-final-answer-1"><summary>Ответ</summary>
+<p><code>id</code> и пара пользователь–чат проверяются разными ограничениями. Уникальность нового номера не означает уникальность пары.</p>
+</details></li>
+<li><p>Чем отличаются <code>null</code> и <code>&#x27;&#x27;</code>?</p><details class="lesson-answer" id="l16-final-answer-2"><summary>Ответ</summary>
+<p><code>null</code> — отсутствие значения; <code>&#x27;&#x27;</code> — строковое значение длины 0.</p>
+</details></li>
+<li><p>Что сделает <code>default</code>, если столбец пропущен? А если явно передан <code>null</code>?</p><details class="lesson-answer" id="l16-final-answer-3"><summary>Ответ</summary>
+<p>Пропущенный столбец получает <code>default</code>. Явный <code>null</code> остаётся <code>null</code> и здесь отвергается <code>not null</code>.</p>
+</details></li>
+<li><p>Как добавить новое правило, сохранив существующие строки?</p><details class="lesson-answer" id="l16-final-answer-4"><summary>Ответ</summary>
+<p>Правила и столбцы добавляются через <code>alter table</code>; уже имеющиеся строки должны удовлетворять добавляемому ограничению.</p>
+</details></li>
+</ol>
 <p><strong>115–120.</strong> Домашка к занятию 17 — новая роль «модератор», задания Д1–Д4 в <a href="#l16-practice">Практике</a>. Изменить именованное ограничение, сделать Сову модератором «Общего», получить список администраторов и модераторов, проверить допустимые и недопустимые роли.</p>
 <p>Сдать <code>chat_rules.sql</code>: изменения занятия, проверочные команды с комментариями об ожидаемых результатах и продолжение домашки. Ожидаемые ошибки пометить; файл выполняется по блокам. Стартовый скрипт с удалением таблиц в него не включать. Приложить результат итогового запроса и одну ошибку запрещённой роли.</p>
 <h3 id="l16-plan-12">Если отстаём или идём быстрее</h3>
@@ -1371,37 +1424,149 @@ ON m.user_id = i.sender_id AND m.chat_id = i.chat_id WHERE m.id IS NULL;
 <h3 id="l16-plan-14">Справка преподавателю</h3>
 <ul><li><a href="https://www.postgresql.org/docs/current/ddl-constraints.html">Ограничения PostgreSQL</a>: <code>check</code>, <code>not null</code>, уникальность и внешние ключи; ограничения проверок между строками.</li>
 <li><a href="https://www.postgresql.org/docs/current/ddl-alter.html">Изменение таблиц</a>: добавление столбцов и ограничений, изменение значений по умолчанию.</li></ul>
-<details class="card" id="l16-practice"><summary>Задания занятия 16 — для проведения урока</summary>
+<section id="l16-practice">
+<span class="lesson-anchor" id="l16-answers"></span>
+<h3>Практика и ответы</h3>
+<p class="note">Под каждым заданием можно раскрыть ответ, объяснение и SQL для преподавателя.</p>
+<p>Все 30 SQL-блоков проверены на PostgreSQL 13, включая 11 ожидаемых ошибок. Проверены результаты запросов, сохранность исходных строк и состояние после домашки.</p>
+<p>Исходное состояние — <a href="files/quiz-relations-14.sql">постоянные таблицы задания 14</a>: 4 пользователя, 3 чата, 4 участия, 4 приглашения. Все обращения указывают <code>public.</code>, чтобы одноимённые временные таблицы не перехватывали запросы.</p>
+<p>Блоки рассчитаны на порядок урока. Ожидаемые ошибки выполнять отдельными командами: не запускать весь документ одним SQL-пакетом. После успешных пробных изменений данные возвращаются в исходное состояние, кроме описания «Общего» и домашнего назначения модератора. Новые правила сохраняются.</p>
 <p>Работаем с <code>public.users</code>, <code>public.chats</code>, <code>public.chat_members</code>, <code>public.invitations</code>. Стартовый SQL запускаем вместе по команде преподавателя. После добавления новых правил его повторно не запускаем.</p>
 <p>SQL сохраняйте в <code>chat_rules.sql</code>. Перед каждой проверкой напишите ожидаемый результат комментарием. Выполняйте отдельные выделенные команды: среди них есть намеренно ошибочные. В командах <code>insert</code> перечисляйте столбцы, а для опытов используйте указанные свободные <code>id</code>.</p>
+<span class="lesson-anchor" id="l16-answers-content-2"></span>
 <h3 id="l16-practice-content-1">Практика 1 — запросы</h3>
-<p><strong>П1. Участники.</strong> Выведите название чата, ник участника и его роль. Одна строка результата — одно участие. Упорядочьте по <code>id</code> чата и <code>id</code> пользователя.</p>
-<p><strong>П2. Численность.</strong> Для каждого чата выведите название и количество участников. Пустой чат тоже должен быть в результате, с числом 0. Упорядочьте по <code>id</code> чата.</p>
-<p><strong>П3. Кто ещё не вступил.</strong> Найдите пользователей без участия в чатах. Упорядочьте по <code>id</code> пользователя.</p>
-<p><strong>П4. Ожидающие приглашения.</strong> Выведите ник отправителя, ник получателя и название чата для приглашений со статусом «ожидает». Пользовательская таблица одна, роли две.</p>
+<article class="lesson-exercise" id="l16-task-p1">
+<h4>П1. Участники</h4>
+<p>Выведите название чата, ник участника и его роль. Одна строка результата — одно участие. Упорядочьте по <code>id</code> чата и <code>id</code> пользователя.</p>
+<details class="lesson-answer" id="l16-answers-content-3"><summary>Ответ и SQL</summary>
+<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>select c.name as chat, u.nickname, m.role
+from public.chat_members m
+join public.chats c on c.id = m.chat_id
+join public.users u on u.id = m.user_id
+order by c.id, u.id;
+</code></pre></div>
+<div class="wrap"><table><tr><th>Чат</th><th>Ник</th><th>Роль</th></tr>
+<tr><td>Общий</td><td>Лис</td><td>администратор</td></tr>
+<tr><td>Общий</td><td>Сова</td><td>участник</td></tr>
+<tr><td>Игры</td><td>Лис</td><td>участник</td></tr>
+<tr><td>Игры</td><td>Сова</td><td>администратор</td></tr></table></div>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-p2">
+<h4>П2. Численность</h4>
+<p>Для каждого чата выведите название и количество участников. Пустой чат тоже должен быть в результате, с числом 0. Упорядочьте по <code>id</code> чата.</p>
+<details class="lesson-answer" id="l16-answers-content-4"><summary>Ответ и SQL</summary>
+<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>select c.name, count(m.id) as members
+from public.chats c
+left join public.chat_members m on m.chat_id = c.id
+group by c.id, c.name
+order by c.id;
+</code></pre></div>
+<p>Результат: «Общий» — 2, «Игры» — 2, «Новый чат» — 0. <code>count(*)</code> посчитал бы строку результата <code>left join</code> для пустого чата и дал 1. Группируем также по <code>c.id</code>, чтобы чаты с одинаковыми названиями не слились.</p>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-p3">
+<h4>П3. Кто ещё не вступил</h4>
+<p>Найдите пользователей без участия в чатах. Упорядочьте по <code>id</code> пользователя.</p>
+<details class="lesson-answer" id="l16-answers-content-5"><summary>Ответ и SQL</summary>
+<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>select u.nickname
+from public.users u
+left join public.chat_members m on m.user_id = u.id
+where m.id is null
+order by u.id;
+</code></pre></div>
+<p>Результат: Кот, Волк. Кот приглашён, но ещё не вступил; у Волка исходно нет ни участия, ни приглашения.</p>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-p4">
+<h4>П4. Ожидающие приглашения</h4>
+<p>Выведите ник отправителя, ник получателя и название чата для приглашений со статусом «ожидает». Пользовательская таблица одна, роли две.</p>
+<details class="lesson-answer" id="l16-answers-content-6"><summary>Ответ и SQL</summary>
+<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>select s.nickname as sender, r.nickname as recipient, c.name as chat
+from public.invitations i
+join public.users s on s.id = i.sender_id
+join public.users r on r.id = i.recipient_id
+join public.chats c on c.id = i.chat_id
+where i.status = &#x27;ожидает&#x27;
+order by i.id;
+</code></pre></div>
+<p>Одна строка: Лис → Кот, «Общий». В исходном скрипте приглашения 2 и 3 уже приняты.</p>
+</details>
+</article>
+
+<span class="lesson-anchor" id="l16-answers-content-7"></span>
 <h3 id="l16-practice-content-2">Практика 2 — что разрешит база?</h3>
 <p>Перед каждым опытом запишите прогноз: выполнится ли команда и какое правило она проверяет. Запускайте по одной команде; после ошибки читайте её текст. Не меняйте исходные правила ради успешного выполнения.</p>
+<article class="lesson-exercise" id="l16-task-o1">
 <h4 id="l16-practice-content-3">О1. Повтор участия</h4>
 <p>Лис уже состоит в «Общем». Номер новой записи отличается от существующих.</p>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>insert into public.chat_members (id, user_id, chat_id, joined_at, role)
 values (9001, 1, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;участник&#x27;);
 </code></pre></div>
+<details class="lesson-answer" id="l16-answers-content-8"><summary>Ответ и SQL</summary>
+<div class="quiz-sql"><p class="note">Ожидаемая ошибка 23505. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23505 (unique_violation).
+insert into public.chat_members (id, user_id, chat_id, joined_at, role)
+values (9001, 1, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;участник&#x27;);
+</code></pre></div>
+<p>Новый номер участия не отменяет уникальность пары <code>(1, 10)</code>.</p>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-o2">
 <h4 id="l16-practice-content-4">О2. Приглашение самому себе</h4>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
 values (9002, 1, 1, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;ожидает&#x27;);
 </code></pre></div>
+<details class="lesson-answer" id="l16-answers-content-9"><summary>Ответ и SQL</summary>
+<div class="quiz-sql"><p class="note">Ожидаемая ошибка 23514. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23514 (check_violation).
+insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
+values (9002, 1, 1, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;ожидает&#x27;);
+</code></pre></div>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-o3">
 <h4 id="l16-practice-content-5">О3. Несуществующий получатель</h4>
 <p>Пользователя с <code>id = 999</code> нет.</p>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
 values (9003, 1, 999, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;ожидает&#x27;);
 </code></pre></div>
+<details class="lesson-answer" id="l16-answers-content-10"><summary>Ответ и SQL</summary>
+<div class="quiz-sql"><p class="note">Ожидаемая ошибка 23503. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23503 (foreign_key_violation).
+insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
+values (9003, 1, 999, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;ожидает&#x27;);
+</code></pre></div>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-o4">
 <h4 id="l16-practice-content-6">О4. Неизвестный статус</h4>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
 values (9004, 1, 4, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;передумал&#x27;);
 </code></pre></div>
+<details class="lesson-answer" id="l16-answers-content-11"><summary>Ответ и SQL</summary>
+<div class="quiz-sql"><p class="note">Ожидаемая ошибка 23514. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23514 (check_violation).
+insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
+values (9004, 1, 4, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;передумал&#x27;);
+</code></pre></div>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-o5">
 <h4 id="l16-practice-content-7">О5. Ник не указан</h4>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>insert into public.users (id, nickname) values (9005, null);
 </code></pre></div>
+<details class="lesson-answer" id="l16-answers-content-12"><summary>Ответ и SQL</summary>
+<div class="quiz-sql"><p class="note">Ожидаемая ошибка 23502. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23502 (not_null_violation).
+insert into public.users (id, nickname) values (9005, null);
+</code></pre></div>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-o6">
 <h4 id="l16-practice-content-8">О6. Ник — пустая строка</h4>
 <p>Этот опыт выполняем вместе после перерыва, до добавления нового ограничения на ник.</p>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>insert into public.users (id, nickname) values (9006, &#x27;&#x27;);
@@ -1410,6 +1575,16 @@ from public.users where id = 9006;
 delete from public.users where id = 9006;
 </code></pre></div>
 <p>Сравните с О5. Что означает результат <code>is_null</code>? Почему <code>not null</code> недостаточно для запрета пустой строки?</p>
+<details class="lesson-answer" id="l16-answers-content-13"><summary>Ответ и SQL</summary>
+<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>insert into public.users (id, nickname) values (9006, &#x27;&#x27;);
+select id, nickname, nickname is null as is_null
+from public.users where id = 9006;
+delete from public.users where id = 9006;
+</code></pre></div>
+<p>Успех; <code>is_null = false</code>. Ник пустой, но значение есть. Пробная строка удалена до добавления ограничения в И2.</p>
+</details>
+</article>
+
 <h3 id="l16-practice-content-9">Шпаргалка для практики 3</h3>
 <p>Это шаблоны: замените имена и условия перед выполнением.</p>
 <pre class="mermaid-source"><code>alter table public.имя_таблицы
@@ -1422,158 +1597,15 @@ alter table public.имя_таблицы
 add column имя_столбца тип;
 </code></pre>
 <p><code>update</code> меняет значения в строках. <code>alter table</code> меняет структуру таблицы и её правила. Команды добавления столбца и ограничений выполняйте один раз; для повторной проверки используйте <code>insert</code>, <code>update</code> и <code>select</code>.</p>
+<span class="lesson-anchor" id="l16-answers-content-14"></span>
 <h3 id="l16-practice-content-10">Практика 3 — новые требования</h3>
 <p>Сохраняйте существующие строки. Для каждого задания нужны изменение схемы и проверки. После успешных пробных вставок удаляйте только добавленные вами строки.</p>
+<article class="lesson-exercise" id="l16-task-i1">
 <h4 id="l16-practice-content-11">И1. Допустимые роли</h4>
 <p>В <code>chat_members.role</code> разрешены только «администратор» и «участник». Назовите ограничение <code>chat_members_role_check</code>.</p>
 <ul><li>Попробуйте изменить роль участия <code>id = 4</code> на «администратор», проверьте результат и верните «участник».</li>
 <li>Попробуйте изменить её на «главный». Объясните результат.</li></ul>
-<h4 id="l16-practice-content-12">И2. Непустой ник</h4>
-<p>Ник <code>&#x27;&#x27;</code> запрещён. Назовите новое ограничение <code>users_nickname_not_empty</code>. Существующий запрет <code>null</code> сохраните.</p>
-<ul><li>Снова попробуйте вставить пользователя с <code>id = 9006</code> и ником <code>&#x27;&#x27;</code>.</li>
-<li>Проверьте <code>null</code>.</li>
-<li>Добавьте пользователя с этим номером и ником «Рысь», затем удалите его.</li></ul>
-<p>Строки из одних пробелов — отдельное возможное требование; сегодня проверяем именно пустую строку <code>&#x27;&#x27;</code>.</p>
-<h4 id="l16-practice-content-13">И3. Статус по умолчанию</h4>
-<p>Если при создании приглашения столбец <code>status</code> не указан, нужно записывать «ожидает».</p>
-<ul><li>Создайте приглашение <code>id = 9007</code>: Лис (<code>1</code>) приглашает Волка (<code>4</code>) в «Общий» (<code>10</code>), время <code>&#x27;2026-11-24 12:00&#x27;</code>. Не включайте <code>status</code> в список столбцов. Посмотрите результат, затем удалите пробную строку.</li>
-<li>Повторите опыт, явно передав <code>null</code> в <code>status</code>. Сработал ли <code>default</code>?</li>
-<li>Проверьте явный статус «отклонено» на приглашении <code>id = 9008</code> с теми же участниками. Посмотрите результат и удалите строку.</li>
-<li>Изменились ли статусы четырёх исходных приглашений?</li></ul>
-<h4 id="l16-practice-content-14">И4. Описание чата</h4>
-<p>Добавьте в <code>chats</code> необязательный столбец <code>description</code> типа <code>text</code>.</p>
-<ul><li>Посмотрите, какие значения получили три существующих чата.</li>
-<li>Для «Общего» (<code>id = 10</code>) запишите «Общение участников».</li>
-<li>Проверьте, что у остальных чатов описание осталось <code>null</code>.</li></ul>
-<h4 id="l16-practice-content-15">Проверка в паре</h4>
-<p>Обменяйтесь командами проверки. Выполните их на своей базе после своих изменений; повторять чужие <code>alter table</code> не нужно. Объясните соседу причину каждой ошибки и результат каждой успешной команды.</p>
-<p>В конце должно остаться 4 пользователя, 3 чата, 4 участия, 4 приглашения. Роль участия <code>id = 4</code> — «участник». Статусы исходных приглашений сохранены; описание заполнено только у «Общего».</p>
-<h3 id="l16-practice-content-16">Бонус Б1 — старые данные нарушают новое правило</h3>
-<p>Для <code>chats.name</code> решили запретить <code>&#x27;&#x27;</code>.</p>
-<ol><li>До добавления правила создайте пробный чат <code>id = 9009</code> с пустым названием.</li>
-<li>Попробуйте добавить ограничение <code>chats_name_not_empty</code>. Что произойдёт?</li>
-<li>Исправьте название пробного чата на «Проверка», затем снова добавьте ограничение.</li>
-<li>Удалите пробный чат. Объясните, почему одинаковая команда добавления ограничения дала разные результаты.</li></ol>
-<h3 id="l16-practice-content-17">Домашка к занятию 17 — модераторы</h3>
-<p>Продолжайте базу после И1–И4. Если что-то не закончено, сначала доделайте практику.</p>
-<p><strong>Д1. Новое правило.</strong> Теперь разрешены три роли: «администратор», «участник» и «модератор». Измените ограничение <code>chat_members_role_check</code>, сохранив все участия. Таблицу пересоздавать нельзя. Подсказка: ограничение можно удалить по имени через <code>drop constraint</code> и добавить новое с тем же именем.</p>
-<p><strong>Д2. Назначение.</strong> Сделайте Сову модератором «Общего»: это участие <code>id = 3</code>, пользователь <code>2</code>, чат <code>10</code>. Её роль в «Играх» должна сохраниться.</p>
-<p><strong>Д3. Список.</strong> Выведите название чата, ник и роль для всех администраторов и модераторов. Упорядочьте по <code>id</code> чата и <code>id</code> пользователя.</p>
-<p><strong>Д4. Проверка.</strong> Покажите, что роль «главный» всё ещё запрещена. Объясните, почему поле <code>role</code> находится в <code>chat_members</code>, а не в <code>users</code>.</p>
-<p>Сдать <code>chat_rules.sql</code> с изменениями, проверками и комментариями об ожидаемых результатах; результат Д3 и одну ошибку для запрещённой роли. Команды с ожидаемыми ошибками пометьте и запускайте отдельно. Не включайте стартовый скрипт с удалением таблиц.</p>
-</details>
-<details class="card" id="l16-answers"><summary>Ответы и разбор — не показывать ученикам</summary>
-<p>Все 30 SQL-блоков проверены на PostgreSQL 13, включая 11 ожидаемых ошибок. Проверены результаты запросов, сохранность исходных строк и состояние после домашки.</p>
-<p>Исходное состояние — <a href="files/quiz-relations-14.sql">постоянные таблицы задания 14</a>: 4 пользователя, 3 чата, 4 участия, 4 приглашения. Все обращения указывают <code>public.</code>, чтобы одноимённые временные таблицы не перехватывали запросы.</p>
-<p>Блоки рассчитаны на порядок урока. Ожидаемые ошибки выполнять отдельными командами: не запускать весь документ одним SQL-пакетом. После успешных пробных изменений данные возвращаются в исходное состояние, кроме описания «Общего» и домашнего назначения модератора. Новые правила сохраняются.</p>
-<h3 id="l16-answers-content-1">Разбор домашки</h3>
-<p>Ответы на пять вопросов блока 5–15 минут. Сначала дать ученикам объяснить своими словами, затем проверить объяснение конкретными строками.</p>
-<h4 id="l16-homework-q1">1. Что означает одна строка chat_members? Где дата вступления и роль?</h4>
-<p><strong>Одна строка — участие одного конкретного пользователя в одном конкретном чате.</strong> В ней <code>user_id</code> указывает на пользователя, <code>chat_id</code> — на чат, <code>joined_at</code> хранит дату и время вступления, <code>role</code> — роль именно в этом чате.</p>
-<p>Например, у Лиса две строки участия:</p>
-<ul><li>В «Общем»: пользователь <code>1</code>, чат <code>10</code>, вступил <code>2026-11-01 12:00</code>, роль «администратор».</li><li>В «Играх»: пользователь <code>1</code>, чат <code>11</code>, вступил <code>2026-11-21 13:10</code>, роль «участник».</li></ul>
-<p>Поэтому роль и дату вступления нельзя хранить одним значением в <code>users</code>: у одного человека они различаются по чатам. Одного значения в <code>chats</code> тоже недостаточно: участники одного чата могут иметь разные роли и вступать в разное время. Эти поля описывают связь пользователя с чатом и находятся в <code>chat_members</code>.</p>
-<p><strong>Фраза для класса:</strong> «Это строка про то, как Лис участвует в конкретном чате. В другом чате у него будет другое участие».</p>
-<h4 id="l16-homework-q2">2. Почему у приглашения две ссылки на users, но таблица пользователей одна?</h4>
-<p><strong>Отправитель и получатель — два пользователя в разных ролях внутри одного приглашения.</strong> <code>sender_id</code> и <code>recipient_id</code> оба ссылаются на <code>users.id</code>, но отвечают на разные вопросы: кто отправил и кому отправил.</p>
-<p>Например, в приглашении <code>2</code> Лис (<code>sender_id = 1</code>) приглашает Сову (<code>recipient_id = 2</code>) в «Общий». В приглашении <code>3</code> роли меняются: Сова (<code>sender_id = 2</code>) приглашает Лиса (<code>recipient_id = 1</code>) в «Игры».</p>
-<p>Лис и Сова не становятся новыми людьми при смене роли. Их ники хранятся по одному разу в <code>users</code>. Отдельные таблицы отправителей и получателей дублировали бы сведения об одних людях. На диаграмме от <code>invitations</code> к <code>users</code> идут две связи с подписями ролей; в запросе одну таблицу можно присоединить дважды с разными псевдонимами.</p>
-<p><strong>Фраза для класса:</strong> «Одна таблица отвечает на вопрос “кто этот человек?”, а два внешних ключа — “кто пригласил?” и “кого пригласили?”».</p>
-<h4 id="l16-homework-q3">3. Можно ли по приглашению считать человека участником? Что означает отказ?</h4>
-<p><strong>Само приглашение не подтверждает участие.</strong> Для проверки участия ищем строку с нужными <code>user_id</code> и <code>chat_id</code> в <code>chat_members</code>.</p>
-<ul><li>«Ожидает» — решение по этому приглашению ещё не принято; приглашение само по себе не добавляет человека в чат.</li><li>«Отклонено» — получатель отказался от конкретного приглашения. Его запись остаётся в истории; позже можно отправить новое.</li><li>При принятии приглашения по правилам задачи нужно изменить его статус на «принято» и добавить участие с собственной датой вступления. Это два изменения данных.</li></ul>
-<p>В исходном примере Кот получил приглашение в «Общий», но в <code>chat_members</code> его нет — он ещё не участник. Сова сначала отказалась от приглашения <code>1</code>, затем приняла приглашение <code>2</code> и вступила. Поэтому старый отказ тоже не доказывает, что человек сейчас не состоит в чате.</p>
-<p>Одна команда изменения статуса не создаёт участие автоматически: внешний ключ этого не делает. В стартовом скрипте добавление участия записано отдельной командой.</p>
-<p><strong>Фраза для класса:</strong> «Приглашение — предложение вступить. Участие — отдельный факт, который мы записываем в другой таблице».</p>
-<h4 id="l16-homework-q4">4. Почему участие не повторяется, а приглашения могут повторяться?</h4>
-<p><strong>В этой задаче <code>chat_members</code> хранит состав чатов, а <code>invitations</code> — отдельные события приглашения.</strong> По условию повторные выходы и вступления не учитываем. Для пары пользователь–чат достаточно одной строки с датой вступления и ролью. Поэтому действует <code>unique (user_id, chat_id)</code>; новый <code>id</code> участия не разрешает повтор той же пары.</p>
-<p>У приглашений другой смысл: один и тот же отправитель может снова пригласить того же получателя в тот же чат после отказа. В исходных данных:</p>
-<ul><li>Приглашение <code>1</code>: Лис приглашает Сову в «Общий» <code>2026-11-20 12:00</code>, статус «отклонено».</li><li>Приглашение <code>2</code>: Лис снова приглашает Сову в «Общий» <code>2026-11-21 12:00</code>, статус «принято».</li></ul>
-<p>Это два разных события с собственными номерами, временем и результатом. Уникальность сочетания <code>sender_id, recipient_id, chat_id</code> запретила бы законное повторное приглашение. У Совы при этом одна строка участия в «Общем».</p>
-<p><strong>Фраза для класса:</strong> «Одно участие отвечает на вопрос “состоит ли человек в чате?”, несколько приглашений — “какие попытки пригласить его происходили?”».</p>
-<h4 id="l16-homework-q5">5. Как показать пустой чат и пользователя без участия?</h4>
-<p><strong>Пользователь и чат существуют в своих таблицах независимо от наличия строк участия.</strong> Для них допускается ноль связанных строк в <code>chat_members</code>.</p>
-<ul><li>Пустой чат: строка в <code>chats</code> есть, а строк с его <code>chat_id</code> в <code>chat_members</code> нет. В примере это «Новый чат», <code>id = 12</code>.</li><li>Пользователь без участия: строка в <code>users</code> есть, а строк с его <code>user_id</code> в <code>chat_members</code> нет. В примере это Кот (<code>3</code>) и Волк (<code>4</code>). У Кота есть приглашение, у Волка исходно нет и приглашений.</li></ul>
-<p>На диаграмме у пользователя и у чата может быть от нуля до многих участий. При этом каждая существующая строка участия обязательно ссылается ровно на одного пользователя и ровно на один чат. Фиктивную строку участия с <code>null</code> создавать не нужно; обязательные внешние ключи такой записи не допускают.</p>
-<p>Для запросов это повод использовать <code>left join</code>: сохраняем пользователей или чаты, даже если участия не найдены. Пустой чат получает <code>count(m.id) = 0</code>, пользователь без участия находится по <code>m.id is null</code> в результате соединения. Этот <code>null</code> появляется в результате <code>left join</code>, а не хранится как отдельное участие.</p>
-<p><strong>Фраза для класса:</strong> «Чат уже создан, но в него ещё никто не вступил. Поэтому чат есть, а записей об участниках пока нет».</p>
-<h4 id="l16-homework-q6">Дополнительный вопрос: что проверяют внешние ключи приглашения?</h4>
-<p>Они проверяют существование отправителя, получателя и чата. Они не проверяют, что отправитель состоит именно в этом чате, и не добавляют получателя в участники при принятии приглашения. В текущем примере проверка членства отправителя относится к логике приложения.</p>
-<h3 id="l16-answers-content-2">Практика 1 — запросы</h3>
-<h4 id="l16-answers-content-3">П1. Участники</h4>
-<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>select c.name as chat, u.nickname, m.role
-from public.chat_members m
-join public.chats c on c.id = m.chat_id
-join public.users u on u.id = m.user_id
-order by c.id, u.id;
-</code></pre></div>
-<div class="wrap"><table><tr><th>Чат</th><th>Ник</th><th>Роль</th></tr>
-<tr><td>Общий</td><td>Лис</td><td>администратор</td></tr>
-<tr><td>Общий</td><td>Сова</td><td>участник</td></tr>
-<tr><td>Игры</td><td>Лис</td><td>участник</td></tr>
-<tr><td>Игры</td><td>Сова</td><td>администратор</td></tr></table></div>
-<h4 id="l16-answers-content-4">П2. Численность</h4>
-<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>select c.name, count(m.id) as members
-from public.chats c
-left join public.chat_members m on m.chat_id = c.id
-group by c.id, c.name
-order by c.id;
-</code></pre></div>
-<p>Результат: «Общий» — 2, «Игры» — 2, «Новый чат» — 0. <code>count(*)</code> посчитал бы строку результата <code>left join</code> для пустого чата и дал 1. Группируем также по <code>c.id</code>, чтобы чаты с одинаковыми названиями не слились.</p>
-<h4 id="l16-answers-content-5">П3. Без участия</h4>
-<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>select u.nickname
-from public.users u
-left join public.chat_members m on m.user_id = u.id
-where m.id is null
-order by u.id;
-</code></pre></div>
-<p>Результат: Кот, Волк. Кот приглашён, но ещё не вступил; у Волка исходно нет ни участия, ни приглашения.</p>
-<h4 id="l16-answers-content-6">П4. Ожидающие приглашения</h4>
-<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>select s.nickname as sender, r.nickname as recipient, c.name as chat
-from public.invitations i
-join public.users s on s.id = i.sender_id
-join public.users r on r.id = i.recipient_id
-join public.chats c on c.id = i.chat_id
-where i.status = &#x27;ожидает&#x27;
-order by i.id;
-</code></pre></div>
-<p>Одна строка: Лис → Кот, «Общий». В исходном скрипте приглашения 2 и 3 уже приняты.</p>
-<h3 id="l16-answers-content-7">Практика 2 — ошибки</h3>
-<p>Во всех опытах новый первичный ключ. Иначе ошибка дубликата <code>id</code> могла бы скрыть исследуемое нарушение.</p>
-<h4 id="l16-answers-content-8">О1. Повтор пары</h4>
-<div class="quiz-sql"><p class="note">Ожидаемая ошибка 23505. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23505 (unique_violation).
-insert into public.chat_members (id, user_id, chat_id, joined_at, role)
-values (9001, 1, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;участник&#x27;);
-</code></pre></div>
-<p>Новый номер участия не отменяет уникальность пары <code>(1, 10)</code>.</p>
-<h4 id="l16-answers-content-9">О2. Приглашение себе</h4>
-<div class="quiz-sql"><p class="note">Ожидаемая ошибка 23514. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23514 (check_violation).
-insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
-values (9002, 1, 1, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;ожидает&#x27;);
-</code></pre></div>
-<h4 id="l16-answers-content-10">О3. Несуществующий получатель</h4>
-<div class="quiz-sql"><p class="note">Ожидаемая ошибка 23503. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23503 (foreign_key_violation).
-insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
-values (9003, 1, 999, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;ожидает&#x27;);
-</code></pre></div>
-<h4 id="l16-answers-content-11">О4. Неизвестный статус</h4>
-<div class="quiz-sql"><p class="note">Ожидаемая ошибка 23514. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23514 (check_violation).
-insert into public.invitations (id, sender_id, recipient_id, chat_id, sent_at, status)
-values (9004, 1, 4, 10, &#x27;2026-11-24 12:00&#x27;, &#x27;передумал&#x27;);
-</code></pre></div>
-<h4 id="l16-answers-content-12">О5. NULL вместо ника</h4>
-<div class="quiz-sql"><p class="note">Ожидаемая ошибка 23502. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23502 (not_null_violation).
-insert into public.users (id, nickname) values (9005, null);
-</code></pre></div>
-<h4 id="l16-answers-content-13">О6. Пустая строка — до нового CHECK</h4>
-<div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>insert into public.users (id, nickname) values (9006, &#x27;&#x27;);
-select id, nickname, nickname is null as is_null
-from public.users where id = 9006;
-delete from public.users where id = 9006;
-</code></pre></div>
-<p>Успех; <code>is_null = false</code>. Ник пустой, но значение есть. Пробная строка удалена до добавления ограничения в И2.</p>
-<h3 id="l16-answers-content-14">Практика 3 — изменения</h3>
-<h4 id="l16-answers-content-15">И1. Ограничение ролей</h4>
+<details class="lesson-answer" id="l16-answers-content-15"><summary>Ответ и SQL</summary>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>alter table public.chat_members
 add constraint chat_members_role_check
 check (role in (&#x27;администратор&#x27;, &#x27;участник&#x27;));
@@ -1588,7 +1620,17 @@ update public.chat_members set role = &#x27;участник&#x27; where id = 4;
 update public.chat_members set role = &#x27;главный&#x27; where id = 4;
 </code></pre></div>
 <p>Ошибка оставляет роль «участник» прежней. Ограничения проверяются и при <code>insert</code>, и при <code>update</code>.</p>
-<h4 id="l16-answers-content-16">И2. Непустой ник</h4>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-i2">
+<h4 id="l16-practice-content-12">И2. Непустой ник</h4>
+<p>Ник <code>&#x27;&#x27;</code> запрещён. Назовите новое ограничение <code>users_nickname_not_empty</code>. Существующий запрет <code>null</code> сохраните.</p>
+<ul><li>Снова попробуйте вставить пользователя с <code>id = 9006</code> и ником <code>&#x27;&#x27;</code>.</li>
+<li>Проверьте <code>null</code>.</li>
+<li>Добавьте пользователя с этим номером и ником «Рысь», затем удалите его.</li></ul>
+<p>Строки из одних пробелов — отдельное возможное требование; сегодня проверяем именно пустую строку <code>&#x27;&#x27;</code>.</p>
+<details class="lesson-answer" id="l16-answers-content-16"><summary>Ответ и SQL</summary>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>alter table public.users
 add constraint users_nickname_not_empty check (nickname &lt;&gt; &#x27;&#x27;);
 </code></pre></div>
@@ -1603,7 +1645,17 @@ select id, nickname from public.users where id = 9006;
 delete from public.users where id = 9006;
 </code></pre></div>
 <p><code>check (nickname &lt;&gt; &#x27;&#x27;)</code> дополняет <code>not null</code>: сам по себе такой <code>check</code> не отвергает <code>null</code>, поскольку результат выражения неизвестен. Строка из пробелов проходит; запрет одних пробелов — отдельное требование, например с <code>btrim</code>.</p>
-<h4 id="l16-answers-content-17">И3. Статус по умолчанию</h4>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-i3">
+<h4 id="l16-practice-content-13">И3. Статус по умолчанию</h4>
+<p>Если при создании приглашения столбец <code>status</code> не указан, нужно записывать «ожидает».</p>
+<ul><li>Создайте приглашение <code>id = 9007</code>: Лис (<code>1</code>) приглашает Волка (<code>4</code>) в «Общий» (<code>10</code>), время <code>&#x27;2026-11-24 12:00&#x27;</code>. Не включайте <code>status</code> в список столбцов. Посмотрите результат, затем удалите пробную строку.</li>
+<li>Повторите опыт, явно передав <code>null</code> в <code>status</code>. Сработал ли <code>default</code>?</li>
+<li>Проверьте явный статус «отклонено» на приглашении <code>id = 9008</code> с теми же участниками. Посмотрите результат и удалите строку.</li>
+<li>Изменились ли статусы четырёх исходных приглашений?</li></ul>
+<details class="lesson-answer" id="l16-answers-content-17"><summary>Ответ и SQL</summary>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>alter table public.invitations
 alter column status set default &#x27;ожидает&#x27;;
 </code></pre></div>
@@ -1625,7 +1677,16 @@ delete from public.invitations where id = 9008;
 select id, status from public.invitations order by id;
 </code></pre></div>
 <p>Явный статус сохраняется. Четыре исходных статуса не меняются: 1 — «отклонено», 2 — «принято», 3 — «принято», 4 — «ожидает».</p>
-<h4 id="l16-answers-content-18">И4. Описание чата</h4>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-i4">
+<h4 id="l16-practice-content-14">И4. Описание чата</h4>
+<p>Добавьте в <code>chats</code> необязательный столбец <code>description</code> типа <code>text</code>.</p>
+<ul><li>Посмотрите, какие значения получили три существующих чата.</li>
+<li>Для «Общего» (<code>id = 10</code>) запишите «Общение участников».</li>
+<li>Проверьте, что у остальных чатов описание осталось <code>null</code>.</li></ul>
+<details class="lesson-answer" id="l16-answers-content-18"><summary>Ответ и SQL</summary>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>alter table public.chats add column description text;
 select id, name, description from public.chats order by id;
 </code></pre></div>
@@ -1634,7 +1695,20 @@ select id, name, description from public.chats order by id;
 select id, name, description from public.chats order by id;
 </code></pre></div>
 <p>Описание заполнено только у «Общего». В других строках <code>null</code> допустим.</p>
-<h3 id="l16-answers-content-19">Бонус Б1 — проверка уже существующих строк</h3>
+</details>
+</article>
+
+<h4 id="l16-practice-content-15">Проверка в паре</h4>
+<p>Обменяйтесь командами проверки. Выполните их на своей базе после своих изменений; повторять чужие <code>alter table</code> не нужно. Объясните соседу причину каждой ошибки и результат каждой успешной команды.</p>
+<p>В конце должно остаться 4 пользователя, 3 чата, 4 участия, 4 приглашения. Роль участия <code>id = 4</code> — «участник». Статусы исходных приглашений сохранены; описание заполнено только у «Общего».</p>
+<article class="lesson-exercise" id="l16-task-b1">
+<h3 id="l16-practice-content-16">Бонус Б1 — старые данные нарушают новое правило</h3>
+<p>Для <code>chats.name</code> решили запретить <code>&#x27;&#x27;</code>.</p>
+<ol><li>До добавления правила создайте пробный чат <code>id = 9009</code> с пустым названием.</li>
+<li>Попробуйте добавить ограничение <code>chats_name_not_empty</code>. Что произойдёт?</li>
+<li>Исправьте название пробного чата на «Проверка», затем снова добавьте ограничение.</li>
+<li>Удалите пробный чат. Объясните, почему одинаковая команда добавления ограничения дала разные результаты.</li></ol>
+<details class="lesson-answer" id="l16-answers-content-19"><summary>Ответ и SQL</summary>
 <p>Выполняется после основной практики. Ограничения на пустое название чата в стартовой базе нет.</p>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>insert into public.chats (id, name) values (9009, &#x27;&#x27;);
 </code></pre></div>
@@ -1649,19 +1723,39 @@ add constraint chats_name_not_empty check (name &lt;&gt; &#x27;&#x27;);
 delete from public.chats where id = 9009;
 </code></pre></div>
 <p>Теперь добавление успешно; правило остаётся, пробный чат удалён.</p>
-<h3 id="l16-answers-content-20">Домашка к занятию 17</h3>
-<h4 id="l16-answers-content-21">Д1. Добавить допустимую роль</h4>
+</details>
+</article>
+
+<span class="lesson-anchor" id="l16-answers-content-20"></span>
+<h3 id="l16-practice-content-17">Домашка к занятию 17 — модераторы</h3>
+<p>Продолжайте базу после И1–И4. Если что-то не закончено, сначала доделайте практику.</p>
+<article class="lesson-exercise" id="l16-task-d1">
+<h4>Д1. Новое правило</h4>
+<p>Теперь разрешены три роли: «администратор», «участник» и «модератор». Измените ограничение <code>chat_members_role_check</code>, сохранив все участия. Таблицу пересоздавать нельзя. Подсказка: ограничение можно удалить по имени через <code>drop constraint</code> и добавить новое с тем же именем.</p>
+<details class="lesson-answer" id="l16-answers-content-21"><summary>Ответ и SQL</summary>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>alter table public.chat_members
 drop constraint chat_members_role_check,
 add constraint chat_members_role_check
 check (role in (&#x27;администратор&#x27;, &#x27;участник&#x27;, &#x27;модератор&#x27;));
 </code></pre></div>
 <p>Одна команда <code>alter table</code> может содержать несколько действий через запятую. Замена ограничения не меняет существующие роли. Два отдельных <code>alter table</code> — сначала удалить старое правило, затем добавить новое — также допустимы для этой учебной работы; после обоих действий проверяем, что новое ограничение действует.</p>
-<h4 id="l16-answers-content-22">Д2. Назначить модератора</h4>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-d2">
+<h4>Д2. Назначение</h4>
+<p>Сделайте Сову модератором «Общего»: это участие <code>id = 3</code>, пользователь <code>2</code>, чат <code>10</code>. Её роль в «Играх» должна сохраниться.</p>
+<details class="lesson-answer" id="l16-answers-content-22"><summary>Ответ и SQL</summary>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>update public.chat_members set role = &#x27;модератор&#x27; where id = 3;
 </code></pre></div>
 <p>Меняется только участие Совы в «Общем»; в «Играх» она остаётся администратором.</p>
-<h4 id="l16-answers-content-23">Д3. Администраторы и модераторы</h4>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-d3">
+<h4>Д3. Список</h4>
+<p>Выведите название чата, ник и роль для всех администраторов и модераторов. Упорядочьте по <code>id</code> чата и <code>id</code> пользователя.</p>
+<details class="lesson-answer" id="l16-answers-content-23"><summary>Ответ и SQL</summary>
 <div class="quiz-sql"><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>select c.name as chat, u.nickname, m.role
 from public.chat_members m
 join public.chats c on c.id = m.chat_id
@@ -1673,24 +1767,29 @@ order by c.id, u.id;
 <tr><td>Общий</td><td>Лис</td><td>администратор</td></tr>
 <tr><td>Общий</td><td>Сова</td><td>модератор</td></tr>
 <tr><td>Игры</td><td>Сова</td><td>администратор</td></tr></table></div>
-<h4 id="l16-answers-content-24">Д4. Проверка</h4>
+</details>
+</article>
+
+<article class="lesson-exercise" id="l16-task-d4">
+<h4>Д4. Проверка</h4>
+<p>Покажите, что роль «главный» всё ещё запрещена. Объясните, почему поле <code>role</code> находится в <code>chat_members</code>, а не в <code>users</code>.</p>
+<details class="lesson-answer" id="l16-answers-content-24"><summary>Ответ и SQL</summary>
 <div class="quiz-sql"><p class="note">Ожидаемая ошибка 23514. Выполняйте эту команду отдельно.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button></p><pre class="mermaid-source"><code>-- Ожидаемая ошибка: 23514 (check_violation).
 update public.chat_members set role = &#x27;главный&#x27; where id = 3;
 </code></pre></div>
 <p>Сова остаётся модератором «Общего». Поле <code>role</code> находится в участии, поскольку один человек может иметь разные роли в разных чатах.</p>
-<h3 id="l16-answers-content-25">Итоговые вопросы</h3>
-<ol><li><code>id</code> и пара пользователь–чат проверяются разными ограничениями. Уникальность нового номера не означает уникальность пары.</li>
-<li><code>null</code> — отсутствие значения; <code>&#x27;&#x27;</code> — строковое значение длины 0.</li>
-<li>Пропущенный столбец получает <code>default</code>. Явный <code>null</code> остаётся <code>null</code> и здесь отвергается <code>not null</code>.</li>
-<li>Правила и столбцы добавляются через <code>alter table</code>; уже имеющиеся строки должны удовлетворять добавляемому ограничению.</li></ol>
 </details>
+</article>
+
+<p>Сдать <code>chat_rules.sql</code> с изменениями, проверками и комментариями об ожидаемых результатах; результат Д3 и одну ошибку для запрещённой роли. Команды с ожидаемыми ошибками пометьте и запускайте отдельно. Не включайте стартовый скрипт с удалением таблиц.</p>
+</section>
 </section>
 
 </div>
 </main>
-<script src="quiz.js?v=20261124163324"></script>
-<script src="engine.js?v=20261124163324"></script>
-<script src="teacher.js?v=20261124163324"></script>
+<script src="quiz.js?v=20261124165346"></script>
+<script src="engine.js?v=20261124165346"></script>
+<script src="teacher.js?v=20261124165346"></script>
 <script type="module" src="answer-diagrams.js"></script>
 <script src="answer-sql.js"></script>
 </body>
