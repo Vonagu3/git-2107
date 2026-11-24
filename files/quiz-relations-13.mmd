@@ -1,0 +1,39 @@
+erDiagram
+    users {
+        integer id PK
+        text nickname
+    }
+    skin_types {
+        integer id PK
+        text name
+        text rarity
+    }
+    skin_copies {
+        integer id PK
+        integer set_skin_id FK
+        integer owner_id FK
+        timestamp created_at
+    }
+    skin_sets {
+        integer id PK
+        text name
+    }
+    set_skins {
+        integer id PK
+        integer set_id FK
+        integer skin_type_id FK
+    }
+    skin_transfers {
+        integer id PK
+        integer copy_id FK
+        integer sender_id FK
+        integer recipient_id FK
+        timestamp transferred_at
+    }
+    users ||--o{ skin_copies : "владеет"
+    set_skins ||--o{ skin_copies : "имеет экземпляры"
+    skin_sets ||--o{ set_skins : "содержит"
+    skin_types ||--o{ set_skins : "входит в набор"
+    skin_copies ||--o{ skin_transfers : "история"
+    users ||--o{ skin_transfers : "отправляет"
+    users ||--o{ skin_transfers : "получает"
