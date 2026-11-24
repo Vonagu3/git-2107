@@ -7,7 +7,7 @@
 <title>Руководителю · git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="quiz.css?v=20261121113556">
+<link rel="stylesheet" href="quiz.css?v=20261124155708">
 <style>
 :root {
   --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f23; --muted: #62666e; --line: #dedbd2;
@@ -1198,73 +1198,73 @@ GROUP BY x.id, t.name, s.name ORDER BY x.id;
     users ||--o{ invitations : &quot;получает приглашение&quot;
     chats ||--o{ invitations : &quot;приглашение в чат&quot;
 </pre></details></figure>
-<details class="card quiz-sql"><summary>SQL · задание 14: таблицы и тестовые данные</summary><p>PostgreSQL. Запустите весь скрипт в одном соединении. Таблицы временные; повторный запуск сбросит их учебные данные. В конце — запросы для проверки результата.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-14.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Запускайте весь скрипт в одном соединении.
--- Временные таблицы доступны до закрытия соединения.
--- Повторный запуск сбрасывает временные учебные данные.
-DROP TABLE IF EXISTS pg_temp.users_one_chat, pg_temp.invitations, pg_temp.chat_members, pg_temp.chats, pg_temp.users CASCADE;
+<details class="card quiz-sql"><summary>SQL · задание 14: постоянные таблицы и тестовые данные</summary><p>PostgreSQL. Таблицы создаются в схеме <code>public</code> и сохраняются после закрытия соединения. Все обращения содержат <code>public.</code>, поэтому одноимённые временные таблицы не мешают.</p><p><strong>Повторный запуск удалит эти четыре таблицы и все их данные.</strong> Запускайте в учебной базе. Если другие таблицы зависят от них, PostgreSQL остановит удаление.</p><p><button type="button" class="btn" data-copy-sql>Скопировать SQL</button> <a href="files/quiz-relations-14.sql" download>Скачать .sql</a></p><pre class="mermaid-source"><code>-- PostgreSQL. Постоянные таблицы сохраняются после закрытия соединения.
+-- ВНИМАНИЕ: повторный запуск удаляет эти четыре таблицы и их данные.
+-- public. отличает их от одноимённых временных таблиц.
+DROP TABLE IF EXISTS public.invitations, public.chat_members, public.chats, public.users;
 
-CREATE TEMP TABLE users (id integer PRIMARY KEY, nickname text NOT NULL);
-CREATE TEMP TABLE chats (id integer PRIMARY KEY, name text NOT NULL);
-CREATE TEMP TABLE chat_members (
-    id integer PRIMARY KEY, user_id integer NOT NULL REFERENCES users(id),
-    chat_id integer NOT NULL REFERENCES chats(id), joined_at timestamp NOT NULL,
+CREATE TABLE public.users (id integer PRIMARY KEY, nickname text NOT NULL);
+CREATE TABLE public.chats (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TABLE public.chat_members (
+    id integer PRIMARY KEY, user_id integer NOT NULL REFERENCES public.users(id),
+    chat_id integer NOT NULL REFERENCES public.chats(id), joined_at timestamp NOT NULL,
     role text NOT NULL, UNIQUE (user_id, chat_id)
 );
-CREATE TEMP TABLE invitations (
-    id integer PRIMARY KEY, sender_id integer NOT NULL REFERENCES users(id),
-    recipient_id integer NOT NULL REFERENCES users(id),
-    chat_id integer NOT NULL REFERENCES chats(id), sent_at timestamp NOT NULL,
+CREATE TABLE public.invitations (
+    id integer PRIMARY KEY, sender_id integer NOT NULL REFERENCES public.users(id),
+    recipient_id integer NOT NULL REFERENCES public.users(id),
+    chat_id integer NOT NULL REFERENCES public.chats(id), sent_at timestamp NOT NULL,
     status text NOT NULL CHECK (status IN (&#x27;ожидает&#x27;, &#x27;принято&#x27;, &#x27;отклонено&#x27;)),
     CHECK (sender_id &lt;&gt; recipient_id)
 );
-INSERT INTO users VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;), (3, &#x27;Кот&#x27;), (4, &#x27;Волк&#x27;);
-INSERT INTO chats VALUES (10, &#x27;Общий&#x27;), (11, &#x27;Игры&#x27;), (12, &#x27;Новый чат&#x27;);
-INSERT INTO chat_members VALUES
+INSERT INTO public.users VALUES (1, &#x27;Лис&#x27;), (2, &#x27;Сова&#x27;), (3, &#x27;Кот&#x27;), (4, &#x27;Волк&#x27;);
+INSERT INTO public.chats VALUES (10, &#x27;Общий&#x27;), (11, &#x27;Игры&#x27;), (12, &#x27;Новый чат&#x27;);
+INSERT INTO public.chat_members VALUES
     (1, 1, 10, &#x27;2026-11-01 12:00&#x27;, &#x27;администратор&#x27;),
     (2, 2, 11, &#x27;2026-11-01 13:00&#x27;, &#x27;администратор&#x27;);
 -- Отказ, повторное приглашение и встречное приглашение в другой чат.
 -- Все отправители уже состоят в соответствующих чатах.
-INSERT INTO invitations VALUES
+INSERT INTO public.invitations VALUES
     (1, 1, 2, 10, &#x27;2026-11-20 12:00&#x27;, &#x27;отклонено&#x27;),
     (2, 1, 2, 10, &#x27;2026-11-21 12:00&#x27;, &#x27;ожидает&#x27;),
     (3, 2, 1, 11, &#x27;2026-11-21 13:00&#x27;, &#x27;ожидает&#x27;),
     (4, 1, 3, 10, &#x27;2026-11-21 14:00&#x27;, &#x27;ожидает&#x27;);
 BEGIN;
-UPDATE invitations SET status = &#x27;принято&#x27; WHERE id = 2;
-INSERT INTO chat_members VALUES (3, 2, 10, &#x27;2026-11-21 12:05&#x27;, &#x27;участник&#x27;);
+UPDATE public.invitations SET status = &#x27;принято&#x27; WHERE id = 2;
+INSERT INTO public.chat_members VALUES (3, 2, 10, &#x27;2026-11-21 12:05&#x27;, &#x27;участник&#x27;);
 COMMIT;
 BEGIN;
-UPDATE invitations SET status = &#x27;принято&#x27; WHERE id = 3;
-INSERT INTO chat_members VALUES (4, 1, 11, &#x27;2026-11-21 13:10&#x27;, &#x27;участник&#x27;);
+UPDATE public.invitations SET status = &#x27;принято&#x27; WHERE id = 3;
+INSERT INTO public.chat_members VALUES (4, 1, 11, &#x27;2026-11-21 13:10&#x27;, &#x27;участник&#x27;);
 COMMIT;
 -- Четыре участия: у Лиса и Совы по два чата и разные роли.
 SELECT u.nickname, c.name, m.role, m.joined_at
-FROM chat_members m JOIN users u ON u.id = m.user_id
-JOIN chats c ON c.id = m.chat_id ORDER BY u.id, c.id;
+FROM public.chat_members m JOIN public.users u ON u.id = m.user_id
+JOIN public.chats c ON c.id = m.chat_id ORDER BY u.id, c.id;
 -- Четыре события, включая отказ и повтор той же пары в тот же чат.
 SELECT s.nickname AS sender, r.nickname AS recipient, c.name,
        i.sent_at, i.status
-FROM invitations i JOIN users s ON s.id = i.sender_id
-JOIN users r ON r.id = i.recipient_id JOIN chats c ON c.id = i.chat_id
+FROM public.invitations i JOIN public.users s ON s.id = i.sender_id
+JOIN public.users r ON r.id = i.recipient_id JOIN public.chats c ON c.id = i.chat_id
 ORDER BY i.id;
 -- Кот получил приглашение, но ещё не вступил. Волк без приглашений и участия.
-SELECT u.nickname FROM users u LEFT JOIN chat_members m ON m.user_id = u.id
+SELECT u.nickname FROM public.users u LEFT JOIN public.chat_members m ON m.user_id = u.id
 WHERE m.id IS NULL ORDER BY u.id;
 -- Новый чат пуст: количество участников 2, 2, 0.
-SELECT c.name, count(m.id) AS members FROM chats c
-LEFT JOIN chat_members m ON m.chat_id = c.id
+SELECT c.name, count(m.id) AS members FROM public.chats c
+LEFT JOIN public.chat_members m ON m.chat_id = c.id
 GROUP BY c.id, c.name ORDER BY c.id;
 -- Проверка правила отправителя: результат должен быть пустым.
-SELECT i.id FROM invitations i LEFT JOIN chat_members m
+SELECT i.id FROM public.invitations i LEFT JOIN public.chat_members m
 ON m.user_id = i.sender_id AND m.chat_id = i.chat_id WHERE m.id IS NULL;
 </code></pre></details>
 </details></section>
 
 </div>
 </main>
-<script src="quiz.js?v=20261121113556"></script>
-<script src="engine.js?v=20261121113556"></script>
-<script src="teacher.js?v=20261121113556"></script>
+<script src="quiz.js?v=20261124155708"></script>
+<script src="engine.js?v=20261124155708"></script>
+<script src="teacher.js?v=20261124155708"></script>
 <script type="module" src="answer-diagrams.js"></script>
 <script src="answer-sql.js"></script>
 </body>
