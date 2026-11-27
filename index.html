@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Git-тренажёр</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="quiz.css?v=20261124205506">
+<link rel="stylesheet" href="quiz.css?v=20261127223427">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -224,6 +224,18 @@ pre.cmd .sn { color: #c9a7ff; } pre.cmd .sc { color: var(--term-muted); } pre.cm
 .mermaid-answer[open] > summary { margin-bottom: 12px; }
 .mermaid-answer pre { white-space: pre; }
 #sql5-skins-answer { scroll-margin-top: 180px; }
+
+#tab-api { max-width: 1040px; margin: 0 auto; font-size: 1rem; }
+#tab-api [id] { scroll-margin-top: var(--lesson-scroll-offset, 200px); }
+#tab-api .lesson-links { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 14px 0; }
+#tab-api .level2 { margin-top: 28px; }
+#tab-api .student-task { margin: 14px 0; }
+#tab-api .student-task > h3 { margin-top: 0; }
+#tab-api .student-task > :last-child { margin-bottom: 0; }
+#tab-api code { overflow-wrap: anywhere; }
+#tab-api pre code { background: none; padding: 0; border-radius: 0; }
+#tab-api th { font-size: .875rem; }
+#api-homework table { min-width: 700px; }
 </style>
 </head>
 <body>
@@ -240,6 +252,7 @@ pre.cmd .sn { color: #c9a7ff; } pre.cmd .sc { color: var(--term-muted); } pre.cm
       <button data-tab="sql4">Типы связей</button>
       <button data-tab="sql5">Квиз: связи</button>
       <button data-tab="sql6">Правила базы</button>
+      <button data-tab="api">API</button>
       <button data-tab="model">Как устроен Git</button>
       <button data-tab="train" class="on">Тренажёр</button>
       <button data-tab="github">Подключение к GitHub</button>
@@ -3105,11 +3118,260 @@ add column имя_столбца тип;</code></pre>
 </section>
 
 </section>
+<!-- ================= ЗАНЯТИЕ 17: API ================= -->
+<section class="tab doc" id="tab-api">
+<h1>Занятие 17 — обращаемся к базе через API</h1>
+<nav class="lesson-links" aria-label="Разделы занятия 17">
+<a href="#api-setup">Настройка Postman</a><a href="#api-cheat">Шпаргалка</a><a href="#api-first">Первый запрос</a><a href="#api-reading">Чтение</a><a href="#api-changes">Изменения</a><a href="#api-errors">Ошибки</a><a href="#api-final">Итог</a><a href="#api-homework">Домашка</a>
+</nav>
+<p><a class="btn" href="files/lesson17/Урок_17.postman_environment.json" download>Скачать окружение Postman</a> <a class="btn" href="files/lesson17/Практика.md" download>Скачать практику</a></p>
+<p class="lead">Сегодня Postman будет нашим приложением: отправит запросы в Supabase и покажет ответы. Работаем со знакомыми пользователями и чатами в отдельной учебной базе. SQL для выполнения заданий не нужен.</p>
+<p><code>users</code> здесь — наша учебная таблица. Создание строки с ником не регистрирует аккаунт Supabase и не позволяет войти в приложение: вход пользователей будем разбирать отдельно.</p>
+<p>Перед отправкой каждого запроса запишите прогноз. После отправки сохраните метод, путь с параметрами, тело запроса, статус и результат. Ключ в отчёт не включайте.</p>
+<section id="api-setup" class="level2">
+<h2>Настройка Postman</h2>
+<ol type="1">
+<li>Откройте Postman Desktop. Импортируйте выданный <a href="files/lesson17/Урок_17.postman_environment.json" download>шаблон окружения</a> через Import.</li>
+<li>В Environments откройте «Урок 17 — мой учебный проект». Заполните <code>base_url</code> адресом проекта вида <code>https://ВАШ-ПРОЕКТ.supabase.co</code> без <code>/</code> в конце, а <code>publishable_key</code> — выданным преподавателем ключом. Выберите это окружение активным.</li>
+<li>Создайте коллекцию «Мои запросы — урок 17», а в ней HTTP-запрос. Для Authorization выберите No Auth: на уроке ключ передаётся отдельным заголовком.</li>
+<li>Выберите метод <code>GET</code>, введите <code>{{base_url}}/rest/v1/users</code>.</li>
+<li>На вкладке Headers добавьте строку: Key — <code>apikey</code>, Value — <code>{{publishable_key}}</code>. Не вставляйте ключ в URL или тело.</li>
+<li>Нажмите Send. Найдите статус ответа и тело. Если переменные не подставились, проверьте выбранное окружение и сохранённые значения.</li>
+</ol>
+<p>Сохраняйте запросы в коллекцию. При создании следующего запроса можно дублировать предыдущий, но проверяйте метод, адрес, Headers и Body. Для <code>GET</code> и <code>DELETE</code> выбирайте Body → none.</p>
+</section>
+<section id="api-cheat" class="level2">
+<h2>Шпаргалка</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Часть запроса</th>
+<th>Пример</th>
+<th>Назначение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Метод</td>
+<td><code>GET</code></td>
+<td>Что хотим сделать</td>
+</tr>
+<tr>
+<td>Адрес сервера</td>
+<td><code>{{base_url}}</code></td>
+<td>К какому проекту обращаемся</td>
+</tr>
+<tr>
+<td>Путь</td>
+<td><code>/rest/v1/users</code></td>
+<td>С каким ресурсом работаем</td>
+</tr>
+<tr>
+<td>Параметры</td>
+<td><code>select=id,nickname&amp;id=eq.1</code></td>
+<td>Какие поля и строки нужны</td>
+</tr>
+<tr>
+<td>Заголовок</td>
+<td><code>apikey: {{publishable_key}}</code></td>
+<td>Ключ приложения</td>
+</tr>
+<tr>
+<td>Тело</td>
+<td><code>{"id":100,"nickname":"Рысь"}</code></td>
+<td>Данные для создания записи</td>
+</tr>
+</tbody>
+</table></div>
+<p>Параметры можно вводить во вкладке Params отдельными строками. Postman сам добавит <code>?</code> и <code>&amp;</code> в URL. Не дублируйте один параметр одновременно вручную и через Params.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Задача в нашем API</th>
+<th>Метод</th>
+<th>Аналог в SQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Получить данные</td>
+<td><code>GET</code></td>
+<td><code>SELECT</code></td>
+</tr>
+<tr>
+<td>Создать строку</td>
+<td><code>POST</code></td>
+<td><code>INSERT</code></td>
+</tr>
+<tr>
+<td>Изменить поля</td>
+<td><code>PATCH</code></td>
+<td><code>UPDATE</code></td>
+</tr>
+<tr>
+<td>Удалить строку</td>
+<td><code>DELETE</code></td>
+<td><code>DELETE</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>select=id,nickname</code> выбирает столбцы. <code>id=eq.1</code> означает «id равен 1». <code>order=id.asc</code> сортирует по возрастанию <code>id</code>. Это правила API Supabase/PostgREST; у других API параметры могут называться иначе.</p>
+<p>JSON передаёт данные. Объект записывается в <code>{}</code>, массив — в <code>[]</code>. Имена полей и строки заключаются в двойные кавычки, числа — без кавычек. <code>null</code> означает отсутствие значения. После последнего поля запятую не ставят.</p>
+</section>
+<section id="api-first" class="level2">
+<h2>Первый запрос вместе</h2>
+<ol type="1">
+<li>Получите всех пользователей: <code>GET {{base_url}}/rest/v1/users</code>.</li>
+<li>Во вкладке Params добавьте <code>select</code> со значением <code>id,nickname</code> и <code>order</code> со значением <code>id.asc</code>.</li>
+<li>Добавьте параметр <code>id</code> со значением <code>eq.1</code>.</li>
+<li>Найдите в ответе массив, объект, число и строку. Сколько строк осталось? Где в запросе это задано?</li>
+</ol>
+<p>У ответа есть статус, заголовки и тело. Например, <code>200 OK</code> сообщает об успехе, а JSON в теле содержит результат. Статус — не поле внутри JSON.</p>
+</section>
+<section id="api-reading" class="level2">
+<h2>Практика 1 — получаем данные</h2>
+<p>В каждом запросе сохраняйте заголовок <code>apikey</code>. В П1–П3 добавьте сортировку по <code>id</code>, чтобы удобнее сверять ответы.</p>
+<article class="card student-task" id="api-p1"><h3>П1. Все чаты</h3><p>Получите <code>id</code> и <code>name</code> всех чатов. Сколько строк ожидаете?</p></article>
+<article class="card student-task" id="api-p2"><h3>П2. Один чат</h3><p>Получите те же поля только для чата <code>10</code>. Как изменились параметры?</p></article>
+<article class="card student-task" id="api-p3"><h3>П3. Участники чата</h3><p>Обратитесь к <code>chat_members</code>. Получите <code>user_id,role</code> только для чата <code>10</code>. Не перепутайте номер участия <code>id</code> и номер чата <code>chat_id</code>. Почему в ответе нет ников?</p></article>
+</section>
+<section id="api-changes" class="level2">
+<h2>Практика 2 — создаём, изменяем и удаляем</h2>
+<p>Используем нового пользователя с <code>id=100</code>. В этой базе <code>id</code> нужно задавать явно. После каждого изменения проверяйте состояние отдельным <code>GET</code>.</p>
+<p>Для запросов с телом откройте Body → raw → JSON. Проверьте заголовок <code>Content-Type: application/json</code>. На <code>POST</code>, <code>PATCH</code> и <code>DELETE</code> добавьте <code>Prefer: return=representation</code>, чтобы сервер вернул затронутые строки. Заголовок <code>apikey</code> нужен во всех запросах.</p>
+<section id="api-i1" class="level3 card student-task">
+<h3>И1. Создать пользователя вместе</h3>
+<p>Метод: <code>POST</code>. URL: <code>{{base_url}}/rest/v1/users</code>. Уберите параметры от предыдущих запросов.</p>
+<pre class="cmd"><code>{&quot;id&quot;: 100, &quot;nickname&quot;: &quot;Рысь&quot;}</code></pre>
+<p>Отправьте один раз. Сохраните статус и тело ответа. Что произойдёт, если повторить тот же запрос?</p>
+</section>
+<section id="api-i2" class="level3 card student-task">
+<h3>И2. Проверить создание</h3>
+<p>Составьте <code>GET</code>, который вернёт <code>id,nickname</code> только пользователя <code>100</code>. Тело запроса не требуется.</p>
+</section>
+<section id="api-i3" class="level3 card student-task">
+<h3>И3. Изменить ник</h3>
+<p>Метод: <code>PATCH</code>. Ресурс: <code>users</code>. Добавьте фильтр по <code>id=100</code>. В теле передайте только поле <code>nickname</code> со значением «Барс».</p>
+<p>Перед Send покажите соседу фильтр. Какие строки мог бы затронуть запрос без него?</p>
+</section>
+<section id="api-i4" class="level3 card student-task">
+<h3>И4. Проверить изменение</h3>
+<p>Повторите запрос И2. Убедитесь, что номер пользователя остался прежним, а ник изменился.</p>
+</section>
+<section id="api-i5" class="level3 card student-task">
+<h3>И5. Удалить пользователя</h3>
+<p>Метод: <code>DELETE</code>. Ресурс: <code>users</code>. Оставьте фильтр по пользователю <code>100</code>. Body → none. Сохраните ответ: это данные удалённой строки, а не доказательство, что она осталась в базе.</p>
+</section>
+<section id="api-i6" class="level3 card student-task">
+<h3>И6. Проверить удаление</h3>
+<p>Повторите запрос И2. Какой статус и какое тело вернулись? Успешно ли выполнен запрос?</p>
+</section>
+</section>
+<section id="api-errors" class="level2">
+<h2>Практика 3 — объясняем ошибки</h2>
+<p>Меняйте одно условие за раз. Не исправляйте ограничения базы ради успешного запроса. После неудачной вставки убедитесь через <code>GET</code>, что исходные данные не изменились.</p>
+<article class="card student-task" id="api-o1"><h3>О1. Повтор номера</h3><p>Отправьте <code>POST</code> в <code>users</code> с телом <code>{"id":1,"nickname":"Дубликат"}</code>. Найдите статус, <code>code</code> и <code>message</code>. Какое правило сработало? Проверьте, что у пользователя <code>1</code> сохранился ник «Лис».</p></article>
+<article class="card student-task" id="api-o2"><h3>О2. Пустой ник</h3><p>Отправьте <code>POST</code> с телом <code>{"id":102,"nickname":""}</code>. Почему новый <code>id</code> не помогает? Убедитесь, что пользователь <code>102</code> не появился.</p></article>
+<article class="card student-task" id="api-o3"><h3>О3. Неверный ключ</h3><p>Дублируйте рабочий <code>GET</code>. Только в копии замените значение заголовка <code>apikey</code> на <code>invalid-key-for-lesson</code>. Саму переменную окружения не меняйте. Отправьте копию, затем повторите исходный запрос. Чем ошибка доступа отличается от ошибки ограничения?</p></article>
+<article class="card student-task" id="api-o4"><h3>О4. Нет подходящей строки</h3><p>С правильным ключом запросите пользователя <code>999</code>. Сравните статус и тело с О3. Пустой список и отказ в доступе — один и тот же результат?</p></article>
+<p>Классы статусов: <code>2xx</code> — успех, <code>4xx</code> — проблема запроса или доступа, <code>5xx</code> — сбой на стороне сервера. Не угадывайте причину только по первой цифре: читайте сообщение.</p>
+</section>
+<section id="api-final" class="level2">
+<h2>Выходное задание</h2>
+<p>Без образца получите участия пользователя <code>1</code>: выведите <code>chat_id,role</code>, отсортируйте по <code>id</code> участия. Объясните метод, ресурс, фильтр и ответ.</p>
+<p>Завершив практику, проверьте: пользователей снова 4, пользователь <code>100</code> отсутствует, у пользователя <code>1</code> ник «Лис». Остальные таблицы на этом уроке только читаем.</p>
+</section>
+<section id="api-homework" class="level2">
+<h2>Домашка к занятию 18</h2>
+<p>В своём учебном проекте создайте пользователя <code>101</code> с ником «Ёж», получите его через API, измените ник на «Енот», проверьте, удалите и подтвердите отсутствие. Добавьте один опыт с намеренной ошибкой: повторный <code>id</code> или пустой ник с новым номером <code>103</code>.</p>
+<p>Сдайте таблицу в текстовом документе:</p>
+<div class="tablewrap"><table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Шаг</th>
+<th>Метод</th>
+<th>Путь и параметры</th>
+<th>Тело запроса или «нет»</th>
+<th>HTTP-статус</th>
+<th>Результат и объяснение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Создание</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Проверка</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Изменение</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Проверка</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Удаление</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Проверка</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Ошибка</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>Вместо адреса проекта достаточно пути <code>/rest/v1/...</code>. Ключи и окружение с заполненными значениями не отправляйте. Объясните своими словами: почему приложение может работать с базой, хотя вы не написали ни одной SQL-команды?</p>
+</section>
+</section>
+
 </main>
 
-<script src="live.js?v=20261124205506"></script>
-<script src="quiz.js?v=20261124205506"></script>
-<script src="engine.js?v=20261124205506"></script>
+<script src="live.js?v=20261127223427"></script>
+<script src="quiz.js?v=20261127223427"></script>
+<script src="engine.js?v=20261127223427"></script>
 <script>
 (function () {
   "use strict";
@@ -3158,10 +3420,14 @@ add column имя_столбца тип;</code></pre>
     if (t === "train") setTimeout(() => $("cmd").focus(), 0);
   }
   document.querySelectorAll("#nav button").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
+  const lessonHeader = document.querySelector("header");
+  const updateLessonOffset = () => $("tab-api").style.setProperty("--lesson-scroll-offset", (lessonHeader.offsetHeight + 16) + "px");
+  updateLessonOffset();
+  new ResizeObserver(updateLessonOffset).observe(lessonHeader);
   const hashTab = location.hash.replace("#", "");
   // #proj и другие якоря внутри вкладки: открыть эту вкладку и прокрутить к разделу
   const hashSec = hashTab && document.getElementById(hashTab)?.closest(".tab");
-  showTab(["live", "lesson", "excel", "sql", "sql2", "sql3", "sql4", "sql5", "sql6", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
+  showTab(["live", "lesson", "excel", "sql", "sql2", "sql3", "sql4", "sql5", "sql6", "api", "model", "train", "github", "cheat", "hw"].includes(hashTab) ? hashTab
     : hashSec ? hashSec.id.replace("tab-", "") : store.get("tab", "train"));
   if (hashSec && $(hashTab).tagName === "DETAILS") $(hashTab).open = true;
   if (hashSec) document.getElementById(hashTab).scrollIntoView();
